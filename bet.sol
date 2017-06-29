@@ -13,6 +13,7 @@ contract Bet is usingOraclize {
     }
   
   BET_STATES bet_state = BET_STATES.OPEN;
+  address public resolver;
   bool public is_featured;
   string public title;
   string public description;
@@ -21,8 +22,9 @@ contract Bet is usingOraclize {
   string public team_1; // Team 1 identifier
   uint public team_0_bet_sum;
   uint public team_1_bet_sum;
-  mapping (address => uint) public bets_by_address;
-  
+  mapping (address => uint) public bets_to_team_0;
+  mapping (address => uint) public bets_to_team_1;
+
   uint public block_match_begin;
   uint public block_match_end;
   uint public block_hard_deadline; // Hard deadline to end bet
@@ -35,6 +37,9 @@ contract Bet is usingOraclize {
 
   event new_betting(bool for_team, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
+  function Bet() {
+
+  }
 
   function arbitrate(bool winner) {
     assert(block.number >= block_hard_deadline);
@@ -77,21 +82,21 @@ contract Bet is usingOraclize {
   }
   
   function toggle_featured() {
-    //if (msg.sender != ebets_address()) throw;
+    assert(msg.sender == resolver);
     is_featured = !is_featured;
   }
   
   // 
   function bet(bool for_team) {
     assert(block.number < block_match_begin);
-    if (for_team == false)
+    if (for_team == false) {
       team_0_bet_sum += msg.value;
-    else
+      bets_to_team_0[msg.sender] += msg.value;
+    }
+    else {
       team_1_bet_sum += msg.value;
-    
-    //TODO: change to say in which team the person voted
-    //TODO: Allow change voting and withdraw before bet closes
-    bets_by_address[msg.sender] += msg.value;
+      bets_to_team_1[msg.sender] += msg.value;
+    }
 
     new_betting(for_team, msg.sender, msg.value);
   }
