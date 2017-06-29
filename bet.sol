@@ -17,6 +17,7 @@ contract Bet is usingOraclize {
   string public team_1; // Team 1 identifier
   uint public team_0_bet_sum;
   uint public team_1_bet_sum;
+  mapping (address => uint) public bets_by_address;
   
   uint public block_match_begin;
   uint public block_match_end;
@@ -82,6 +83,10 @@ contract Bet is usingOraclize {
       team_0_bet_sum += msg.value;
     else
       team_1_bet_sum += msg.value;
+    
+    //TODO: change to say in which team the person voted
+    //TODO: Allow change voting and withdraw before bet closes
+    bets_by_address[msg.sender] += msg.value;
 
     new_betting(for_team_idx, msg.sender, msg.value);
   }
