@@ -1,18 +1,59 @@
+pragma solidity ^0.4.11;
 contract Bet is usingOraclize {
+  enum BET_STATES {
+    OPEN,
+    TEAM_ONE_WON,
+    TEAM_TWO_WON,
+    DRAW,
+    ORACLE_UNDECIDED
+    }
+  
+  BET_STATES bet_state;
   bool public is_featured;
   string public title;
   string public description;
   string public category;
+  string public team_0; // Team 0 identifier
+  string public team_1; // Team 1 identifier
+  uint public team_0_bet_sum;
+  uint public team_1_bet_sum;
+  
+  uint public block_match_begin;
+  uint public block_match_end;
+  uint public block_hard_deadline; // Hard deadline to end bet 
+
+  uint8 oracle_retries; // How many times the oracle tried to set the score on the bet
+  uint constant oracle_retry_interval = 100; // Interval for retries (in blocks)
+
   string url_oraclize;
 
   uint8 winner_idx;
   
   event new_betting(uint8 for_team_idx, address from, amount);
+  event new_winner_declared(BET_STATES winner);
 
   function __callback(bytes32 myid, string result) {
-    if (msg.sender != oraclize_cbAddress()) throw;
-      viewsCount = result;
-      newYoutubeViewsCount(viewsCount);
+    // Cannot call after hard deadline
+    assert(block.number < block_hard_deadline);
+    // Oraclize should call this
+    assert(msg.sender == oraclize_cbAddress());
+    // Must be called after the bet ends
+    assert(block.number >= block_match_end);
+    // Can call only when bet is open or undecided
+    assert(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
+
+    oracle_retries += 1;
+    // Oracle is retrying 
+    if (bet_state == BET_STATES.ORACLE_UNDECIDED) {
+      assert(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
+    }
+    if (result == team_0)
+      bet_state = BET_STATES.TEAM_ONE_WON;
+    else if (result == team_1)
+      bet_state = BET_STATES.TEAM_TWO_WON;
+    else
+      bet_state = BET_STATES.ORACLE_UNDECIDED;
+    new_winner_declared(bet_state);
   }
 
   function update_result() payable {
@@ -24,15 +65,17 @@ contract Bet is usingOraclize {
     is_featured = !is_featured;
   }
   
+  // 
   function bet(uint8 for_team_idx) {
     new_betting(for_team_idx, msg.sender, msg.value);
   }
 
+  // Called by the user to collect his reward
   function collect_profit() {
 
   }
   
-  //If the oracle fails or is not able to get the right answer
+  // If the oracle fails or is not able to get the right answer
   function resolve_conflict(uint8 for_team_idx) {
   }
 }
