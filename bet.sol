@@ -8,7 +8,7 @@ contract Bet is usingOraclize {
     ORACLE_UNDECIDED
     }
   
-  BET_STATES bet_state;
+  BET_STATES bet_state = BET_STATES.OPEN;
   bool public is_featured;
   string public title;
   string public description;
@@ -20,17 +20,26 @@ contract Bet is usingOraclize {
   
   uint public block_match_begin;
   uint public block_match_end;
-  uint public block_hard_deadline; // Hard deadline to end bet 
+  uint public block_hard_deadline; // Hard deadline to end bet
+  uint public block_suicide_deadline; // Suicide deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
   uint8 oracle_retries; // How many times the oracle tried to set the score on the bet
   uint constant oracle_retry_interval = 100; // Interval for retries (in blocks)
 
   string url_oraclize;
 
-  uint8 winner_idx;
-  
-  event new_betting(uint8 for_team_idx, address from, amount);
+  event new_betting(uint8 for_team_idx, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
+
+  function arbitrate(bool winner) {
+    assert(block.number >= block_hard_deadline);
+    assert(bet_state == ORACLE_UNDECIDED);
+
+    if (winner == 0)
+       bet_state = BET_STATES.TEAM_ONE_WON;
+    else
+       bet_state = BET_STATES.TEAM_TWO_WON;
+  }
 
   function __callback(bytes32 myid, string result) {
     // Cannot call after hard deadline
@@ -53,6 +62,7 @@ contract Bet is usingOraclize {
       bet_state = BET_STATES.TEAM_TWO_WON;
     else
       bet_state = BET_STATES.ORACLE_UNDECIDED;
+
     new_winner_declared(bet_state);
   }
 
@@ -66,7 +76,13 @@ contract Bet is usingOraclize {
   }
   
   // 
-  function bet(uint8 for_team_idx) {
+  function bet(bool for_team) {
+    assert(block.number < block_match_begin);
+    if (for_team == 0)
+      team_0_bet_sum += msg.value;
+    else
+      team_0_bet_sum += msg.value;
+
     new_betting(for_team_idx, msg.sender, msg.value);
   }
 
