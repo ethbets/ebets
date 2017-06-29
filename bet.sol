@@ -1,4 +1,8 @@
 pragma solidity ^0.4.11;
+
+import './ethereum-api/oraclizeAPI.sol';
+import './helpers.sol';
+
 contract Bet is usingOraclize {
   enum BET_STATES {
     OPEN,
@@ -29,14 +33,14 @@ contract Bet is usingOraclize {
 
   string url_oraclize;
 
-  event new_betting(uint8 for_team_idx, address from, uint amount);
+  event new_betting(bool for_team, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
 
   function arbitrate(bool winner) {
     assert(block.number >= block_hard_deadline);
-    assert(bet_state == ORACLE_UNDECIDED);
+    assert(bet_state == BET_STATES.ORACLE_UNDECIDED);
 
-    if (winner == 0)
+    if (winner == false)
        bet_state = BET_STATES.TEAM_ONE_WON;
     else
        bet_state = BET_STATES.TEAM_TWO_WON;
@@ -57,9 +61,9 @@ contract Bet is usingOraclize {
     if (bet_state == BET_STATES.ORACLE_UNDECIDED) {
       assert(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
     }
-    if (result == team_0)
+    if (Helpers.string_equal(result, team_0))
       bet_state = BET_STATES.TEAM_ONE_WON;
-    else if (result == team_1)
+    else if (Helpers.string_equal(result, team_1))
       bet_state = BET_STATES.TEAM_TWO_WON;
     else
       bet_state = BET_STATES.ORACLE_UNDECIDED;
@@ -72,14 +76,14 @@ contract Bet is usingOraclize {
   }
   
   function toggle_featured() {
-    if (msg.sender != ebets_address()) throw;
+    //if (msg.sender != ebets_address()) throw;
     is_featured = !is_featured;
   }
   
   // 
   function bet(bool for_team) {
     assert(block.number < block_match_begin);
-    if (for_team == 0)
+    if (for_team == false)
       team_0_bet_sum += msg.value;
     else
       team_1_bet_sum += msg.value;
@@ -88,7 +92,7 @@ contract Bet is usingOraclize {
     //TODO: Allow change voting and withdraw before bet closes
     bets_by_address[msg.sender] += msg.value;
 
-    new_betting(for_team_idx, msg.sender, msg.value);
+    new_betting(for_team, msg.sender, msg.value);
   }
 
   // Called by the user to collect his reward

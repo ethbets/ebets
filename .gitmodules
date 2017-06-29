@@ -1,0 +1,3 @@
+[submodule "ethereum-api"]
+	path = ethereum-api
+	url = https://github.com/oraclize/ethereum-api
