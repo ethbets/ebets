@@ -53,14 +53,7 @@ contract Bet is usingOraclize {
     assert(msg.sender == oraclize_cbAddress());
     // Must be called after the bet ends
     assert(block.number >= block_match_end);
-    // Can call only when bet is open or undecided
-    assert(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
 
-    oracle_retries += 1;
-    // Oracle is retrying 
-    if (bet_state == BET_STATES.ORACLE_UNDECIDED) {
-      assert(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
-    }
     if (Helpers.string_equal(result, team_0))
       bet_state = BET_STATES.TEAM_ONE_WON;
     else if (Helpers.string_equal(result, team_1))
@@ -72,6 +65,14 @@ contract Bet is usingOraclize {
   }
 
   function update_result() payable {
+    // Can call only when bet is open or undecided
+    assert(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
+
+    oracle_retries += 1;
+    // Oracle is retrying 
+    if (bet_state == BET_STATES.ORACLE_UNDECIDED) {
+      assert(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
+    }
     oraclize_query('URL', url_oraclize);
   }
   
