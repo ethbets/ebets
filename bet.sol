@@ -81,7 +81,7 @@ contract Bet is usingOraclize {
     if (for_team == 0)
       team_0_bet_sum += msg.value;
     else
-      team_0_bet_sum += msg.value;
+      team_1_bet_sum += msg.value;
 
     new_betting(for_team_idx, msg.sender, msg.value);
   }
