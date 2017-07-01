@@ -25,10 +25,10 @@ contract Bet is usingOraclize {
   mapping (address => uint) public bets_to_team_0;
   mapping (address => uint) public bets_to_team_1;
 
-  uint public block_match_begin;
-  uint public block_match_end;
-  uint public block_hard_deadline; // Hard deadline to end bet
-  uint public block_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
+  uint public timestamp_match_begin;
+  uint public timestamp_match_end;
+  uint public timestamp_hard_deadline; // Hard deadline to end bet
+  uint public timestamp_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
   string url_oraclize;
 
