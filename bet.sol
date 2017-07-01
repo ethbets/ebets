@@ -30,7 +30,7 @@ contract Bet is usingOraclize {
   uint public timestamp_hard_deadline; // Hard deadline to end bet
   uint public timestamp_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
-  uint constant TAX = 10; // %
+  uint8 constant TAX = 10;
 
   string url_oraclize;
 
@@ -166,19 +166,21 @@ contract Bet is usingOraclize {
 
     // Approach one:
     // We might lose precision, but no overflow
-    uint sender_pc = bet / sum; // THIS SHOULD BE FLOAT
-    uint sender_profit = sender_pc * profit; // THIS SHOULD BE FLOAT
+    var sender_pc = bet / sum;
+    var sender_profit = sender_pc * profit;
     // Approach two:
     // Better precision, since multiplication is done first, but may overflow
-    //uint sender_profit = (bet * profit) / sum; // THIS SHOULD BE FLOAT
+    //uint sender_profit = (bet * profit) / sum;
 
     assert(sender_pc <= 1);
     assert(sender_profit <= profit);
 
-    uint tax = (sender_profit * TAX) / 100;
+    var mul_tax = (sender_profit * TAX);
+    assert(mul_tax >= sender_profit);
+    var tax = mul_tax / 100;
     assert(tax <= sender_profit);
 
-    uint notax_profit = sender_profit;
+    var notax_profit = sender_profit;
     sender_profit -= tax;
     assert(sender_profit <= notax_profit);
 
