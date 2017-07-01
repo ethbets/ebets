@@ -72,12 +72,10 @@ contract Bet is usingOraclize {
   function update_result() payable {
     // Can call only when bet is open or undecided
     require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
+    require(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
 
     oracle_retries += 1;
     // Oracle is retrying 
-    if (bet_state == BET_STATES.ORACLE_UNDECIDED) {
-      assert(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
-    }
     oraclize_query('URL', url_oraclize);
   }
   
