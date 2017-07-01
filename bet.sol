@@ -28,15 +28,13 @@ contract Bet is usingOraclize {
   uint public block_match_begin;
   uint public block_match_end;
   uint public block_hard_deadline; // Hard deadline to end bet
-  uint public block_suicide_deadline; // Suicide deadline > hard_deadline (this must be big, so people can withdraw their funds)
-
-  uint8 oracle_retries; // How many times the oracle tried to set the score on the bet
-  uint constant oracle_retry_interval = 100; // Interval for retries (in blocks)
+  uint public block_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
   string url_oraclize;
 
   event new_betting(bool for_team, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
+
   function Bet() {
 
   }
@@ -72,10 +70,8 @@ contract Bet is usingOraclize {
   function update_result() payable {
     // Can call only when bet is open or undecided
     require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
-    require(block.number >= (block_match_end + (oracle_retry_interval * oracle_retries)));
+    require(block.number >= block_match_end);
 
-    oracle_retries += 1;
-    // Oracle is retrying 
     oraclize_query('URL', url_oraclize);
   }
   
@@ -85,13 +81,19 @@ contract Bet is usingOraclize {
   }
   
   // 
-  function bet(bool for_team) {
+  function bet(bool for_team) payable {
     require(block.number < block_match_begin);
+    if (for_team)
+    
     if (for_team) {
+      // Cannot bet in two teams
+      require(bets_to_team_1[msg.sender] == 0);
       team_0_bet_sum += msg.value;
       bets_to_team_0[msg.sender] += msg.value;
     }
     else {
+      // Cannot bet in two teams
+      require(bets_to_team_0[msg.sender] == 0);
       team_1_bet_sum += msg.value;
       bets_to_team_1[msg.sender] += msg.value;
     }
@@ -106,5 +108,7 @@ contract Bet is usingOraclize {
   
   // If the oracle fails or is not able to get the right answer
   function resolve_conflict(uint8 for_team_idx) {
+    require(msg.sender == resolver);
+
   }
 }
