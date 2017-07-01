@@ -51,7 +51,7 @@ contract Bet is usingOraclize {
   }
 
   function arbitrate(BET_STATES result) {
-    require(block.number >= block_hard_deadline);
+    require(block.timestamp >= timestamp_hard_deadline);
     require(bet_state == BET_STATES.ORACLE_UNDECIDED);
     require(result != BET_STATES.ORACLE_UNDECIDED);
     require(result != BET_STATES.OPEN);
@@ -62,11 +62,11 @@ contract Bet is usingOraclize {
 
   function __callback(bytes32 myid, string result) {
     // Cannot call after hard deadline
-    require(block.number < block_hard_deadline);
+    require(block.timestamp < timestamp_hard_deadline);
     // Oraclize should call this
     require(msg.sender == oraclize_cbAddress());
     // Must be called after the bet ends
-    require(block.number >= block_match_end);
+    require(block.timestamp >= block_match_end);
 
     if (Helpers.string_equal(result, team_0))
       bet_state = BET_STATES.TEAM_ONE_WON;
@@ -81,7 +81,7 @@ contract Bet is usingOraclize {
   function update_result() payable {
     // Can call only when bet is open or undecided
     require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
-    require(block.number >= block_match_end);
+    require(block.timestamp >= timestamp_match_end);
 
     oraclize_query('URL', url_oraclize);
   }
@@ -93,7 +93,7 @@ contract Bet is usingOraclize {
   
   // 
   function bet(bool for_team) payable {
-    require(block.number < block_match_begin);
+    require(block.timestamp < timestamp_match_begin);
     if (for_team)
     
     if (for_team) {
