@@ -35,8 +35,19 @@ contract Bet is usingOraclize {
   event new_betting(bool for_team, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
 
-  function Bet() {
-
+  function Bet(address _resolver, string _title, string _category, 
+               string _team_0, string _team_1, uint _block_match_begin,
+               uint _block_match_end, uint _block_hard_deadline,
+               uint _block_terminate_deadline, string _url_oraclize) {
+    resolver = _resolver;
+    title = _title;
+    category = _category;
+    team_0 = _team_0;
+    team_1 = _team_1;
+    block_match_begin = _block_match_begin;
+    block_match_end = _block_match_end;
+    block_terminate_deadline = _block_terminate_deadline;
+    url_oraclize = _url_oraclize;
   }
 
   function arbitrate(bool winner) {
