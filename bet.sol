@@ -42,10 +42,10 @@ contract Bet is usingOraclize {
   }
 
   function arbitrate(bool winner) {
-    assert(block.number >= block_hard_deadline);
-    assert(bet_state == BET_STATES.ORACLE_UNDECIDED);
+    require(block.number >= block_hard_deadline);
+    require(bet_state == BET_STATES.ORACLE_UNDECIDED);
 
-    if (winner == false)
+    if (winner)
        bet_state = BET_STATES.TEAM_ONE_WON;
     else
        bet_state = BET_STATES.TEAM_TWO_WON;
@@ -53,11 +53,11 @@ contract Bet is usingOraclize {
 
   function __callback(bytes32 myid, string result) {
     // Cannot call after hard deadline
-    assert(block.number < block_hard_deadline);
+    require(block.number < block_hard_deadline);
     // Oraclize should call this
-    assert(msg.sender == oraclize_cbAddress());
+    require(msg.sender == oraclize_cbAddress());
     // Must be called after the bet ends
-    assert(block.number >= block_match_end);
+    require(block.number >= block_match_end);
 
     if (Helpers.string_equal(result, team_0))
       bet_state = BET_STATES.TEAM_ONE_WON;
@@ -71,7 +71,7 @@ contract Bet is usingOraclize {
 
   function update_result() payable {
     // Can call only when bet is open or undecided
-    assert(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
+    require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
 
     oracle_retries += 1;
     // Oracle is retrying 
@@ -82,14 +82,14 @@ contract Bet is usingOraclize {
   }
   
   function toggle_featured() {
-    assert(msg.sender == resolver);
+    require(msg.sender == resolver);
     is_featured = !is_featured;
   }
   
   // 
   function bet(bool for_team) {
-    assert(block.number < block_match_begin);
-    if (for_team == false) {
+    require(block.number < block_match_begin);
+    if (for_team) {
       team_0_bet_sum += msg.value;
       bets_to_team_0[msg.sender] += msg.value;
     }
