@@ -30,6 +30,8 @@ contract Bet is usingOraclize {
   uint public timestamp_hard_deadline; // Hard deadline to end bet
   uint public timestamp_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
+  uint constant TAX = 10; // %
+
   string url_oraclize;
 
   event new_betting(bool for_team, address from, uint amount);
@@ -88,33 +90,102 @@ contract Bet is usingOraclize {
   
   function toggle_featured() {
     require(msg.sender == resolver);
+
     is_featured = !is_featured;
   }
   
   // 
   function bet(bool for_team) payable {
     require(block.timestamp < timestamp_match_begin);
-    if (for_team)
+    uint prev_sum;
     
     if (for_team) {
       // Cannot bet in two teams
       require(bets_to_team_1[msg.sender] == 0);
+      prev_sum = team_0_bet_sum;
       team_0_bet_sum += msg.value;
+      assert(team_0_bet_sum >= prev_sum);
       bets_to_team_0[msg.sender] += msg.value;
     }
     else {
       // Cannot bet in two teams
       require(bets_to_team_0[msg.sender] == 0);
+      prev_sum = team_1_bet_sum;
       team_1_bet_sum += msg.value;
+      assert(team_1_bet_sum >= prev_sum);
       bets_to_team_1[msg.sender] += msg.value;
     }
 
     new_betting(for_team, msg.sender, msg.value);
   }
 
-  // Called by the user to collect his reward
-  function collect_profit() {
+  function withdraw() {
+    require(block.timestamp < timestamp_match_begin || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.TEAM_TWO_WON || bet_state == BET_STATES.DRAW);
+    if (block.timestamp < timestamp_match_begin || bet_state == BET_STATES.DRAW) {
+        collect_bet();
+    }
+    else {
+        collect_profit();
+    }
+  }
 
+  // Transfers the user's initial bet back
+  function collect_bet() internal {
+    require(bets_to_team_0[msg.sender] > 0 || bets_to_team_1[msg.sender] > 0);
+
+    if (bets_to_team_0[msg.sender] > 0) {
+      msg.sender.transfer(bets_to_team_0[msg.sender]);
+      bets_to_team_0[msg.sender] = 0;
+    }
+    else { // if (bets_to_team_1[msg.sender] > 0)
+      msg.sender.transfer(bets_to_team_1[msg.sender]);
+      bets_to_team_1[msg.sender] = 0;
+    }
+  }
+
+  // Transfers the user's profit
+  function collect_profit() internal {
+    require( ( bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_0[msg.sender] > 0 ) || ( bet_state == BET_STATES.TEAM_TWO_WON && bets_to_team_1[msg.sender] > 0 ) );
+
+    uint bet = 0;
+    uint sum = 0;
+    uint profit = 0;
+
+    if (bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_0[msg.sender] > 0) {
+      bet = bets_to_team_0[msg.sender];
+      sum = team_0_bet_sum;
+      profit = team_1_bet_sum;
+    }
+    else { // if (BET_STATES.bet_state == TEAM_TWO_WON && bets_to_team_1[msg.sender] > 0)
+      bet = bets_to_team_1[msg.sender];
+      sum = team_1_bet_sum;
+      profit = team_1_bet_sum;
+    }
+
+    assert(bet <= sum);
+
+    // Approach one:
+    // We might lose precision, but no overflow
+    uint sender_pc = bet / sum; // THIS SHOULD BE FLOAT
+    uint sender_profit = sender_pc * profit; // THIS SHOULD BE FLOAT
+    // Approach two:
+    // Better precision, since multiplication is done first, but may overflow
+    //uint sender_profit = (bet * profit) / sum; // THIS SHOULD BE FLOAT
+
+    assert(sender_pc <= 1);
+    assert(sender_profit <= profit);
+
+    uint tax = (sender_profit * TAX) / 100;
+    assert(tax <= sender_profit);
+
+    uint notax_profit = sender_profit;
+    sender_profit -= tax;
+    assert(sender_profit <= notax_profit);
+
+    resolver.transfer(tax);
+    msg.sender.transfer(sender_profit);
+    
+    collect_bet();
   }
   
   // If the oracle fails or is not able to get the right answer
