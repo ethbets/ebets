@@ -50,14 +50,14 @@ contract Bet is usingOraclize {
     url_oraclize = _url_oraclize;
   }
 
-  function arbitrate(bool winner) {
+  function arbitrate(BET_STATES result) {
     require(block.number >= block_hard_deadline);
     require(bet_state == BET_STATES.ORACLE_UNDECIDED);
-
-    if (winner)
-       bet_state = BET_STATES.TEAM_ONE_WON;
-    else
-       bet_state = BET_STATES.TEAM_TWO_WON;
+    require(result != BET_STATES.ORACLE_UNDECIDED);
+    require(result != BET_STATES.OPEN);
+    
+    bet_state = result;
+    new_winner_declared(result);
   }
 
   function __callback(bytes32 myid, string result) {
