@@ -36,17 +36,17 @@ contract Bet is usingOraclize {
   event new_winner_declared(BET_STATES winner);
 
   function Bet(address _resolver, string _title, string _category, 
-               string _team_0, string _team_1, uint _block_match_begin,
-               uint _block_match_end, uint _block_hard_deadline,
-               uint _block_terminate_deadline, string _url_oraclize) {
+               string _team_0, string _team_1, uint _timestamp_match_begin,
+               uint _timestamp_match_end, uint _timestamp_hard_deadline,
+               uint _timestamp_terminate_deadline, string _url_oraclize) {
     resolver = _resolver;
     title = _title;
     category = _category;
     team_0 = _team_0;
     team_1 = _team_1;
-    block_match_begin = _block_match_begin;
-    block_match_end = _block_match_end;
-    block_terminate_deadline = _block_terminate_deadline;
+    timestamp_match_begin = _timestamp_match_begin;
+    timestamp_match_end = _timestamp_match_end;
+    timestamp_terminate_deadline = _timestamp_terminate_deadline;
     url_oraclize = _url_oraclize;
   }
 
@@ -66,7 +66,7 @@ contract Bet is usingOraclize {
     // Oraclize should call this
     require(msg.sender == oraclize_cbAddress());
     // Must be called after the bet ends
-    require(block.timestamp >= block_match_end);
+    require(block.timestamp >= timestamp_match_end);
 
     if (Helpers.string_equal(result, team_0))
       bet_state = BET_STATES.TEAM_ONE_WON;
