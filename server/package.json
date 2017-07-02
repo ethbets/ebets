@@ -1,0 +1,26 @@
+{
+  "name": "ebets_server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.3",
+    "express-boom": "^2.0.0",
+    "lodash": "^4.17.4",
+    "request": "^2.81.0",
+    "xmldom": "^0.1.27",
+    "xpath": "0.0.24"
+  },
+  "devDependencies": {
+    "eslint": "^3.16.0"
+  }
+}
