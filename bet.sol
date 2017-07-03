@@ -103,6 +103,7 @@ contract Bet is usingOraclize {
       // Cannot bet in two teams
       require(bets_to_team_1[msg.sender] == 0);
       prev_sum = team_0_bet_sum;
+      require((prev_sum + msg.value) >= prev_sum); // Overflow
       team_0_bet_sum += msg.value;
       assert(team_0_bet_sum >= prev_sum);
       bets_to_team_0[msg.sender] += msg.value;
@@ -111,6 +112,7 @@ contract Bet is usingOraclize {
       // Cannot bet in two teams
       require(bets_to_team_0[msg.sender] == 0);
       prev_sum = team_1_bet_sum;
+      require((prev_sum + msg.value) >= prev_sum); // Overflow
       team_1_bet_sum += msg.value;
       assert(team_1_bet_sum >= prev_sum);
       bets_to_team_1[msg.sender] += msg.value;
@@ -167,16 +169,17 @@ contract Bet is usingOraclize {
     // Approach one:
     // We might lose precision, but no overflow
     var sender_pc = bet / sum;
+    assert(sender_pc >= 0 && sender_pc <= 1);
+    
     var sender_profit = sender_pc * profit;
+    assert(sender_profit <= profit);
+    
     // Approach two:
     // Better precision, since multiplication is done first, but may overflow
     //uint sender_profit = (bet * profit) / sum;
 
-    assert(sender_pc <= 1);
-    assert(sender_profit <= profit);
-
     var mul_tax = (sender_profit * TAX);
-    assert(mul_tax >= sender_profit);
+    require(mul_tax >= sender_profit); // Overflow
     var tax = mul_tax / 100;
     assert(tax <= sender_profit);
 
