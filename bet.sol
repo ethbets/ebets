@@ -6,8 +6,8 @@ import './helpers.sol';
 contract Bet is usingOraclize {
   enum BET_STATES {
     OPEN,
+    TEAM_ZERO_WON,
     TEAM_ONE_WON,
-    TEAM_TWO_WON,
     DRAW,
     ORACLE_UNDECIDED
     }
@@ -34,7 +34,7 @@ contract Bet is usingOraclize {
 
   string url_oraclize;
 
-  event new_betting(bool for_team, address from, uint amount);
+  event new_bet(bool for_team, address from, uint amount);
   event new_winner_declared(BET_STATES winner);
 
   function Bet(address _resolver, string _title, string _category, 
@@ -71,9 +71,9 @@ contract Bet is usingOraclize {
     require(block.timestamp >= timestamp_match_end);
 
     if (Helpers.string_equal(result, team_0))
-      bet_state = BET_STATES.TEAM_ONE_WON;
+      bet_state = BET_STATES.TEAM_ZERO_WON;
     else if (Helpers.string_equal(result, team_1))
-      bet_state = BET_STATES.TEAM_TWO_WON;
+      bet_state = BET_STATES.TEAM_ONE_WON;
     else
       bet_state = BET_STATES.ORACLE_UNDECIDED;
 
@@ -118,11 +118,11 @@ contract Bet is usingOraclize {
       bets_to_team_1[msg.sender] += msg.value;
     }
 
-    new_betting(for_team, msg.sender, msg.value);
+    new_bet(for_team, msg.sender, msg.value);
   }
 
   function withdraw() {
-    require(block.timestamp < timestamp_match_begin || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.TEAM_TWO_WON || bet_state == BET_STATES.DRAW);
+    require(block.timestamp < timestamp_match_begin || bet_state == BET_STATES.TEAM_ZERO_WON || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.DRAW);
     if (block.timestamp < timestamp_match_begin || bet_state == BET_STATES.DRAW) {
         collect_bet();
     }
@@ -147,18 +147,18 @@ contract Bet is usingOraclize {
 
   // Transfers the user's profit
   function collect_profit() internal {
-    require( ( bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_0[msg.sender] > 0 ) || ( bet_state == BET_STATES.TEAM_TWO_WON && bets_to_team_1[msg.sender] > 0 ) );
+    require( ( bet_state == BET_STATES.TEAM_ZERO_WON && bets_to_team_0[msg.sender] > 0 ) || ( bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_1[msg.sender] > 0 ) );
 
     uint bet = 0;
     uint sum = 0;
     uint profit = 0;
 
-    if (bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_0[msg.sender] > 0) {
+    if (bet_state == BET_STATES.TEAM_ZERO_WON && bets_to_team_0[msg.sender] > 0) {
       bet = bets_to_team_0[msg.sender];
       sum = team_0_bet_sum;
       profit = team_1_bet_sum;
     }
-    else { // if (BET_STATES.bet_state == TEAM_TWO_WON && bets_to_team_1[msg.sender] > 0)
+    else { // if (BET_STATES.bet_state == TEAM_ONE_WON && bets_to_team_1[msg.sender] > 0)
       bet = bets_to_team_1[msg.sender];
       sum = team_1_bet_sum;
       profit = team_1_bet_sum;
