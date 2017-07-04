@@ -147,7 +147,8 @@ contract Bet is usingOraclize {
 
   // Transfers the user's profit
   function collect_profit() internal {
-    require( ( bet_state == BET_STATES.TEAM_ZERO_WON && bets_to_team_0[msg.sender] > 0 ) || ( bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_1[msg.sender] > 0 ) );
+    require( ( bet_state == BET_STATES.TEAM_ZERO_WON && bets_to_team_0[msg.sender] > 0 ) || 
+             ( bet_state == BET_STATES.TEAM_ONE_WON && bets_to_team_1[msg.sender] > 0 ) );
 
     uint bet = 0;
     uint sum = 0;
@@ -161,7 +162,7 @@ contract Bet is usingOraclize {
     else { // if (BET_STATES.bet_state == TEAM_ONE_WON && bets_to_team_1[msg.sender] > 0)
       bet = bets_to_team_1[msg.sender];
       sum = team_1_bet_sum;
-      profit = team_1_bet_sum;
+      profit = team_0_bet_sum;
     }
 
     assert(bet <= sum);
