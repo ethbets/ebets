@@ -27,7 +27,7 @@ contract Bet is usingOraclize {
 
   uint public timestamp_match_begin;
   uint public timestamp_match_end;
-  uint public timestamp_hard_deadline; // Hard deadline to end bet
+  uint public timestamp_hard_deadline; // Hard deadline to end bet (for the oracle)
   uint public timestamp_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
   uint8 constant TAX = 10;
@@ -35,12 +35,16 @@ contract Bet is usingOraclize {
   string url_oraclize;
 
   event new_bet(bool for_team, address from, uint amount);
-  event new_winner_declared(BET_STATES winner);
+  event state_changed(BET_STATES state);
 
   function Bet(address _resolver, string _title, string _category, 
                string _team_0, string _team_1, uint _timestamp_match_begin,
                uint _timestamp_match_end, uint _timestamp_hard_deadline,
                uint _timestamp_terminate_deadline, string _url_oraclize) {
+    require(_timestamp_terminate_deadline > _timestamp_hard_deadline);
+    require(_timestamp_match_end > _timestamp_match_begin);
+    require(block.timestamp < _timestamp_match_begin);
+
     resolver = _resolver;
     title = _title;
     category = _category;
@@ -59,7 +63,7 @@ contract Bet is usingOraclize {
     require(result != BET_STATES.OPEN);
     
     bet_state = result;
-    new_winner_declared(result);
+    state_changed(result);
   }
 
   function __callback(bytes32 myid, string result) {
@@ -77,7 +81,7 @@ contract Bet is usingOraclize {
     else
       bet_state = BET_STATES.ORACLE_UNDECIDED;
 
-    new_winner_declared(bet_state);
+    state_changed(bet_state);
   }
 
   function update_result() payable {
@@ -194,9 +198,13 @@ contract Bet is usingOraclize {
     collect_bet();
   }
   
-  // If the oracle fails or is not able to get the right answer
-  function resolve_conflict(uint8 for_team_idx) {
-    require(msg.sender == resolver);
-
+  function close() {
+    require(block.timestamp > timestamp_terminate_deadline);
+    selfdestruct(resolver);
   }
+
+  /* Fallback just throws now
+   * Can do something, maybe increase the value of both pools
+  */
+  function () { throw; }
 }
