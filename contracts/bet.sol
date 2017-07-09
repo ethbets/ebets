@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import './ethereum-api/oraclizeAPI.sol';
+import './usingOraclize.sol';
 import './helpers.sol';
 
 contract Bet is usingOraclize {
