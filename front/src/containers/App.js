@@ -12,13 +12,14 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import Home from 'components/Home';
 import BetForm from 'components/BetForm';
+import Ebets from 'components/Ebets'
 
 import 'containers/App.css';
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {open: false};
+    this.state = { open: false };
     this.toggleNavigation = this.toggleNavigation.bind(this);
   }
 
@@ -42,6 +43,7 @@ class App extends Component {
     return (
       <Router>
         <div id="app">
+          <Ebets />
           <AppBar
             title="Ebets"
             onLeftIconButtonTouchTap={this.toggleNavigation} />
