@@ -3,6 +3,8 @@ import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import Checkbox from 'material-ui/Checkbox'
 
+import BetDetail from 'components/BetDetail'
+
 class BetForm extends Component {
 
   constructor(props) {
@@ -15,8 +17,7 @@ class BetForm extends Component {
       team0: '',
       team1: '',
       resolverAddress: '',
-      urlOraclize: '',
-      isFeatured: false           
+      urlOraclize: ''
     }
 
     this.handleOnChange = this.handleOnChange.bind(this);
@@ -35,8 +36,7 @@ class BetForm extends Component {
     event.preventDefault();
     // TODO: handle form errors
     const newBet = this.state
-    console.log(newBet)
-    // this.props.bet.addBet(newBet);
+    const bet = React.createElement(BetDetail, newBet);
     // TODO: make a POST to store this newBet using web3 api
   }
 
@@ -93,12 +93,6 @@ class BetForm extends Component {
                 value={this.state.urlOraclize}
                 placeholder="Oraclize URL"
                 onChange={this.handleOnChange}
-              /><br />
-              <Checkbox
-                name="isFeatured"
-                label="Featured"
-                checked={this.state.isFeatured}
-                onCheck={this.handleOnChange}
               /><br />
               <RaisedButton type="submit" label="Create" primary />
             </div>
