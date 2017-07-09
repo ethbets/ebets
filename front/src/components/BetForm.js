@@ -3,7 +3,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import Checkbox from 'material-ui/Checkbox'
 
-import BetDetail from 'components/BetDetail'
+//import BetDetail from 'components/BetDetail'
 
 class BetForm extends Component {
 
@@ -36,7 +36,7 @@ class BetForm extends Component {
     event.preventDefault();
     // TODO: handle form errors
     const newBet = this.state
-    const bet = React.createElement(BetDetail, newBet);
+    //const bet = React.createElement(BetDetail, newBet);
     // TODO: make a POST to store this newBet using web3 api
   }
 
