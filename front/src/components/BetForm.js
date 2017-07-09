@@ -24,8 +24,11 @@ class BetForm extends Component {
   }
 
   handleOnChange = event => {
-    const { name, value } = event.target;
-    this.setState({ [name]: value })
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({ [name]: value });
   }
 
   handleOnSubmit = event => {
@@ -48,42 +51,55 @@ class BetForm extends Component {
           <form onSubmit={this.handleOnSubmit} >
             <div>
               <TextField 
-                hintText="Title"
-                defaultValue={this.state.title}
+                name="title"
+                value={this.state.title}
+                placeholder="Title"
                 onChange={this.handleOnChange}
               /><br />
               <TextField
-                hintText="Description"
-                defaultValue={this.state.description}
+                name="description"
+                value={this.state.description}
+                placeholder="Description"
                 multiLine={true}
                 rows={2}
+                onChange={this.handleOnChange}
               /><br />
                <TextField
-                hintText="Category"
-                defaultValue={this.state.category}
+                name="category"
+                value={this.state.category}
+                placeholder="Category"
                 onChange={this.handleOnChange}
               /><br />
               <TextField
-                hintText="Team0"
-                defaultValue={this.state.team1}
+                name="team0"
+                value={this.state.team0}
+                placeholder="Team0"
                 onChange={this.handleOnChange}
               /><br />
               <TextField
-                hintText="Team1"
-                defaultValue={this.state.team2}
+                name="team1"
+                value={this.state.team1}
+                placeholder="Team1"
                 onChange={this.handleOnChange}
               /><br />
               <TextField
-                hintText="Resolver Address"
-                defaultValue={this.state.resolverAddress}
+                name="resolverAddress"
+                value={this.state.resolverAddress}
+                placeholder="Resolver Address"
                 onChange={this.handleOnChange}
               /><br />
               <TextField
-                hintText="UrlOraclize"
-                defaultValue={this.state.urlOraclize}
+                name="urlOraclize"
+                value={this.state.urlOraclize}
+                placeholder="Oraclize URL"
                 onChange={this.handleOnChange}
               /><br />
-              <Checkbox label="Featured" /><br />         
+              <Checkbox
+                name="isFeatured"
+                label="Featured"
+                checked={this.state.isFeatured}
+                onCheck={this.handleOnChange}
+              /><br />
               <RaisedButton type="submit" label="Create" primary />
             </div>
           </form>
