@@ -9,7 +9,8 @@
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.1.1",
     "react-scripts": "1.0.10",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-tap-event-plugin": "^2.0.1",
+    "truffle-contract": "^2.0.1"
   },
   "scripts": {
     "start": "NODE_PATH=src react-scripts start",
