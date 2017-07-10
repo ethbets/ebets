@@ -50,19 +50,14 @@ class Bet extends Component {
       Object.keys(attributeNames).map(async (attr) => {
         if (attr !== 'web3' // FIXME: REMOVE ONCE WEB3 IS NOT HERE
             && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
-            && attr !== 'bets_to_team_1' && attr === 'url_oraclize') { // idem
+            && attr !== 'bets_to_team_1') { // idem
           var obj = {};
-          console.log(betContractInstance);
-          var a = betContractInstance.url_oraclize.call();
-          a.then(console.log);
-          //console.log(a);
-          //obj[attr] = await betContractInstance[attr]();
-          //console.log(attr, obj[attr]);
-          //if (typeof obj[attr] === 'object') // Handle Big Number
-          //  obj[attr] = obj[attr].toNumber();
-          //else
-          //  obj[attr] = obj[attr].toString();
-          //self.setState(obj);
+          obj[attr] = await betContractInstance[attr]();
+          if (typeof obj[attr] === 'object') // Handle Big Number
+            obj[attr] = obj[attr].toNumber();
+          else
+            obj[attr] = obj[attr].toString();
+          self.setState(obj);
         }
       });
     }
