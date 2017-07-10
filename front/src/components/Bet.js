@@ -21,6 +21,7 @@ class Bet extends Component {
       timestamp_match_end: 0,
       timestamp_hard_deadline: 0,
       timestamp_terminate_deadline: 0,
+      url_oraclize: '',
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
   }
@@ -47,17 +48,26 @@ class Bet extends Component {
     var self = this;
     function setAttribute(attributeNames, contractInstance) {
       Object.keys(attributeNames).map(async (attr) => {
-        if (attr != 'web3') { //FIXME: REMOVE ONCE WEB3 IS NOT HERE
+        if (attr !== 'web3' // FIXME: REMOVE ONCE WEB3 IS NOT HERE
+            && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
+            && attr !== 'bets_to_team_1' && attr === 'url_oraclize') { // idem
           var obj = {};
-          obj[attr] = await betContractInstance[attr]();
-          obj[attr] = obj[attr].toString();
-          self.setState(obj);
+          console.log(betContractInstance);
+          var a = betContractInstance.url_oraclize.call();
+          a.then(console.log);
+          //console.log(a);
+          //obj[attr] = await betContractInstance[attr]();
+          //console.log(attr, obj[attr]);
+          //if (typeof obj[attr] === 'object') // Handle Big Number
+          //  obj[attr] = obj[attr].toNumber();
+          //else
+          //  obj[attr] = obj[attr].toString();
+          //self.setState(obj);
         }
       });
     }
 
     const contract = require('truffle-contract');
-    //const betContract = contract({...BetJson, ...{address: this.props.address}});
     const betContract = contract(BetJson);
     betContract.setProvider(this.state.web3.currentProvider);
 
@@ -67,25 +77,32 @@ class Bet extends Component {
 
     betContractInstance.title(title => {console.log('TITLE', title);})
 
-    var betEvents = betContractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
+    var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
+    console.log(betEvents);
     betEvents.watch((error, response) => {
-      console.log('Bet:', response.args.amount.toString());
-      if (response.args.for_team == 0)
-        this.state.team_0_bet_sum = +this.state.team_0_bet_sum + 30*(+response.args.amount);
+      console.log('Bet:', response.args);
+      if (response.args.for_team === false)
+        this.setState({ team_0_bet_sum : this.state.team_0_bet_sum + response.args.amount.toNumber() });
       else
-        this.state.team_1_bet_sum = +this.state.team_1_bet_sum + 30*(+response.args.amount);
+        this.setState({ team_1_bet_sum : this.state.team_1_bet_sum + response.args.amount.toNumber() });
     });
   }
 
   render() {
     return (
       <div>
+        <h3>Title: {this.state.title} </h3>
         Addr: {this.props.address} <br/>
-        {this.state.team_0} $: {this.state.team_0_bet_sum} <br/>
-        {this.state.team_1} $: {this.state.team_1_bet_sum} <br/>
-        title: {this.state.title} <br/>
+        State: {this.state.bet_state} <br />
+        Featured: {this.state.is_featured} <br />
+        Team0 {this.state.team_0}: ${this.state.team_0_bet_sum} <br/>
+        Team1 {this.state.team_1}: ${this.state.team_1_bet_sum} <br/>
         Category: {this.state.category} <br/>
-        begins: {this.state.timestamp_match_begin} <br/>
+        Begins: {this.state.timestamp_match_begin} <br/>
+        Ends: {this.state.timestamp_match_end} <br/>
+        Hard Deadline: {this.state.timestamp_hard_deadline} <br/>
+        Terminate Deadline: {this.state.timestamp_terminate_deadline} <br/>
+        Oracle: {this.state.url_oraclize}
       </div>
     );
   }

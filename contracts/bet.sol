@@ -32,7 +32,7 @@ contract Bet is usingOraclize {
 
   uint8 constant TAX = 10;
 
-  string url_oraclize;
+  string public url_oraclize;
 
   event new_bet(bool for_team, address from, uint amount);
   event state_changed(BET_STATES state);
@@ -41,8 +41,9 @@ contract Bet is usingOraclize {
                string _team_0, string _team_1, uint _timestamp_match_begin,
                uint _timestamp_match_end, uint _timestamp_hard_deadline,
                uint _timestamp_terminate_deadline, string _url_oraclize) {
-    require(_timestamp_terminate_deadline > _timestamp_hard_deadline);
-    require(_timestamp_match_end > _timestamp_match_begin);
+    require(_timestamp_match_begin < _timestamp_match_end);
+    require(_timestamp_match_end < _timestamp_hard_deadline);
+    require(_timestamp_hard_deadline < _timestamp_terminate_deadline);
     require(block.timestamp < _timestamp_match_begin);
 
     resolver = _resolver;
@@ -52,6 +53,7 @@ contract Bet is usingOraclize {
     team_1 = _team_1;
     timestamp_match_begin = _timestamp_match_begin;
     timestamp_match_end = _timestamp_match_end;
+    timestamp_hard_deadline = _timestamp_hard_deadline;
     timestamp_terminate_deadline = _timestamp_terminate_deadline;
     url_oraclize = _url_oraclize;
   }
@@ -103,7 +105,7 @@ contract Bet is usingOraclize {
     require(block.timestamp < timestamp_match_begin);
     uint prev_sum;
     
-    if (for_team) {
+    if (for_team == false) {
       // Cannot bet in two teams
       require(bets_to_team_1[msg.sender] == 0);
       prev_sum = team_0_bet_sum;

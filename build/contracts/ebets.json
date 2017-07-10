@@ -82,12 +82,12 @@
         }
       },
       "links": {
-        "Helpers": "0x1b63e49916cccae82c9ffe5355be1c10dd6e492b"
+        "Helpers": "0x9de2ff317ff75d698ae45cbc55be1e0908bcb9c2"
       },
-      "address": "0x0ef537128964205417dd4eec5a0c6fd2b8726f86",
-      "updated_at": 1499632802358
+      "address": "0xe32543cfb93d49578a590c5ef295fd5c73bf2953",
+      "updated_at": 1499678732801
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1499632802358
+  "updated_at": 1499678732801
 }
