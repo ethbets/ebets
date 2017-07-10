@@ -1,7 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
-import EbetsJson from '../build/contracts/ebets.json'
-import getWeb3 from '../utils/getWeb3'
+import EbetsJson from '../build/contracts/ebets.json';
+import getWeb3 from '../utils/getWeb3';
+
+import Bet from 'components/Bet';
 
 class Ebets extends Component {
   constructor(props) {
@@ -23,7 +25,6 @@ class Ebets extends Component {
       this.setState({
         web3: results.web3
       })
-
       // Instantiate contract once web3 provided.
       this.instantiateContract()
     })
@@ -52,14 +53,11 @@ class Ebets extends Component {
       ebetsContract.deployed().then((instance) => {
         ebetsContractInstance = instance;
 
-        // Stores a given value, 5 by default.
-        //console.log(ebetsContractInstance);
         //events
         var betsEvents = ebetsContractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
-        //console.log(betsEvents);
+
         betsEvents.watch((error, response) => {
-          this.state.bets.push(response.address);
-          console.log(this.state.bets);
+          this.setState({ bets: this.state.bets.concat(response.args.bet_addr) });
         });
       });
     });
@@ -67,14 +65,19 @@ class Ebets extends Component {
 
   render() {
     const listItems = this.state.bets.map((bet) => 
-      <li>{bet}</li>
+      <li key={bet.toString()}>
+         <Bet address={bet} />
+      </li>
     );
+    console.log("BETS", this.state.bets)
     return (
-      <ul>
-        {listItems}
-      </ul>
+      <div>
+        <ul>
+          {listItems}
+        </ul>
+      </div>
     );
   }
 }
 
-export default Ebets
+export default Ebets;

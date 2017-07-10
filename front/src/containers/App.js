@@ -43,7 +43,6 @@ class App extends Component {
     return (
       <Router>
         <div id="app">
-          <Ebets />
           <AppBar
             title="Ebets"
             onLeftIconButtonTouchTap={this.toggleNavigation} />

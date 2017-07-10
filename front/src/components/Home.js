@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import BetDetail from 'components/BetDetail';
+//import BetDetail from 'components/BetDetail';
 import Ebets from 'components/Ebets'
 
 class Home extends Component {
@@ -8,7 +8,7 @@ class Home extends Component {
     return (
       <div>
         <h1 className="page-title">Home</h1>
-        <BetDetail />
+          <Ebets />
       </div>
     );
   }

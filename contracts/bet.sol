@@ -12,7 +12,7 @@ contract Bet is usingOraclize {
     ORACLE_UNDECIDED
     }
   
-  BET_STATES bet_state = BET_STATES.OPEN;
+  BET_STATES public bet_state = BET_STATES.OPEN;
   address public resolver;
   bool public is_featured;
   string public title;
