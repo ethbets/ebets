@@ -46,20 +46,25 @@ class Bet extends Component {
 
   instantiateContract() {
     var self = this;
-    function setAttribute(attributeNames, contractInstance) {
-      Object.keys(attributeNames).map(async (attr) => {
+    var objs = {};
+    function setAttributes(attributeNames, contractInstance) {
+      var promises = Object.keys(attributeNames).map(async (attr) => {
         if (attr !== 'web3' // FIXME: REMOVE ONCE WEB3 IS NOT HERE
             && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
             && attr !== 'bets_to_team_1') { // idem
-          var obj = {};
-          obj[attr] = await betContractInstance[attr]();
-          if (typeof obj[attr] === 'object') // Handle Big Number
-            obj[attr] = obj[attr].toNumber();
+
+          var res = await betContractInstance[attr]();
+          if (typeof res === 'object') // Handle BigNumber
+            res = res.toNumber();
           else
-            obj[attr] = obj[attr].toString();
-          self.setState(obj);
+            res = res.toString();
+          objs[attr] = res;
+          // self.setState(obj);
         }
       });
+      Promise.all(promises).then(res => {
+        self.setState(objs);
+      })
     }
 
     const contract = require('truffle-contract');
@@ -68,9 +73,8 @@ class Bet extends Component {
 
     // Declaring this for later so we can chain functions on SimpleStorage.
     var betContractInstance = betContract.at(this.props.address);
-    setAttribute(this.state, betContractInstance);
+    setAttributes(this.state, betContractInstance);
 
-    betContractInstance.title(title => {console.log('TITLE', title);})
 
     var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
     console.log(betEvents);
@@ -84,21 +88,32 @@ class Bet extends Component {
   }
 
   render() {
+    var teams = this.state.title.split('x');
+    const listClass = `list-item card list`;
+    console.log('Props', this.props);
     return (
-      <div>
-        <h3>Title: {this.state.title} </h3>
-        Addr: {this.props.address} <br/>
-        State: {this.state.bet_state} <br />
-        Featured: {this.state.is_featured} <br />
-        Team0 {this.state.team_0}: ${this.state.team_0_bet_sum} <br/>
-        Team1 {this.state.team_1}: ${this.state.team_1_bet_sum} <br/>
-        Category: {this.state.category} <br/>
-        Begins: {this.state.timestamp_match_begin} <br/>
-        Ends: {this.state.timestamp_match_end} <br/>
-        Hard Deadline: {this.state.timestamp_hard_deadline} <br/>
-        Terminate Deadline: {this.state.timestamp_terminate_deadline} <br/>
-        Oracle: {this.state.url_oraclize}
-      </div>
+      <li key={this.props.address} className={listClass}>
+        <span>
+          <div className='team0'>
+            <h3>{teams[0]} </h3>
+          </div>
+          <div className='team1'>
+            <h3>{teams[1]} </h3>
+          </div>
+
+          Addr: {this.props.address} <br/>
+          State: {this.state.bet_state} <br />
+          Featured: {this.state.is_featured} <br />
+          Team0 {this.state.team_0}: ${this.state.team_0_bet_sum} <br/>
+          Team1 {this.state.team_1}: ${this.state.team_1_bet_sum} <br/>
+          Category: {this.state.category} <br/>
+          Begins: {this.state.timestamp_match_begin} <br/>
+          Ends: {this.state.timestamp_match_end} <br/>
+          Hard Deadline: {this.state.timestamp_hard_deadline} <br/>
+          Terminate Deadline: {this.state.timestamp_terminate_deadline} <br/>
+          Oracle: {this.state.url_oraclize}
+        </span>
+      </li>
     );
   }
 }
