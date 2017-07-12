@@ -31,6 +31,7 @@ contract Bet is usingOraclize {
   uint public timestamp_terminate_deadline; // Self-destruct deadline > hard_deadline (this must be big, so people can withdraw their funds)
 
   uint8 constant TAX = 10;
+  uint constant TIMESTAMP_MARGIN = 1000;
 
   string public url_oraclize;
 
@@ -51,10 +52,10 @@ contract Bet is usingOraclize {
     category = _category;
     team_0 = _team_0;
     team_1 = _team_1;
-    timestamp_match_begin = _timestamp_match_begin;
-    timestamp_match_end = _timestamp_match_end;
-    timestamp_hard_deadline = _timestamp_hard_deadline;
-    timestamp_terminate_deadline = _timestamp_terminate_deadline;
+    timestamp_match_begin = _timestamp_match_begin - TIMESTAMP_MARGIN;
+    timestamp_match_end = _timestamp_match_end + TIMESTAMP_MARGIN;
+    timestamp_hard_deadline = _timestamp_hard_deadline + TIMESTAMP_MARGIN;
+    timestamp_terminate_deadline = _timestamp_terminate_deadline + TIMESTAMP_MARGIN;
     url_oraclize = _url_oraclize;
   }
 
@@ -127,9 +128,13 @@ contract Bet is usingOraclize {
     new_bet(for_team, msg.sender, msg.value);
   }
 
+  // The commented code works allows money withdraw before the match begins.
+  // It was decided that this will not be allowed.
   function withdraw() {
-    require(block.timestamp < timestamp_match_begin || bet_state == BET_STATES.TEAM_ZERO_WON || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.DRAW);
-    if (block.timestamp < timestamp_match_begin || bet_state == BET_STATES.DRAW) {
+    //require(block.timestamp < timestamp_match_begin || bet_state == BET_STATES.TEAM_ZERO_WON || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.DRAW);
+    require(block.timestamp > timestamp_match_end && (bet_state == BET_STATES.TEAM_ZERO_WON || bet_state == BET_STATES.TEAM_ONE_WON || bet_state == BET_STATES.DRAW));
+    //if (block.timestamp < timestamp_match_begin || bet_state == BET_STATES.DRAW) {
+    if (bet_state == BET_STATES.DRAW) {
         collect_bet();
     }
     else {
@@ -141,13 +146,16 @@ contract Bet is usingOraclize {
   function collect_bet() internal {
     require(bets_to_team_0[msg.sender] > 0 || bets_to_team_1[msg.sender] > 0);
 
+    uint amount;
     if (bets_to_team_0[msg.sender] > 0) {
-      msg.sender.transfer(bets_to_team_0[msg.sender]);
+      amount = bets_to_team_0[msg.sender];
       bets_to_team_0[msg.sender] = 0;
+      msg.sender.transfer(amount);
     }
     else { // if (bets_to_team_1[msg.sender] > 0)
-      msg.sender.transfer(bets_to_team_1[msg.sender]);
+      amount = bets_to_team_1[msg.sender];
       bets_to_team_1[msg.sender] = 0;
+      msg.sender.transfer(amount);
     }
   }
 
@@ -195,9 +203,9 @@ contract Bet is usingOraclize {
     assert(sender_profit <= notax_profit);
 
     resolver.transfer(tax);
+    collect_bet();
     msg.sender.transfer(sender_profit);
     
-    collect_bet();
   }
   
   function close() {
