@@ -89,28 +89,31 @@ class Bet extends Component {
 
   render() {
     var teams = this.state.title.split('x');
-    console.log(teams);
+    const listClass = `list-item card list`;
+    console.log('Props', this.props);
     return (
-      <span>
-        <div>
-          <h3>{teams[0]} </h3>
-        </div>
-          <h3>{teams[1]} </h3>
-        <div>
+      <li key={this.props.address} className={listClass}>
+        <span>
+          <div className='team0'>
+            <h3>{teams[0]} </h3>
+          </div>
+          <div className='team1'>
+            <h3>{teams[1]} </h3>
+          </div>
 
-        </div>
-        Addr: {this.props.address} <br/>
-        State: {this.state.bet_state} <br />
-        Featured: {this.state.is_featured} <br />
-        Team0 {this.state.team_0}: ${this.state.team_0_bet_sum} <br/>
-        Team1 {this.state.team_1}: ${this.state.team_1_bet_sum} <br/>
-        Category: {this.state.category} <br/>
-        Begins: {this.state.timestamp_match_begin} <br/>
-        Ends: {this.state.timestamp_match_end} <br/>
-        Hard Deadline: {this.state.timestamp_hard_deadline} <br/>
-        Terminate Deadline: {this.state.timestamp_terminate_deadline} <br/>
-        Oracle: {this.state.url_oraclize}
-      </span>
+          Addr: {this.props.address} <br/>
+          State: {this.state.bet_state} <br />
+          Featured: {this.state.is_featured} <br />
+          Team0 {this.state.team_0}: ${this.state.team_0_bet_sum} <br/>
+          Team1 {this.state.team_1}: ${this.state.team_1_bet_sum} <br/>
+          Category: {this.state.category} <br/>
+          Begins: {this.state.timestamp_match_begin} <br/>
+          Ends: {this.state.timestamp_match_end} <br/>
+          Hard Deadline: {this.state.timestamp_hard_deadline} <br/>
+          Terminate Deadline: {this.state.timestamp_terminate_deadline} <br/>
+          Oracle: {this.state.url_oraclize}
+        </span>
+      </li>
     );
   }
 }
