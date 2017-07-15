@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import { Progress } from 'reactstrap';
 import BetJson from '../build/contracts/Bet.json'
 import getWeb3 from '../utils/getWeb3'
 
@@ -100,19 +100,33 @@ class Bet extends Component {
 
   render() {
     var teams = this.state.title.split('x');
+    var total = this.state.team_0_bet_sum + this.state.team_1_bet_sum;
+    var percentage0 = (this.state.team_0_bet_sum / total)*100;
+    var percentage1 = (this.state.team_1_bet_sum / total)*100;
+    isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
+    isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
+    
+
     console.log('Props', this.props);
     return (
-      <li key={this.props.address} className='bet'>
-
+      <li key={this.props.address} className='betColumn'>
+        <div className='bet'>
         <div className='team'>
           <header className='teamTitle'>{teams[0]}</header>
-          <div className='teamAmountBetted'>{this.state.team_0_bet_sum}</div>
+          <div className='teamAmountBetted'>${this.state.team_0_bet_sum}</div>
         </div>
 
         <div className='team'>
           <header className='teamTitle'>{teams[1]}</header>
-          <div className='teamAmountBetted'>{this.state.team_1_bet_sum}</div>
+          <div className='teamAmountBetted'>${this.state.team_1_bet_sum}</div>
         </div>
+        </div>
+
+        <Progress multi className='progressBar'>
+          <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
+          <Progress bar color="success" value={percentage1}>{percentage1}%</Progress>
+        </Progress>
+
       </li>
     );
   }
