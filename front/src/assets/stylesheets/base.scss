@@ -1,17 +1,32 @@
 @import './variables.scss';
 .card {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
-  flex-direction: row;
+  
+  -webkit-flex-flow: row wrap;
+  justify-content: space-around;
   background: $yellow;
 }
 
-html, body, input, button, select, option {
-  color: $blue;
-  font-family: "museo-sans-rounded", sans-serif;
-}
-
-ul {
-  padding: 0;
+.bet {
+  background: tomato;
+  padding: 5px;
+  width: 200px;
+  height: 150px;
+  margin-top: 10px;
+  
+  line-height: 150px;
+  color: white;
+  font-weight: bold;
+  font-size: 3em;
+  text-align: center;
 }
 
 .team0 {

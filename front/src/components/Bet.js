@@ -100,17 +100,10 @@ class Bet extends Component {
 
   render() {
     var teams = this.state.title.split('x');
-    const listClass = `card`;
     console.log('Props', this.props);
     return (
-      <li key={this.props.address} className={listClass}>
-        <div className='team0'>
-          <h3>{teams[0]} </h3>
-        </div>
-        X
-        <div className='team1'>
-          <h3>{teams[1]} </h3>
-        </div>
+      <li key={this.props.address} className='bet'>
+        aa
       </li>
     );
   }
