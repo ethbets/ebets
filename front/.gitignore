@@ -9,3 +9,6 @@
 
 # misc
 npm-debug.log*
+
+*.css
+package-lock.json
