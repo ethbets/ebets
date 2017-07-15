@@ -73,14 +73,6 @@ class Ebets extends Component {
         <ul className='card'>
           {listItems}
         </ul>
-        <ul className='card'>
-          <li className='bet'> a</li>
-          <li className='bet'> b</li>
-          <li className='bet'> c</li>
-          <li className='bet'> d</li>
-          <li className='bet'> e</li>
-          <li className='bet'> f</li>
-        </ul>
       </div>
     );
   }

@@ -1,4 +1,5 @@
 @import './variables.scss';
+
 .card {
   padding: 0;
   margin: 0;
@@ -17,17 +18,36 @@
 }
 
 .bet {
-  background: tomato;
-  padding: 5px;
-  width: 200px;
-  height: 150px;
-  margin-top: 10px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;  
   
-  line-height: 150px;
-  color: white;
+  -webkit-flex-flow: row wrap;
+  flex-flow: column wrap;
+  
   font-weight: bold;
-  font-size: 3em;
   text-align: center;
+}
+
+.bet > * {
+  padding: 10px;
+  flex: 1 100%;
+}
+
+.header {
+  background: gold;
+}
+
+.main {
+  text-align: left;
+  background: deepskyblue;
+}
+
+@media all and (min-width: 800px) {
+  .main    { flex: 3 0px; }
+  .main    { order: 2; }
 }
 
 .team0 {
