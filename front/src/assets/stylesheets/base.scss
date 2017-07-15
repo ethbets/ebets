@@ -32,28 +32,35 @@
 }
 
 .bet > * {
-  padding: 10px;
+  padding: 1px;
   flex: 1 100%;
 }
 
 .header {
-  background: gold;
+  background: green;
 }
 
-.main {
+.info {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;  
+  
+  -webkit-flex-flow: row wrap;
+  flex-flow: row wrap;
+  
+  font-weight: bold;
+  text-align: center;
+}
+
+.team0prop {
   text-align: left;
-  background: deepskyblue;
-}
-
-@media all and (min-width: 800px) {
-  .main    { flex: 3 0px; }
-  .main    { order: 2; }
-}
-
-.team0 {
+  background: red;
   order: 0;
 }
-
-.team1 {
-  order: 1;
+.team1prop {
+  text-align: left;
+  background: blue;
+  order: 0;
 }

@@ -104,7 +104,10 @@ class Bet extends Component {
     return (
       <li key={this.props.address} className='bet'>
         <header className='header'>{teams[0]} x {teams[1]}</header>
-        <article className='main'>coisas</article>
+        <div className='info'>
+          <div className='team0prop'>coisas T0</div>
+          <div className='team1prop'>coisas T1</div>
+        </div>
       </li>
     );
   }
