@@ -110,6 +110,7 @@ class Bet extends Component {
     console.log('Props', this.props);
     return (
       <li key={this.props.address} className='betColumn'>
+        <div>{this.state.category}</div>
         <div className='bet'>
         <div className='team'>
           <header className='teamTitle'>{teams[0]}</header>
