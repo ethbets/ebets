@@ -9,6 +9,8 @@
     "eslint-plugin-react": "^7.1.0",
     "glob": "^7.1.2",
     "material-ui": "^0.18.6",
+    "node-sass-chokidar": "0.0.3",
+    "npm-run-all": "^4.0.2",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
@@ -20,9 +22,13 @@
     "webpack": "^3.2.0"
   },
   "scripts": {
-    "start": "NODE_PATH=src react-scripts start",
-    "build": "NODE_PATH=src react-scripts build",
+    "build-css": "NODE_PATH=src node-sass-chokidar src/ -o src/",
+    "watch-css": "NODE_PATH=src npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "test": "NODE_PATH=src react-scripts test --env=jsdom",
-    "eject": "NODE_PATH=src react-scripts eject"
+    "eject": "NODE_PATH=src react-scripts eject",
+    "start-js": "NODE_PATH=src react-scripts start",
+    "start": "NODE_PATH=src npm-run-all -p watch-css start-js",
+    "build": "NODE_PATH=src npm run build-css && react-scripts build",
+    "old-start": "NODE_PATH=src react-scripts start"
   }
 }

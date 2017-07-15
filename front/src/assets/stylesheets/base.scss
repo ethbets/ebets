@@ -1,0 +1,29 @@
+@import './variables.scss';
+.card {
+  background: $yellow;
+  border-radius: 1px;
+  box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+}
+
+html, body, input, button, select, option {
+  color: $blue;
+  font-family: "museo-sans-rounded", sans-serif;
+}
+
+ul {
+  padding: 0;
+}
+
+.team0 {
+  display: inline-block;
+  width: 25%;
+}
+
+.team1 {
+  display: inline-block;     
+  vertical-align: top;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-right: 5px;
+  padding-bottom: 0px;
+}

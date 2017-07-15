@@ -14,7 +14,7 @@ import Home from 'components/Home';
 import BetForm from 'components/BetForm';
 import Ebets from 'components/Ebets'
 
-import 'containers/App.css';
+import '../assets/stylesheets/base.css';
 
 class App extends Component {
   constructor(props) {
