@@ -106,10 +106,12 @@ class Bet extends Component {
 
         <div className='team'>
           <header className='teamTitle'>{teams[0]}</header>
+          <div className='teamAmountBetted'>{this.state.team_0_bet_sum}</div>
         </div>
 
         <div className='team'>
           <header className='teamTitle'>{teams[1]}</header>
+          <div className='teamAmountBetted'>{this.state.team_1_bet_sum}</div>
         </div>
       </li>
     );
