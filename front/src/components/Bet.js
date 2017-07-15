@@ -7,6 +7,7 @@ class Bet extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isExpanded : false,
       bet_state: '',
       is_featured: false,
       title: '',
@@ -50,6 +51,7 @@ class Bet extends Component {
     function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {
         if (attr !== 'web3' // FIXME: REMOVE ONCE WEB3 IS NOT HERE
+            && attr !== 'isExpanded'
             && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
             && attr !== 'bets_to_team_1') { // idem
 
@@ -106,10 +108,14 @@ class Bet extends Component {
     isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
     isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
     
+    var activateLasers = () => {
+      console.log(this.props.address, this.state.isExpanded);
+      this.setState({isExpanded: !this.state.isExpanded});
+    }
 
     console.log('Props', this.props);
     return (
-      <li key={this.props.address} className='betColumn'>
+      <li key={this.props.address} className='betColumn' onClick={activateLasers}>
         <div>{this.state.category}</div>
         <div className='bet'>
         <div className='team'>
