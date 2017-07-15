@@ -1,8 +1,8 @@
 @import './variables.scss';
 .card {
+  display: flex;
+  flex-direction: row;
   background: $yellow;
-  border-radius: 1px;
-  box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 
 html, body, input, button, select, option {
@@ -15,15 +15,9 @@ ul {
 }
 
 .team0 {
-  display: inline-block;
-  width: 25%;
+  order: 0;
 }
 
 .team1 {
-  display: inline-block;     
-  vertical-align: top;
-  padding-top: 5px;
-  padding-left: 10px;
-  padding-right: 5px;
-  padding-bottom: 0px;
+  order: 1;
 }
