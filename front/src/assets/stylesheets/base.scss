@@ -14,33 +14,10 @@
   -webkit-flex-flow: row wrap;
   flex-flow: row wrap;
   justify-content: space-around;
-  background: $yellow;
+  background: yellow;
 }
 
 .bet {
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;  
-  
-  -webkit-flex-flow: row wrap;
-  flex-flow: column wrap;
-  
-  font-weight: bold;
-  text-align: center;
-}
-
-.bet > * {
-  padding: 1px;
-  flex: 1 100%;
-}
-
-.header {
-  background: green;
-}
-
-.info {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -52,15 +29,29 @@
   
   font-weight: bold;
   text-align: center;
+  background: red;
 }
 
-.team0prop {
-  text-align: left;
-  background: red;
-  order: 0;
+.team {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;  
+  
+  -webkit-flex-flow: column wrap;
+  flex-flow: column wrap;
+  
+  font-weight: bold;
+  text-align: center;
+  justify-content: space-around;
+  padding: 10px;
 }
-.team1prop {
-  text-align: left;
-  background: blue;
-  order: 0;
+
+.teamName {
+  background: green;
+}
+
+.teamAmountBetted {
+  background: darkcyan;
 }

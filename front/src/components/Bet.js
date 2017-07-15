@@ -103,10 +103,13 @@ class Bet extends Component {
     console.log('Props', this.props);
     return (
       <li key={this.props.address} className='bet'>
-        <header className='header'>{teams[0]} x {teams[1]}</header>
-        <div className='info'>
-          <div className='team0prop'>coisas T0</div>
-          <div className='team1prop'>coisas T1</div>
+
+        <div className='team'>
+          <header className='teamTitle'>{teams[0]}</header>
+        </div>
+
+        <div className='team'>
+          <header className='teamTitle'>{teams[1]}</header>
         </div>
       </li>
     );
