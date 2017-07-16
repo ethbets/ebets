@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
+import { RaisedButton, Card, Paper } from 'material-ui'
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -101,13 +102,28 @@ class Bet extends Component {
   //         Oracle: {this.state.url_oraclize}
 
   render() {
+
     var teams = this.state.title.split('x');
+    var getState = (state) => {
+      if (state === 0)
+        return `Open bet`;
+      else if (state === 1)
+        return `${teams[0]} won`;
+      else if (state === 2)
+        return `${teams[1]} won`;
+      else if (state === 3)
+        return 'Draw';
+      else if (state === 4)
+        return 'Undecided';
+    }
     var total = this.state.team_0_bet_sum + this.state.team_1_bet_sum;
     var percentage0 = (this.state.team_0_bet_sum / total)*100;
     var percentage1 = (this.state.team_1_bet_sum / total)*100;
     isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
     isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
     
+    var state = getState(this.state.bet_state);
+
     var activateLasers = () => {
       console.log(this.props.address, this.state.isExpanded);
       this.setState({isExpanded: !this.state.isExpanded});
@@ -115,7 +131,7 @@ class Bet extends Component {
 
     console.log('Props', this.props);
     return (
-      <li key={this.props.address} className='betColumn' onClick={activateLasers}>
+      <Paper key={this.props.address} className='betColumn'>
         <div>{this.state.category}</div>
         <div className='bet'>
         <div className='team'>
@@ -133,8 +149,8 @@ class Bet extends Component {
           <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
           <Progress bar color="success" value={percentage1}>{percentage1}%</Progress>
         </Progress>
-
-      </li>
+        <div>{state}</div>
+      </Paper>
     );
   }
 }
