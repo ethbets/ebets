@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import DatePicker from 'material-ui/DatePicker';
-import Checkbox from 'material-ui/Checkbox';
+import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 
 import getWeb3 from 'utils/getWeb3';
@@ -22,6 +22,7 @@ class BetForm extends Component {
 
     this.state = {
       alert: {
+        open: false,
         type: 'info',
         message: ''
       },
@@ -74,6 +75,14 @@ class BetForm extends Component {
     this.createContract()
   }
 
+  handleAlert = () => {
+    this.setState((prevState, props) => ({
+      alert: {
+        open: !prevState.alert.open
+      }
+    }));
+  };
+
   componentWillMount() {
     // Get network provider and web3 instance.
     getWeb3
@@ -114,21 +123,28 @@ class BetForm extends Component {
 
       betsEvents.then(response => {
         console.log(response.args.bet_addr);
-        this.setState({ alert: { type: 'success', message: 'Bet created successfully' } });
+        this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
       })
       .catch((error) => {
         console.log(error);
-        this.setState({ alert: { type: 'danger', message: `Error: ${error.message}` } });
+        this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true} });
       });
     });
   }
 
   render() {
     if (this.state.alert.type && this.state.alert.message) {
+      // TODO apply layouts
       var classString = 'bg-' + this.state.alert.type;
-      var status = <div id="status" className={classString} ref="status">
-                     {this.state.alert.message}
-                   </div>;
+      var status = <div id="status" className={classString}>
+                    <Dialog
+                      modal={false}
+                      open={this.state.alert.open}
+                      onRequestClose={this.handleAlert}
+                    >
+                      {this.state.alert.message}
+                    </Dialog>
+                  </div>
     }
     return (
       <div>
