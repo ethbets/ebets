@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import EbetsJson from '../build/contracts/ebets.json';
-import getWeb3 from '../utils/getWeb3';
+import EbetsJson from 'build/contracts/ebets.json';
+import getWeb3 from 'utils/getWeb3';
 
 import Bet from 'components/Bet';
 

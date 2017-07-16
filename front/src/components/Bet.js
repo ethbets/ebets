@@ -1,7 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
-import BetJson from '../build/contracts/Bet.json'
-import getWeb3 from '../utils/getWeb3'
+
+import BetJson from 'build/contracts/Bet.json';
+import getWeb3 from 'utils/getWeb3';
 
 class Bet extends Component {
   constructor(props) {
@@ -34,14 +35,14 @@ class Bet extends Component {
     .then(results => {
       this.setState({
         web3: results.web3
-      })
+      });
 
       // Instantiate contract once web3 provided.
       this.instantiateContract();
     })
     .catch((err) => {
       console.log('Error finding web3', err);
-    })
+    });
   }
 
   instantiateContract() {
@@ -74,7 +75,6 @@ class Bet extends Component {
     // Declaring this for later so we can chain functions on SimpleStorage.
     var betContractInstance = betContract.at(this.props.address);
     setAttributes(this.state, betContractInstance);
-
 
     var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
     console.log(betEvents);
