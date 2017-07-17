@@ -98,15 +98,10 @@ class BetForm extends Component {
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(this.state.web3.currentProvider);
 
-    // Declaring this for later so we can chain functions on SimpleStorage.
-    let ebetsContractInstance;
-
     //create contract
     ebetsContract.deployed().then((instance) => {
-      ebetsContractInstance = instance;
 
-      //events
-      let betsEvents = ebetsContractInstance.create_bet(
+      let createdBet = instance.create_bet(
         this.state.title,
         this.state.category,
         this.state.team_0,
@@ -115,11 +110,15 @@ class BetForm extends Component {
         moment(this.state.timestamp_match_end).unix(),
         moment(this.state.timestamp_hard_deadline).unix(),
         moment(this.state.timestamp_terminate_deadline).unix(),
-        this.state.url_oraclize
-      );
+        this.state.url_oraclize,
+        /* TODO: accounts[0] can be changed by the user,
+         * There should be a way so when the user changes, this is updated too.
+         */
+        {from: this.state.web3.eth.accounts[0]}
+        );
 
-      betsEvents.then(response => {
-        console.log(response.args.bet_addr);
+      createdBet.then(response => {
+        console.log(response);
         this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
       })
       .catch((error) => {
