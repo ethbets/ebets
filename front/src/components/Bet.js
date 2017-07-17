@@ -4,27 +4,14 @@ import { RaisedButton, Card, Paper } from 'material-ui'
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
+import betFields from './betFields';
 
 class Bet extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isExpanded : false,
-      bet_state: '',
-      is_featured: false,
-      title: '',
-      category: '',
-      team_0: '',
-      team_1: '',
-      team_0_bet_sum: 0,
-      team_1_bet_sum: 0,
-      bets_to_team_0: {},
-      bets_to_team_1: {},
-      timestamp_match_begin: 0,
-      timestamp_match_end: 0,
-      timestamp_hard_deadline: 0,
-      timestamp_terminate_deadline: 0,
-      url_oraclize: '',
+      ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
   }

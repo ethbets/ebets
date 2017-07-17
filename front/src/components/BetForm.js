@@ -10,6 +10,8 @@ import {Card, CardHeader, CardText} from 'material-ui/Card';
 import getWeb3 from 'utils/getWeb3';
 import EbetsJson from 'build/contracts/ebets.json';
 
+import betFields from './betFields';
+
 const HARD_DEADLINE_PERIOD = 7
 const TERMINATE_DEADLINE_PERIOD = 14
 
@@ -26,19 +28,13 @@ class BetForm extends Component {
         type: 'info',
         message: ''
       },
-      title: '',
-      description: '',
-      category: '',
-      team0: '',
-      team1: '',
-      timestampMatchBegin: currentDate,
-      timestampMatchEnd: moment(currentDate).add(1, 'day').toDate(),
-      timestampHardDeadline: moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
-      timestampTerminateDeadline: moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
-      resolverAddress: '',
-      urlOraclize: '',
+      ...betFields,
       web3: null
     }
+    this.state.timestamp_match_begin = currentDate;
+    this.state.timestamp_match_end = moment(currentDate).add(1, 'day').toDate();
+    this.state.timestamp_hard_deadline = moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate();
+    this.state.timestamp_terminate_deadline = moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate();
   };
 
   handleOnChange = event => {
@@ -50,26 +46,27 @@ class BetForm extends Component {
   };
 
   handleChangeTimestampBegin = (event, date) => {
-    this.setState({ timestampMatchBegin: date });
+    this.setState({ timestamp_match_begin: date });
   };
 
-  handleChangeTimestampMatchEnd = (event, date) => {
+  handleChangetimestamp_match_end = (event, date) => {
     this.setState({
-      timestampMatchEnd: date,
-      timestampHardDeadline: moment(date).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
-      timestampTerminateDeadline: moment(date).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
+      timestamp_match_end: date,
+      timestamp_hard_deadline: moment(date).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
+      timestamp_terminate_deadline: moment(date).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
     });
   };
 
-  handleChangeTimestampHardDeadline = (event, date) => {
-    this.setState({ timestampHardDeadline: date });
+  handleChangetimestamp_hard_deadline = (event, date) => {
+    this.setState({ timestamp_hard_deadline: date });
   };
 
   handleChangeTimestampTeminateDeadline = (event, date) => {
-    this.setState({ timestampTerminateDeadline: date });
+    this.setState({ timestamp_terminate_deadline: date });
   };
 
   handleOnSubmit = event => {
+    console.log(this.state);
     event.preventDefault();
     // TODO: handle form errors
     this.createContract()
@@ -112,13 +109,13 @@ class BetForm extends Component {
       let betsEvents = ebetsContractInstance.create_bet(
         this.state.title,
         this.state.category,
-        this.state.team0,
-        this.state.team1,
-        moment(this.state.timestampMatchBegin).unix(),
-        moment(this.state.timestampMatchEnd).unix(),
-        moment(this.state.timestampHardDeadline).unix(),
-        moment(this.state.timestampTerminateDeadline).unix(),
-        this.state.urlOraclize
+        this.state.team_0,
+        this.state.team_1,
+        moment(this.state.timestamp_match_begin).unix(),
+        moment(this.state.timestamp_match_end).unix(),
+        moment(this.state.timestamp_hard_deadline).unix(),
+        moment(this.state.timestamp_terminate_deadline).unix(),
+        this.state.url_oraclize
       );
 
       betsEvents.then(response => {
@@ -177,38 +174,32 @@ class BetForm extends Component {
                   onChange={this.handleOnChange}
                 /><br />
                 <TextField
-                  name="team0"
-                  value={this.state.team0}
-                  placeholder="Team0"
+                  name="team_0"
+                  value={this.state.team_0}
+                  placeholder="Team 0"
                   onChange={this.handleOnChange}
                 /><br />
                 <TextField
-                  name="team1"
-                  value={this.state.team1}
-                  placeholder="Team1"
+                  name="team_1"
+                  value={this.state.team_1}
+                  placeholder="Team 1"
                   onChange={this.handleOnChange}
                 /><br />
                 <DatePicker
                   autoOk={true}
                   floatingLabelText="Starts in"
-                  defaultDate={this.state.timestampMatchBegin}
+                  defaultDate={this.state.timestamp_match_begin}
                   onChange={this.handleChangeTimestampBegin}
                 />
                 <DatePicker
                   autoOk={true}
                   floatingLabelText="Ends in"
-                  defaultDate={this.state.timestampMatchEnd}
-                  onChange={this.handleChangeTimestampMatchEnd}
+                  defaultDate={this.state.timestamp_match_end}
+                  onChange={this.handleChangetimestamp_match_end}
                 />
                 <TextField
-                  name="resolverAddress"
-                  value={this.state.resolverAddress}
-                  placeholder="Resolver Address"
-                  onChange={this.handleOnChange}
-                /><br />
-                <TextField
-                  name="urlOraclize"
-                  value={this.state.urlOraclize}
+                  name="url_oraclize"
+                  value={this.state.url_oraclize}
                   placeholder="Oraclize URL"
                   onChange={this.handleOnChange}
                 /><br />
@@ -223,13 +214,13 @@ class BetForm extends Component {
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Hard deadline"
-                        defaultDate={this.state.timestampHardDeadline}
-                        onChange={this.handleChangeTimestampHardDeadline}
+                        defaultDate={this.state.timestamp_hard_deadline}
+                        onChange={this.handleChangetimestamp_hard_deadline}
                       />
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Terminate deadline"
-                        defaultDate={this.state.timestampTerminateDeadline}
+                        defaultDate={this.state.timestamp_terminate_deadline}
                         onChange={this.handleChangeTimestampTeminateDeadline}
                       />
                       </div>
