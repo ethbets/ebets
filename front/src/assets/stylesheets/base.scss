@@ -12,8 +12,8 @@
   display: -webkit-flex;
   display: flex;
   
-  -webkit-flex-flow: column wrap;
-  flex-flow: column wrap;
+  -webkit-flex-flow: column;
+  flex-flow: column;
   justify-content: space-around;
   background: yellow;
 }
