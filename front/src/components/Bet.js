@@ -32,18 +32,18 @@ class Bet extends Component {
     var loserPool;
     if (betTeam.betOn === '0') {
       loserPool = this.state.team_1_bet_sum - 0.02*this.state.team_1_bet_sum;
-      winnerPool = (expectedIncome + this.state.team_0_bet_sum)
+      winnerPool = expectedIncome + this.state.team_0_bet_sum;
     }
     else {
       loserPool = this.state.team_0_bet_sum - 0.02*this.state.team_0_bet_sum;
-      winnerPool = (expectedIncome + this.state.team_1_bet_sum)
+      winnerPool = expectedIncome + this.state.team_1_bet_sum;
     }
     
     expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
     if (this.state.amountToBet === 0 || isNaN(this.state.amountToBet))
       return null;
     else
-      return <div>Expected gain: {expectedIncome} </div>
+      return <div>Expected gain: {parseFloat(expectedIncome).toFixed(2)} </div>
   }
 
   ExpandedBet = (props) => {
