@@ -15,9 +15,64 @@ class Bet extends Component {
     super(props);
     this.state = {
       isExpanded : false,
+      amountToBet : 0,
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
+  }
+
+  setExpectedGain = (event, newValue) => {
+    console.log(newValue);
+    this.setState({amountToBet : parseInt(newValue, 10)});
+  }
+
+  ExpectedGain = (betTeam) => {
+    var expectedIncome = this.state.amountToBet;
+    var winnerPool;
+    var loserPool;
+    if (betTeam.betOn === '0') {
+      loserPool = this.state.team_1_bet_sum - 0.02*this.state.team_1_bet_sum;
+      winnerPool = (expectedIncome + this.state.team_0_bet_sum)
+    }
+    else {
+      loserPool = this.state.team_0_bet_sum - 0.02*this.state.team_0_bet_sum;
+      winnerPool = (expectedIncome + this.state.team_1_bet_sum)
+    }
+    
+    expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
+    if (this.state.amountToBet === 0 || isNaN(this.state.amountToBet))
+      return null;
+    else
+      return <div>Expected gain: {expectedIncome} </div>
+  }
+
+  ExpandedBet = (props) => {
+    if (this.state.isExpanded) {
+      if (props.team === '0')
+        return <div>
+          <TextField type='number' 
+            style={{width: '100px'}} 
+            name="jobNumber"
+            hintText='Amount' 
+            floatingLabelText='In ether'
+            onChange={this.setExpectedGain}/>
+          <RaisedButton primary={true}>BET</RaisedButton> <br/>
+          <this.ExpectedGain betOn={props.team}/>
+          </div>
+      else
+        return <div>
+          <TextField type='number' 
+            style={{width: '100px'}} 
+            name="jobNumber"
+            hintText='Amount' 
+            floatingLabelText='In ether'
+            onChange={this.setExpectedGain}/>
+          <RaisedButton secondary={true}>BET</RaisedButton>
+          <this.ExpectedGain betOn={props.team}/>
+          </div>
+    }
+    else
+      return null;
   }
 
   onExpand = (expanded) => {
@@ -48,8 +103,7 @@ class Bet extends Component {
     var objs = {};
     function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {
-        if (attr !== 'web3' // FIXME: REMOVE ONCE WEB3 IS NOT HERE
-            && attr !== 'isExpanded'
+        if (attr in betFields
             && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
             && attr !== 'bets_to_team_1') { // idem
 
@@ -98,8 +152,8 @@ class Bet extends Component {
   //         Oracle: {this.state.url_oraclize}
 
   render() {
-
     var teams = this.state.title.split('x');
+
     var getState = (state) => {
       if (state === 0)
         return `Open bet`;
@@ -117,19 +171,6 @@ class Bet extends Component {
     var percentage1 = (this.state.team_1_bet_sum / total)*100;
     isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
     isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
-    
-    var state = getState(this.state.bet_state);
-
-    var ExpandedBet = (props) => {
-      if (this.state.isExpanded) {
-        if (props.team === '0')
-          return <RaisedButton primary='true'>BET0</RaisedButton>
-        else
-          return <RaisedButton secondary='true'>BET1</RaisedButton>
-      }
-      else
-        return null;
-    }
 
     var ProgressBar = () => {
       if (percentage0 !== 0 && percentage1 !== 0)
@@ -152,20 +193,22 @@ class Bet extends Component {
           actAsExpander={true}
           showExpandableButton={true}
         />
-        
         <CardText className='bet'>
           <CardText className='team0'>
             <header className='teamTitle'>{teams[0]}</header>
             <Divider />
-            ${this.state.team_0_bet_sum}
-            <ExpandedBet team='0'/>
+            Ξ{this.state.team_0_bet_sum}
+            <this.ExpandedBet team='0'/>
           </CardText>
           <CardText className='team1'>
             <header className='teamTitle'>{teams[1]}</header>
             <Divider />
-            ${this.state.team_1_bet_sum}
-            <ExpandedBet team='1'/>
+            Ξ{this.state.team_1_bet_sum}
+            <this.ExpandedBet team='1'/>
           </CardText>
+        </CardText>
+        <CardText style={{'text-align': 'center'}}>
+          { getState(this.state.bet_state) }
         </CardText>
         <ProgressBar />
       </Card>

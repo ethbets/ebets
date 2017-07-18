@@ -50,7 +50,7 @@ class Ebets extends Component {
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
-      ebetsContract.deployed().then((instance) => {
+      ebetsContract.deployed().then(instance => {
         ebetsContractInstance = instance;
 
         //events
