@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
-import { RaisedButton, Card, Paper } from 'material-ui'
+import { RaisedButton, Paper } from 'material-ui'
+import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import FlatButton from 'material-ui/FlatButton';
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -116,28 +118,61 @@ class Bet extends Component {
       this.setState({isExpanded: !this.state.isExpanded});
     }
 
-    console.log('Props', this.props);
-    return (
-      <Paper key={this.props.address} className='betColumn'>
-        <div>{this.state.category}</div>
-        <div className='bet'>
-        <div className='team'>
-          <header className='teamTitle'>{teams[0]}</header>
-          <div className='teamAmountBetted'>${this.state.team_0_bet_sum}</div>
-        </div>
-
-        <div className='team'>
-          <header className='teamTitle'>{teams[1]}</header>
-          <div className='teamAmountBetted'>${this.state.team_1_bet_sum}</div>
-        </div>
-        </div>
-
-        <Progress multi className='progressBar'>
+    var ProgressBar = () => {
+      if (percentage0 !== 0 && percentage1 !== 0)
+        return <Progress multi className='progressBar'>
           <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
           <Progress bar color="success" value={percentage1}>{percentage1}%</Progress>
-        </Progress>
-        <div>{state}</div>
-      </Paper>
+          </Progress>;
+      else
+        return null;
+    }
+
+    console.log('Props', this.props);
+    return (
+      // <Paper zDepth={2} key={this.props.address} className='betColumn'>
+      //   <div>{this.state.category}</div>
+      //   <div className='bet'>
+      //   <div className='team'>
+      //     <header className='teamTitle'>{teams[0]}</header>
+      //     <div className='teamAmountBetted'>${this.state.team_0_bet_sum}</div>
+      //   </div>
+
+      //   <div className='team'>
+      //     <header className='teamTitle'>{teams[1]}</header>
+      //     <div className='teamAmountBetted'>${this.state.team_1_bet_sum}</div>
+      //   </div>
+      //   </div>
+        
+      //   <ProgressBar />
+      //   <div>{state}</div>
+      // </Paper>
+      <Card>
+        <CardHeader
+          title={this.state.title}
+          subtitle={this.state.category}
+          actAsExpander={true}
+          showExpandableButton={true}
+        />
+        
+        <div className='bet'>
+          <CardText className='team0'>
+          <header className='teamTitle'>{teams[0]}</header>
+          ${this.state.team_0_bet_sum}
+          </CardText>
+          <CardText className='team1'>
+          <header className='teamTitle'>{teams[1]}</header>
+          ${this.state.team_1_bet_sum}
+          </CardText>
+        </div>
+        <ProgressBar />
+        <CardText expandable={true}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
+          Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
+          Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
+        </CardText>
+      </Card>
     );
   }
 }
