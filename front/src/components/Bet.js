@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, Paper } from 'material-ui'
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import Chip from 'material-ui/Chip';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import Divider from 'material-ui/Divider';
@@ -49,7 +50,7 @@ class Bet extends Component {
   ExpandedBet = (props) => {
     if (this.state.isExpanded) {
       if (props.team === '0')
-        return <div>
+        return <span>
           <TextField type='number' 
             style={{width: '100px'}} 
             name="jobNumber"
@@ -58,9 +59,9 @@ class Bet extends Component {
             onChange={this.setExpectedGain}/>
           <RaisedButton primary={true}>BET</RaisedButton> <br/>
           <this.ExpectedGain betOn={props.team}/>
-          </div>
+          </span>
       else
-        return <div>
+        return <span>
           <TextField type='number' 
             style={{width: '100px'}} 
             name="jobNumber"
@@ -69,7 +70,7 @@ class Bet extends Component {
             onChange={this.setExpectedGain}/>
           <RaisedButton secondary={true}>BET</RaisedButton>
           <this.ExpectedGain betOn={props.team}/>
-          </div>
+          </span>
     }
     else
       return null;
@@ -193,12 +194,39 @@ class Bet extends Component {
         onExpandChange={this.onExpand}
         expanded={this.state.isExpanded}
       >
-        <CardHeader
-          title={this.state.title}
-          subtitle={this.state.category}
-          actAsExpander={true}
-          showExpandableButton={true}
-        />
+      <CardHeader
+        actAsExpander={true}
+        showExpandableButton={true}
+      />
+      <div>
+        <CardText>
+          <span>
+            {this.state.category}  
+          </span>
+          <span className="bet2">
+            Ξ{this.state.team_0_bet_sum}  
+          </span>
+          <span className="bet2">
+            {teams[0]} vs {teams[1]}  
+          </span>
+          <span className="bet2">
+            Ξ{this.state.team_1_bet_sum}  
+          </span>
+          <span className="bet2">
+            { getState(this.state.bet_state) }
+          </span>
+        </CardText>
+        <CardText>
+          <span>
+            <this.ExpandedBet team='0'/>
+          </span>
+          <span>
+            <this.ExpandedBet team='1'/>
+          </span>
+        </CardText>
+        <ProgressBar />
+      </div>
+          
       </Card>
     );
   }
