@@ -97,7 +97,24 @@ class Bet extends Component {
       console.log('Error finding web3', err);
     });
   }
-
+        // <CardText className='bet'>
+        //   <CardText className='team0'>
+        //     <header className='teamTitle'>{teams[0]}</header>
+        //     <Divider />
+        //     Ξ{this.state.team_0_bet_sum}
+        //     <this.ExpandedBet team='0'/>
+        //   </CardText>
+        //   <CardText className='team1'>
+        //     <header className='teamTitle'>{teams[1]}</header>
+        //     <Divider />
+        //     Ξ{this.state.team_1_bet_sum}
+        //     <this.ExpandedBet team='1'/>
+        //   </CardText>
+        // </CardText>
+        // <CardText style={{'text-align': 'center'}}>
+        //   { getState(this.state.bet_state) }
+        // </CardText>
+        // <ProgressBar />
   instantiateContract() {
     var self = this;
     var objs = {};
@@ -193,24 +210,6 @@ class Bet extends Component {
           actAsExpander={true}
           showExpandableButton={true}
         />
-        <CardText className='bet'>
-          <CardText className='team0'>
-            <header className='teamTitle'>{teams[0]}</header>
-            <Divider />
-            Ξ{this.state.team_0_bet_sum}
-            <this.ExpandedBet team='0'/>
-          </CardText>
-          <CardText className='team1'>
-            <header className='teamTitle'>{teams[1]}</header>
-            <Divider />
-            Ξ{this.state.team_1_bet_sum}
-            <this.ExpandedBet team='1'/>
-          </CardText>
-        </CardText>
-        <CardText style={{'text-align': 'center'}}>
-          { getState(this.state.bet_state) }
-        </CardText>
-        <ProgressBar />
       </Card>
     );
   }
