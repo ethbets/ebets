@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, Paper } from 'material-ui'
-import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import {Card, CardTitle, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import {GridList, GridTile} from 'material-ui/GridList';
 import Chip from 'material-ui/Chip';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
@@ -22,58 +23,83 @@ class Bet extends Component {
     }
   }
 
-  setExpectedGain = (event, newValue) => {
+  setBet0Value = (event, newValue) => {
+    this.setState({amountToBet0 : parseInt(newValue, 10), amountToBet1: 0});
+    this.setExpectedGain(newValue);
+  }
+
+
+  setBet1Value = (event, newValue) => {
+    this.setState({amountToBet1 : parseInt(newValue, 10), amountToBet0: 0});
+    this.setExpectedGain(newValue);
+  }
+
+  setExpectedGain = (newValue) => {
     console.log(newValue);
     this.setState({amountToBet : parseInt(newValue, 10)});
   }
 
-  ExpectedGain = (betTeam) => {
-    var expectedIncome = this.state.amountToBet;
+  ExpectedGain = () => {
+    var expectedIncome;
+    var amount;
     var winnerPool;
     var loserPool;
-    if (betTeam.betOn === '0') {
+
+    var betTeam = -1;
+    if (this.state.amountToBet0 > 0) betTeam = 0;
+    else if(this.state.amountToBet1 > 0) betTeam = 1;
+
+    if (betTeam === -1)
+      return <GridTile></GridTile>
+
+    if (betTeam === 0) {
+      amount = this.state.amountToBet0;
+      expectedIncome = this.state.amountToBet0;
       loserPool = this.state.team_1_bet_sum - 0.02*this.state.team_1_bet_sum;
       winnerPool = expectedIncome + this.state.team_0_bet_sum;
     }
     else {
+      amount = this.state.amountToBet1;
+      expectedIncome = this.state.amountToBet1;
       loserPool = this.state.team_0_bet_sum - 0.02*this.state.team_0_bet_sum;
       winnerPool = expectedIncome + this.state.team_1_bet_sum;
     }
     
     expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
-    if (this.state.amountToBet === 0 || isNaN(this.state.amountToBet))
-      return null;
+    if (amount === 0 || isNaN(amount))
+      return <GridTile></GridTile>
     else
-      return <div>Expected gain: {parseFloat(expectedIncome).toFixed(2)} </div>
+      return <GridTile>Expected gain: {parseFloat(expectedIncome).toFixed(2)} </GridTile>
   }
 
   ExpandedBet = (props) => {
     if (this.state.isExpanded) {
-      if (props.team === '0')
-        return <span>
-          <TextField type='number' 
-            style={{width: '100px'}} 
-            name="jobNumber"
-            hintText='Amount' 
-            floatingLabelText='In ether'
-            onChange={this.setExpectedGain}/>
-          <RaisedButton primary={true}>BET</RaisedButton> <br/>
-          <this.ExpectedGain betOn={props.team}/>
-          </span>
-      else
-        return <span>
-          <TextField type='number' 
-            style={{width: '100px'}} 
-            name="jobNumber"
-            hintText='Amount' 
-            floatingLabelText='In ether'
-            onChange={this.setExpectedGain}/>
-          <RaisedButton secondary={true}>BET</RaisedButton>
-          <this.ExpectedGain betOn={props.team}/>
-          </span>
+      return <GridList cols={5} cellHeight={20}>
+            <GridTile></GridTile>
+            <GridTile>
+              <TextField type='number'
+                style={{width: '100px'}} 
+                name="jobNumber1"
+                floatingLabelText="0 Eth"
+                value={this.state.amountToBet0}
+                onChange={this.setBet0Value}
+              />
+            </GridTile>
+            <RaisedButton primary={true}>BET</RaisedButton>
+            <GridTile>
+              <TextField type='number'
+                style={{width: '100px'}} 
+                name="jobNumber2"
+                floatingLabelText="0 Eth"
+                value={this.state.amountToBet1}
+                onChange={this.setBet1Value}
+            />
+            </GridTile>
+            <this.ExpectedGain/>
+            </GridList> 
     }
     else
-      return null;
+      return <GridList cols={0} cellHeight={0}></GridList>
   }
 
   onExpand = (expanded) => {
@@ -98,24 +124,6 @@ class Bet extends Component {
       console.log('Error finding web3', err);
     });
   }
-        // <CardText className='bet'>
-        //   <CardText className='team0'>
-        //     <header className='teamTitle'>{teams[0]}</header>
-        //     <Divider />
-        //     Ξ{this.state.team_0_bet_sum}
-        //     <this.ExpandedBet team='0'/>
-        //   </CardText>
-        //   <CardText className='team1'>
-        //     <header className='teamTitle'>{teams[1]}</header>
-        //     <Divider />
-        //     Ξ{this.state.team_1_bet_sum}
-        //     <this.ExpandedBet team='1'/>
-        //   </CardText>
-        // </CardText>
-        // <CardText style={{'text-align': 'center'}}>
-        //   { getState(this.state.bet_state) }
-        // </CardText>
-        // <ProgressBar />
         
   instantiateContract() {
     var self = this;
@@ -194,39 +202,25 @@ class Bet extends Component {
         onExpandChange={this.onExpand}
         expanded={this.state.isExpanded}
       >
-      <CardHeader
+      <CardTitle
         actAsExpander={true}
         showExpandableButton={true}
       />
+
+      <CardText>
       <div>
-        <CardText>
-          <span>
-            {this.state.category}  
-          </span>
-          <span className="bet2">
-            Ξ{this.state.team_0_bet_sum}  
-          </span>
-          <span className="bet2">
-            {teams[0]} vs {teams[1]}  
-          </span>
-          <span className="bet2">
-            Ξ{this.state.team_1_bet_sum}  
-          </span>
-          <span className="bet2">
-            { getState(this.state.bet_state) }
-          </span>
-        </CardText>
-        <CardText>
-          <span>
-            <this.ExpandedBet team='0'/>
-          </span>
-          <span>
-            <this.ExpandedBet team='1'/>
-          </span>
-        </CardText>
-        <ProgressBar />
+      <GridList cols={5} cellHeight={20}>
+        <GridTile>{this.state.category}</GridTile>
+        <GridTile>Ξ{this.state.team_0_bet_sum}</GridTile>
+        <GridTile>{this.state.team_0} vs {this.state.team_1}</GridTile>
+        <GridTile>Ξ{this.state.team_1_bet_sum}</GridTile>
+        <GridTile>{ getState(this.state.bet_state) }</GridTile>
+      </GridList>
+      <this.ExpandedBet/>
       </div>
-          
+      </CardText>
+      <ProgressBar /> 
+         
       </Card>
     );
   }
