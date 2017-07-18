@@ -99,7 +99,7 @@ class BetForm extends Component {
     ebetsContract.setProvider(this.state.web3.currentProvider);
 
     //create contract
-    ebetsContract.deployed().then((instance) => {
+    ebetsContract.deployed().then(instance => {
 
       let createdBet = instance.create_bet(
         this.state.title,
@@ -116,15 +116,15 @@ class BetForm extends Component {
          */
         {from: this.state.web3.eth.accounts[0]}
         );
-
-      createdBet.then(response => {
-        console.log(response);
-        this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true} });
-      });
+      return createdBet;
+    })
+    .then(response => {
+      console.log(response);
+      this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
+    })
+    .catch((error) => {
+      console.log(error);
+      this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true} });
     });
   }
 

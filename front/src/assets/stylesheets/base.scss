@@ -49,8 +49,6 @@
 
 .team0 {
   max-width: 100px;
-  height: 90%;
-  flex: 0 0 30%;
   order: 0;
   display: -webkit-box;
   display: -moz-box;
@@ -58,16 +56,14 @@
   display: -webkit-flex;
   display: flex;
   
-  -webkit-flex-flow: column wrap;
-  flex-flow: column wrap;
+  -webkit-flex-flow: column;
+  flex-flow: column;
   justify-content: center;
   text-align: center;
   background: red;
 }
 .team1 {
   max-width: 100px;
-  height: 90%;
-  flex: 0 0 30%;
   order: 1;
   display: -webkit-box;
   display: -moz-box;
@@ -75,8 +71,8 @@
   display: -webkit-flex;
   display: flex;
   
-  -webkit-flex-flow: column wrap;
-  flex-flow: column wrap;
+  -webkit-flex-flow: column;
+  flex-flow: column;
   justify-content: center;
   text-align: center;
   background: blue;
