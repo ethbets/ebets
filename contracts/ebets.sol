@@ -10,15 +10,13 @@ contract ebets {
     resolver = msg.sender;
   }
   
-  function create_bet(string title, string category, 
-                      string team_0, string team_1, uint timestamp_match_begin,
-                      uint timestamp_match_end, uint timestamp_hard_deadline,
-                      uint timestamp_terminate_deadline, string url_oraclize) {
+  function create_bet(string team_0_title, string team_1_title, string category, 
+                      string team_0_id, string team_1_id, uint[] timestamps,
+                      string url_oraclize) {
 
-    address bet = new Bet(resolver, title, category, team_0, team_1, 
-                              timestamp_match_begin, timestamp_match_end,
-                              timestamp_hard_deadline, timestamp_terminate_deadline,
-                              url_oraclize);
+    address bet = new Bet(resolver, team_0_title, team_1_title, category,
+                          team_0_id, team_1_id, timestamps,
+                          url_oraclize);
     created_bet(bet);
   }
 }

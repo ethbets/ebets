@@ -15,11 +15,12 @@ contract Bet is usingOraclize {
   BET_STATES public bet_state = BET_STATES.OPEN;
   address public resolver;
   bool public is_featured;
-  string public title;
+  string public team_0_title;
+  string public team_1_title;
   string public description;
   string public category;
-  string public team_0; // Team 0 identifier
-  string public team_1; // Team 1 identifier
+  string public team_0_id; // Team 0 identifier
+  string public team_1_id; // Team 1 identifier
   uint public team_0_bet_sum;
   uint public team_1_bet_sum;
   mapping (address => uint) public bets_to_team_0;
@@ -38,24 +39,25 @@ contract Bet is usingOraclize {
   event new_bet(bool for_team, address from, uint amount);
   event state_changed(BET_STATES state);
 
-  function Bet(address _resolver, string _title, string _category, 
-               string _team_0, string _team_1, uint _timestamp_match_begin,
-               uint _timestamp_match_end, uint _timestamp_hard_deadline,
-               uint _timestamp_terminate_deadline, string _url_oraclize) {
-    require(_timestamp_match_begin < _timestamp_match_end);
-    require(_timestamp_match_end < _timestamp_hard_deadline);
-    require(_timestamp_hard_deadline < _timestamp_terminate_deadline);
-    require(block.timestamp < _timestamp_match_begin);
+  function Bet(address _resolver, string _team_0_title, 
+               string _team_1_title, string _category, 
+               string _team_0_id, string _team_1_id, uint[] _timestamps,
+               string _url_oraclize) {
+    require(block.timestamp < _timestamps[0]);
+    require(_timestamps[0] < _timestamps[1]);
+    require(_timestamps[1] < _timestamps[2]);
+    require(_timestamps[2] < _timestamps[3]);
 
     resolver = _resolver;
-    title = _title;
+    team_0_title = _team_0_title;
+    team_1_title = _team_1_title;
     category = _category;
-    team_0 = _team_0;
-    team_1 = _team_1;
-    timestamp_match_begin = _timestamp_match_begin - TIMESTAMP_MARGIN;
-    timestamp_match_end = _timestamp_match_end + TIMESTAMP_MARGIN;
-    timestamp_hard_deadline = _timestamp_hard_deadline + TIMESTAMP_MARGIN;
-    timestamp_terminate_deadline = _timestamp_terminate_deadline + TIMESTAMP_MARGIN;
+    team_0_id = _team_0_id;
+    team_1_id = _team_1_id;
+    timestamp_match_begin = _timestamps[0] - TIMESTAMP_MARGIN;
+    timestamp_match_end = _timestamps[1] + TIMESTAMP_MARGIN;
+    timestamp_hard_deadline = _timestamps[2] + TIMESTAMP_MARGIN;
+    timestamp_terminate_deadline = _timestamps[3] + TIMESTAMP_MARGIN;
     url_oraclize = _url_oraclize;
   }
 
@@ -77,9 +79,9 @@ contract Bet is usingOraclize {
     // Must be called after the bet ends
     require(block.timestamp >= timestamp_match_end);
 
-    if (Helpers.string_equal(result, team_0))
+    if (Helpers.string_equal(result, team_0_id))
       bet_state = BET_STATES.TEAM_ZERO_WON;
-    else if (Helpers.string_equal(result, team_1))
+    else if (Helpers.string_equal(result, team_1_id))
       bet_state = BET_STATES.TEAM_ONE_WON;
     else
       bet_state = BET_STATES.ORACLE_UNDECIDED;
