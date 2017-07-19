@@ -183,10 +183,12 @@ class Bet extends Component {
   render() {
     var betTitle = 
       <div className='card'>
-        <div className='pushLeft'>
-          {this.state.team_0_title} vs {this.state.team_1_title}
+        <div className='inRows'>
+            <div className='pushLeft'> 
+            {this.state.team_0_title} vs {this.state.team_1_title}
+          </div> 
+          <Timer date={this.state.timestamp_match_begin}/>  
         </div>
-        <Timer date={this.state.timestamp_match_begin}/>
       </div>;
 
     var getState = (state) => {
