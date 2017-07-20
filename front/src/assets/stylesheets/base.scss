@@ -41,8 +41,8 @@
   
   -webkit-flex-flow: row;
   flex-flow: row;
-  justify-content: center;
-  align-items: center; 
+  justify-content: left;
+  align-items: left; 
 }
 
 .betColumn {
@@ -89,14 +89,22 @@
   background: blue;
 }
 
-@media all and (min-width: 600px) {
-  .progressBar { flex: 1 auto; }
-}
+// @media all and (min-width: 600px) {
+//   .progressBar { flex: 1 auto; }
+// }
 
 .pushLeft {
 }
 
 .pushRight {
+  font-size: 19px;
+  color: rgba(0, 0, 0, 0.54);
   text-align: right;
   margin-right: 30px;
+}
+
+.test {
+  vertical-align: bottom;
+  margin-right: 10px;
+  margin-left: 10px;
 }

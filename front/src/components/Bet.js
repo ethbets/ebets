@@ -1,13 +1,13 @@
-import moment from 'moment';
+import contract from 'truffle-contract';
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
-import { RaisedButton, Paper } from 'material-ui'
-import {Card, CardTitle, CardActions, CardHeader, CardText} from 'material-ui/Card';
-import {GridList, GridTile} from 'material-ui/GridList';
-import Chip from 'material-ui/Chip';
-import FlatButton from 'material-ui/FlatButton';
+import { RaisedButton, FlatButton } from 'material-ui'
+import { Card, CardTitle } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
-import Divider from 'material-ui/Divider';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
+import Dialog from 'material-ui/Dialog';
+import LinearProgress from 'material-ui/LinearProgress';
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -18,28 +18,63 @@ class Bet extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isExpanded : false,
+      open: false,
+      betHappened: false,
+      betStatusMessage: '',
+      betInProgress: false,
+      isExpanded: false,
+      selectedTeam: '',
       amountToBet : 0,
+
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
   }
 
-  setBet0Value = (event, newValue) => {
-    this.setState({amountToBet0 : parseInt(newValue, 10), amountToBet1: 0});
-    this.setExpectedGain(newValue);
-  }
+  handleCloseDialog = () => {
+    this.setState({betHappened: false});
+  };
 
+  setTeam = (event, index, value) => {
+    console.log(value);
+    this.setState({selectedTeam: value});
+  };
 
-  setBet1Value = (event, newValue) => {
-    this.setState({amountToBet1 : parseInt(newValue, 10), amountToBet0: 0});
-    this.setExpectedGain(newValue);
-  }
-
-  setExpectedGain = (newValue) => {
-    console.log(newValue);
+  setBetValue = (event, newValue) => {
     this.setState({amountToBet : parseInt(newValue, 10)});
-  }
+  };
+
+  betOnTeam = () => {
+    console.log(this.state.contractInstance);
+    if (this.state.contractInstance === undefined ||
+        this.state.selectedTeam === '' ||
+        this.state.amountToBet <= 0 ||
+        this.state.amountToBet === '') {
+      console.log('Error');
+      return;
+    }
+    this.setState({betInProgress: true});
+    var betPromisse = this.state.contractInstance.bet(
+      this.state.selectedTeam === 1,
+      { from: this.state.web3.eth.accounts[0],
+        value: this.state.amountToBet
+      }
+    );
+    betPromisse.then(tx => {
+      console.log(tx);
+      this.setState({
+        betStatusMessage: 'Transaction hash: ' + tx.tx + 
+        '\n\nAppended in block: ' + tx.receipt.blockNumber + '\n'
+      })
+    })
+    .catch(err => {
+      this.setState({betStatusMessage: err.toString()});
+    })
+    .then(() => {
+      this.setState({betHappened: true});
+      this.setState({betInProgress: false});
+    })
+  };
 
   ExpectedGain = () => {
     var expectedIncome;
@@ -47,63 +82,80 @@ class Bet extends Component {
     var winnerPool;
     var loserPool;
 
-    var betTeam = -1;
-    if (this.state.amountToBet0 > 0) betTeam = 0;
-    else if(this.state.amountToBet1 > 0) betTeam = 1;
+    if (this.state.selectedTeam === '')
+      return null;
 
-    if (betTeam === -1)
-      return <GridTile></GridTile>
-
-    if (betTeam === 0) {
-      amount = this.state.amountToBet0;
-      expectedIncome = this.state.amountToBet0;
+    if (this.state.selectedTeam === 0) {
+      amount = this.state.amountToBet;
+      expectedIncome = this.state.amountToBet;
       loserPool = this.state.team_1_bet_sum - 0.02*this.state.team_1_bet_sum;
       winnerPool = expectedIncome + this.state.team_0_bet_sum;
     }
     else {
-      amount = this.state.amountToBet1;
-      expectedIncome = this.state.amountToBet1;
+      amount = this.state.amountToBet;
+      expectedIncome = this.state.amountToBet;
       loserPool = this.state.team_0_bet_sum - 0.02*this.state.team_0_bet_sum;
       winnerPool = expectedIncome + this.state.team_1_bet_sum;
     }
     
     expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
     if (amount === 0 || isNaN(amount))
-      return <GridTile></GridTile>
+      return null
     else
-      return <GridTile>Expected gain: {parseFloat(expectedIncome).toFixed(2)} </GridTile>
+      return <div> Expected gain: {parseFloat(expectedIncome).toFixed(2)} </div>
+  }
+
+  LinearProgressCustom = (props) => {
+    if (this.state.betInProgress)
+      return <LinearProgress mode="indeterminate" />;
+    return null;
+  };
+
+  BetStatusDialog = (props) => {
+    const actions = [
+      <FlatButton
+        label="Ok"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.handleCloseDialog}
+      />
+    ];
+
+    return <Dialog
+          title="Bet status"
+          actions={actions}
+          modal={false}
+          open={this.state.betHappened}
+          onRequestClose={this.handleCloseDialog}
+        >
+        {this.state.betStatusMessage}
+        </Dialog>
   }
 
   ExpandedBet = (props) => {
     if (this.state.isExpanded) {
-      return <GridList cols={5} cellHeight={20}>
-            <GridTile></GridTile>
-            <GridTile>
-              <TextField type='number'
-                style={{width: '100px'}} 
-                name="jobNumber1"
-                floatingLabelText="0 Eth"
-                value={this.state.amountToBet0}
-                onChange={this.setBet0Value}
-              />
-            </GridTile>
-            <RaisedButton primary={true}>BET</RaisedButton>
-            <GridTile>
-              <TextField type='number'
-                style={{width: '100px'}} 
-                name="jobNumber2"
-                floatingLabelText="0 Eth"
-                value={this.state.amountToBet1}
-                onChange={this.setBet1Value}
-            />
-            </GridTile>
-            <this.ExpectedGain/>
-            </GridList> 
+    return <div>
+        <div>
+          Ξ{this.state.team_0_bet_sum} Ξ{this.state.team_1_bet_sum}
+        </div>
+        <SelectField className='test'
+          floatingLabelText="Team"
+          value={this.state.selectedTeam}
+          onChange={this.setTeam}
+        >
+          <MenuItem value={0} primaryText={this.state.team_0_title} />
+          <MenuItem value={1} primaryText={this.state.team_1_title} />
+        </SelectField>
+        <TextField id='betAmount' type='number' onChange={this.setBetValue}/>
+        <RaisedButton primary={true} onTouchTap={this.betOnTeam}>BET</RaisedButton>
+        <this.LinearProgressCustom mode="indeterminate" />
+        <this.ExpectedGain/>
+        <this.BetStatusDialog />
+      </div>
     }
-    else
-      return <GridList cols={0} cellHeight={0}></GridList>
+    return null;
   }
-
+  
   onExpand = (expanded) => {
       console.log(this.props.address, this.state.isExpanded);
       this.setState({isExpanded: !this.state.isExpanded});
@@ -122,7 +174,7 @@ class Bet extends Component {
       // Instantiate contract once web3 provided.
       this.instantiateContract();
     })
-    .catch((err) => {
+    .catch(err => {
       console.log('Error finding web3', err);
     });
   }
@@ -131,6 +183,7 @@ class Bet extends Component {
     var self = this;
     var objs = {};
     function setAttributes(attributeNames, contractInstance) {
+      self.setState({contractInstance: contractInstance});
       var promises = Object.keys(attributeNames).map(async (attr) => {
         if (attr in betFields
             && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
@@ -150,17 +203,14 @@ class Bet extends Component {
       })
     }
 
-    const contract = require('truffle-contract');
     const betContract = contract(BetJson);
     betContract.setProvider(this.state.web3.currentProvider);
 
-    // Declaring this for later so we can chain functions on SimpleStorage.
     var betContractInstance = betContract.at(this.props.address);
     setAttributes(this.state, betContractInstance);
 
     var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
     betEvents.watch((error, response) => {
-      console.log('Bet:', response.args);
       if (response.args.for_team === false)
         this.setState({ team_0_bet_sum : this.state.team_0_bet_sum + response.args.amount.toNumber() });
       else
@@ -230,6 +280,7 @@ class Bet extends Component {
         actAsExpander={true}
         showExpandableButton={true}
       />
+      <this.ExpandedBet/>
       </Card>
     );
   }
