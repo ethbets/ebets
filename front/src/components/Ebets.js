@@ -57,7 +57,9 @@ class Ebets extends Component {
         var betsEvents = ebetsContractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
 
         betsEvents.watch((error, response) => {
-          this.setState({ bets: this.state.bets.concat(response.args.bet_addr) });
+          this.setState(previousState => {
+            return { bets: previousState.bets.concat(response.args.bet_addr) }
+          });
         });
       });
     });

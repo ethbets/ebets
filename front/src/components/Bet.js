@@ -53,7 +53,7 @@ class Bet extends Component {
       console.log('Error');
       return;
     }
-    this.setState({betInProgress: true});
+    this.setState({ betInProgress: true });
     var betPromisse = this.state.contractInstance.bet(
       this.state.selectedTeam === 1,
       { from: this.state.web3.eth.accounts[0],
@@ -157,9 +157,11 @@ class Bet extends Component {
   }
   
   onExpand = (expanded) => {
-      console.log(this.props.address, this.state.isExpanded);
-      this.setState({isExpanded: !this.state.isExpanded});
-    }
+    // FIXME: There is a bug here, onExpand is called twice
+    // FIXME: Don't reference this.state in this.setState
+    console.log(this.props.address, this.state.isExpanded);
+    this.setState({isExpanded: !this.state.isExpanded});
+  }
 
   componentWillMount() {
     // Get network provider and web3 instance.
@@ -212,9 +214,13 @@ class Bet extends Component {
     var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
     betEvents.watch((error, response) => {
       if (response.args.for_team === false)
-        this.setState({ team_0_bet_sum : this.state.team_0_bet_sum + response.args.amount.toNumber() });
+        this.setState(previousState => {
+          return { team_0_bet_sum : previousState.team_0_bet_sum + response.args.amount.toNumber() }
+        });
       else
-        this.setState({ team_1_bet_sum : this.state.team_1_bet_sum + response.args.amount.toNumber() });
+        this.setState(previousState => {
+          return { team_1_bet_sum : previousState.team_1_bet_sum + response.args.amount.toNumber() };
+        });
     });
   }
 // <CardText>
