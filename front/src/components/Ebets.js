@@ -79,7 +79,7 @@ class Ebets extends Component {
     console.log('Category', this.props.routeParams.category);
     return (
       <div style={{marginLeft: 210}}>
-        <h1 style={{marginLeft: 40}}>{this.props.location.pathname}</h1>
+        <h1 style={{marginLeft: 210}}>{this.props.location.pathname}</h1>
         <ul className='card'>
           {listItems}
         </ul>
