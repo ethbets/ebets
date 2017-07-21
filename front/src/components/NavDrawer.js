@@ -70,7 +70,7 @@ class NavDrawer extends Component {
             primaryTogglesNestedList={true}
             nestedItems={[
                 <ListItem
-                  primaryText="LOL"
+                  primaryText="League of Legends"
                   value="/category/esports/lol"
                   href="#/category/esports/lol"
                 />,
@@ -87,7 +87,7 @@ class NavDrawer extends Component {
             href="#/category/ufc"
           />
           <ListItem
-            primaryText="Football"
+            primaryText="Soccer"
             value="/category/football"
             href="#/category/football"
           />

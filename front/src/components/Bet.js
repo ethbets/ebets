@@ -2,12 +2,13 @@ import contract from 'truffle-contract';
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, FlatButton } from 'material-ui'
-import { Card, CardTitle } from 'material-ui/Card';
+import { Card, CardHeader, CardTitle } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Dialog from 'material-ui/Dialog';
 import LinearProgress from 'material-ui/LinearProgress';
+import Avatar from 'material-ui/Avatar';
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -24,7 +25,9 @@ class Bet extends Component {
       betInProgress: false,
       isExpanded: false,
       selectedTeam: '',
-      amountToBet : 0,
+      amountToBet: 0,
+      loadCompleted: false,
+      cat_url: '',
 
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
@@ -179,11 +182,13 @@ class Bet extends Component {
     .catch(err => {
       console.log('Error finding web3', err);
     });
+
+ 
   }
         
   instantiateContract() {
     var self = this;
-    var objs = {};
+    var objs = {loadCompleted: true};
     function setAttributes(attributeNames, contractInstance) {
       self.setState({contractInstance: contractInstance});
       var promises = Object.keys(attributeNames).map(async (attr) => {
@@ -201,6 +206,7 @@ class Bet extends Component {
         }
       });
       Promise.all(promises).then(res => {
+        objs.cat_url = require('assets/imgs/' + objs.category + '.png')
         self.setState(objs);
       })
     }
@@ -237,10 +243,14 @@ class Bet extends Component {
 //       </CardText>
 //       <ProgressBar /> 
   render() {
+
+  if (!this.state.loadCompleted)
+    return null;
+
     var betTitle = 
       <div className='card'>
         <div className='inRows'>
-            <div className='pushLeft'> 
+          <div className='pushLeft'> 
             {this.state.team_0_title} vs {this.state.team_1_title}
           </div> 
           <Timer date={this.state.timestamp_match_begin}/>  
@@ -249,7 +259,7 @@ class Bet extends Component {
 
     var getState = (state) => {
       if (state === 0)
-        return `Open bet`;
+        return 'Open bet';
       else if (state === 1)
         return `${this.state.team_0_title} won`;
       else if (state === 2)
@@ -265,7 +275,7 @@ class Bet extends Component {
     isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
     isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
 
-    var ProgressBar = () => {
+   var ProgressBar = () => {
       if (percentage0 !== 0 && percentage1 !== 0)
         return <Progress multi className='progressBar'>
           <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
@@ -274,15 +284,15 @@ class Bet extends Component {
       else
         return null;
     }
-    
+
     return (
       <Card
         onExpandChange={this.onExpand}
         expanded={this.state.isExpanded}
       >
-      <CardTitle
+      <CardHeader
+        avatar={this.state.cat_url}
         title={betTitle}
-        subtitle={this.state.category}
         actAsExpander={true}
         showExpandableButton={true}
       />
