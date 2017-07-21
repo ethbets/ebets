@@ -106,7 +106,7 @@ class Bet extends Component {
     if (amount === 0 || isNaN(amount))
       return null
     else
-      return <div> Expected gain: {parseFloat(expectedIncome).toFixed(2)} </div>
+        return <RaisedButton backgroundColor='#FAD723'>Win Ξ{parseFloat(expectedIncome).toFixed(2)} </RaisedButton>
   }
 
   LinearProgressCustom = (props) => {
@@ -139,10 +139,7 @@ class Bet extends Component {
   ExpandedBet = (props) => {
     if (this.state.isExpanded) {
     return <div>
-        <div>
-          Ξ{this.state.team_0_bet_sum} Ξ{this.state.team_1_bet_sum}
-        </div>
-        <SelectField className='test'
+        <SelectField style={{ width: 160 }} className='test'
           floatingLabelText="Team"
           value={this.state.selectedTeam}
           onChange={this.setTeam}
@@ -150,10 +147,10 @@ class Bet extends Component {
           <MenuItem value={0} primaryText={this.state.team_0_title} />
           <MenuItem value={1} primaryText={this.state.team_1_title} />
         </SelectField>
-        <TextField id='betAmount' type='number' onChange={this.setBetValue}/>
-        <RaisedButton primary={true} onTouchTap={this.betOnTeam}>BET</RaisedButton>
-        <this.LinearProgressCustom mode="indeterminate" />
+        <TextField style={{ width: 80 }} id='betAmount' type='number' onChange={this.setBetValue}/>
+        <RaisedButton className="betBtn" primary={true} onTouchTap={this.betOnTeam}>BET</RaisedButton>
         <this.ExpectedGain/>
+        <this.LinearProgressCustom mode="indeterminate" />
         <this.BetStatusDialog />
       </div>
     }
@@ -249,13 +246,11 @@ class Bet extends Component {
     return ( <div className="center"> <CircularProgress /> </div> ) ;
 
     var betTitle = 
-      <div className='card'>
         <div className='inRows'>
           <div className='pushLeft'> 
-            {this.state.team_0_title} vs {this.state.team_1_title}
+            <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
           </div> 
           <Timer date={this.state.timestamp_match_begin}/>  
-        </div>
       </div>;
 
     var getState = (state) => {
@@ -287,7 +282,7 @@ class Bet extends Component {
     }
 
     return (
-      <Card
+      <Card containerStyle={{ backgroundColor: '#097986' }}
         onExpandChange={this.onExpand}
         expanded={this.state.isExpanded}
       >

@@ -12,6 +12,8 @@
   flex-flow: column;
   
   justify-content: space-between;
+
+  background-color: #097986;
 }
 
 .inRows {
@@ -25,10 +27,6 @@
   flex-flow: row;
   
   justify-content: space-between;
-}
-
-.bet2 {
-  margin-left: 12px;
 }
 
 .bet {
@@ -61,32 +59,40 @@
 
 .team0 {
   //max-width: 100px;
-  order: 0;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
+  //order: 0;
+  //display: -webkit-box;
+  //display: -moz-box;
+  //display: -ms-flexbox;
+  //display: -webkit-flex;
+  //display: flex;
   
-  -webkit-flex-flow: column;
-  flex-flow: column;
-  justify-content: center;
-  text-align: center;
+  //-webkit-flex-flow: column;
+  //flex-flow: column;
+  //justify-content: center;
+  //text-align: center;
+
+  background-color: #097986;
+  border-radius: 5px;
+  padding: 5px;
 }
 .team1 {
   //max-width: 100px;
-  order: 1;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
+  //order: 1;
+  //display: -webkit-box;
+  //display: -moz-box;
+  //display: -ms-flexbox;
+  //display: -webkit-flex;
+  //display: flex;
   
-  -webkit-flex-flow: column;
-  flex-flow: column;
-  justify-content: center;
-  text-align: center;
-  background: blue;
+  //-webkit-flex-flow: column;
+  //flex-flow: column;
+  //justify-content: center;
+  //text-align: center;
+  //background: blue;
+
+  background-color: #F05056;
+  border-radius: 5px;
+  padding: 5px;
 }
 
 // @media all and (min-width: 600px) {
@@ -97,16 +103,16 @@
 }
 
 .pushRight {
-  font-size: 19px;
-  color: rgba(0, 0, 0, 0.54);
+  //font-size: 19px;
+  //color: rgba(0, 0, 0, 0.54);
   text-align: right;
-  margin-right: 30px;
+  //margin-right: 30px;
 }
 
 .test {
   vertical-align: bottom;
   margin-right: 10px;
-  margin-left: 10px;
+  margin-left: 70px;
 }
 
 a {
@@ -119,3 +125,16 @@ a {
   justify-content: center
 }
 
+.betBtn {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.betValue {
+  width: 1px;
+}
+
+.winValue {
+  background-color: #FAD723;
+}
+ 
