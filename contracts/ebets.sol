@@ -4,8 +4,8 @@ import './bet.sol';
 
 contract ebets {
   address resolver;
-
   event created_bet(address bet_addr);
+  
   function ebets() {
     resolver = msg.sender;
   }
@@ -14,9 +14,13 @@ contract ebets {
                       string team_0_id, string team_1_id, uint[] timestamps,
                       string url_oraclize) {
 
-    address bet = new Bet(resolver, team_0_title, team_1_title, category,
+    Bet bet = new Bet(resolver, team_0_title, team_1_title, category,
                           team_0_id, team_1_id, timestamps,
                           url_oraclize);
+    // Featured by default for resolver
+    if (msg.sender == resolver)
+      bet.toggle_featured();
+
     created_bet(bet);
   }
 }

@@ -20,6 +20,7 @@ class Bet extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      betOnTeam: null,
       open: false,
       betHappened: false,
       betStatusMessage: '',
@@ -143,6 +144,7 @@ class Bet extends Component {
           floatingLabelText="Team"
           value={this.state.selectedTeam}
           onChange={this.setTeam}
+          disabled={this.state.betOnTeam !== null}
         >
           <MenuItem value={0} primaryText={this.state.team_0_title} />
           <MenuItem value={1} primaryText={this.state.team_1_title} />
@@ -158,10 +160,9 @@ class Bet extends Component {
   }
   
   onExpand = (expanded) => {
-    // FIXME: There is a bug here, onExpand is called twice
-    // FIXME: Don't reference this.state in this.setState
+    // NOTE: Don't reference this.state in this.setState
     console.log(this.props.address, this.state.isExpanded);
-    this.setState({isExpanded: !this.state.isExpanded});
+    this.setState(previousState => ({isExpanded: !previousState.isExpanded}));
   }
 
   componentWillMount() {
@@ -226,6 +227,25 @@ class Bet extends Component {
           return { team_1_bet_sum : previousState.team_1_bet_sum + response.args.amount.toNumber() };
         });
     });
+      
+    var allBetEvents = betContractInstance.allEvents({
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+
+    allBetEvents.watch((error, response) => {
+      if (response.event === 'new_bet') {
+        if (response.args.from === this.state.web3.eth.accounts[0]) {
+          this.setState({
+            betOnTeam: response.args.for_team,
+            selectedTeam: (response.args.for_team) ? 1 : 0
+          });
+        }
+      }
+      else if (response.event === 'state_changed') {
+        this.setState({ bet_state: response.args.state });
+      }
+    });
   }
 // <CardText>
 //       <div>
@@ -281,20 +301,31 @@ class Bet extends Component {
         return null;
     }
 
-    return (
-      <Card containerStyle={{ backgroundColor: '#097986' }}
-        onExpandChange={this.onExpand}
-        expanded={this.state.isExpanded}
-      >
-      <CardHeader
-        avatar={this.state.cat_url}
-        title={betTitle}
-        actAsExpander={true}
-        showExpandableButton={true}
-      />
-      <this.ExpandedBet/>
-      </Card>
-    );
+    let FilteredBet = () => {
+      console.log(this.state.category.toLowerCase(), this.props);
+      // My bets
+      if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
+        (this.props.category  === this.state.category) ||
+        (this.props.subcategory === this.state.category.toLowerCase()) ||
+        (this.props.category === 'all_bets'))
+        return (
+          <Card containerStyle={{ backgroundColor: '#097986' }}
+            onExpandChange={this.onExpand}
+            expanded={this.state.isExpanded}
+          >
+          <CardHeader
+            avatar={this.state.cat_url}
+            title={betTitle}
+            actAsExpander={true}
+            showExpandableButton={true}
+          />
+          <this.ExpandedBet/>
+          </Card>
+        );
+      return null;
+    }
+
+    return <FilteredBet />
   }
 }
 

@@ -13,7 +13,8 @@ contract Bet is usingOraclize {
     }
   
   BET_STATES public bet_state = BET_STATES.OPEN;
-  address public resolver;
+  address public owner; //Can be a parent contract
+  address public resolver; //Usually an account
   bool public is_featured;
   string public team_0_title;
   string public team_1_title;
@@ -48,6 +49,8 @@ contract Bet is usingOraclize {
     require(_timestamps[1] < _timestamps[2]);
     require(_timestamps[2] < _timestamps[3]);
 
+    is_featured = false;
+    owner = msg.sender;
     resolver = _resolver;
     team_0_title = _team_0_title;
     team_1_title = _team_1_title;
@@ -98,9 +101,13 @@ contract Bet is usingOraclize {
   }
   
   function toggle_featured() {
-    require(msg.sender == resolver);
-
+    require(msg.sender == resolver || msg.sender == owner);
     is_featured = !is_featured;
+  }
+
+  function modify_category(string new_category) {
+    require(msg.sender == resolver || msg.sender == owner);
+    category = new_category;
   }
   
   // 
@@ -207,7 +214,6 @@ contract Bet is usingOraclize {
     resolver.transfer(tax);
     collect_bet();
     msg.sender.transfer(sender_profit);
-    
   }
   
   function close() {
