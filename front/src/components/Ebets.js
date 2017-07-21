@@ -67,11 +67,16 @@ class Ebets extends Component {
 
   render() {
     var listItems;
+    var category = this.props.routeParams.category;
+    if (this.props.routeParams.subcategory !== undefined)
+      category = category + '/' + this.props.routeParams.subcategory;
     listItems = this.state.bets.map((bet) => 
-      <Bet address={bet} key={bet.toString()} />
+      <Bet key={bet.toString()}
+      category={category}
+      address={bet} 
+      />
     );
-    console.log("BETS", this.state.bets)
-    console.log(this.props);
+    console.log('Category', this.props.routeParams.category);
     return (
       <div style={{marginLeft: 210}}>
         <h1 style={{marginLeft: 40}}>{this.props.location.pathname}</h1>

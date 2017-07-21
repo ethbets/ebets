@@ -61,6 +61,11 @@ class NavDrawer extends Component {
           <Divider />
           <Subheader>Categories</Subheader>
           <ListItem
+            primaryText='All'
+            value='/category/all_bets'
+            href='#/category/all_bets'
+          />
+          <ListItem
             primaryText='E-Sports'
             primaryTogglesNestedList={true}
             nestedItems={[

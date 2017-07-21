@@ -159,10 +159,9 @@ class Bet extends Component {
   }
   
   onExpand = (expanded) => {
-    // FIXME: There is a bug here, onExpand is called twice
-    // FIXME: Don't reference this.state in this.setState
+    // NOTE: Don't reference this.state in this.setState
     console.log(this.props.address, this.state.isExpanded);
-    this.setState({isExpanded: !this.state.isExpanded});
+    this.setState(previousState => ({isExpanded: !previousState.isExpanded}));
   }
 
   componentWillMount() {
@@ -295,20 +294,32 @@ class Bet extends Component {
       else
         return null;
     }
-    return (
-      <Card
-        onExpandChange={this.onExpand}
-        expanded={this.state.isExpanded}
-      >
-      <CardTitle
-        title={betTitle}
-        subtitle={this.state.category}
-        actAsExpander={true}
-        showExpandableButton={true}
-      />
-      <this.ExpandedBet/>
-      </Card>
-    );
+
+    let FilteredBet = () => {
+      console.log(this.state.category.toLowerCase(), this.props);
+      // My bets
+      if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
+        (this.props.category  === this.state.category) ||
+        (this.props.subcategory === this.state.category.toLowerCase()) ||
+        (this.props.category === 'all_bets'))
+        return (
+          <Card
+            onExpandChange={this.onExpand}
+            expanded={this.state.isExpanded}
+          >
+          <CardTitle
+            title={betTitle}
+            subtitle={this.state.category}
+            actAsExpander={true}
+            showExpandableButton={true}
+          />
+          <this.ExpandedBet/>
+          </Card>
+        );
+      return null;
+    }
+
+    return <FilteredBet />
   }
 }
 
