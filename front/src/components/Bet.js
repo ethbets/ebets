@@ -12,6 +12,11 @@ import Dialog from 'material-ui/Dialog';
 import LinearProgress from 'material-ui/LinearProgress';
 import Avatar from 'material-ui/Avatar';
 import CircularProgress from 'material-ui/CircularProgress';
+import {
+  Step,
+  Stepper,
+  StepLabel,
+} from 'material-ui/Stepper';
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -32,6 +37,7 @@ class Bet extends Component {
       amountToBet: 0,
       loadCompleted: false,
       cat_url: '',
+      stepIndex: 0,
 
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
@@ -115,6 +121,35 @@ class Bet extends Component {
       return null;
     }
 
+
+  Steps = () => {
+    var winner = '';
+    if (this.state.bet_state == 4)
+      this.setState({stepIndex : 1});
+    else if (this.state.bet_state == 1) {
+      this.setState({stepIndex : 2});
+      winner = this.state.team_0_title;
+    }
+    else if (this.state.bet_state == 2) {
+      this.setState({stepIndex : 2});
+      winner = this.state.team_1_title;
+    }
+
+    return (
+        <Stepper activeStep={this.state.stepIndex}>
+          <Step>
+            <StepLabel>Place your bet!</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Match running</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Withdraw</StepLabel>
+          </Step>
+        </Stepper>
+      );
+  }
+
   ExpectedGain = () => {
     var expectedIncome;
     var amount;
@@ -141,7 +176,7 @@ class Bet extends Component {
     if (amount === 0 || isNaN(amount))
       return null
     else
-        return <RaisedButton backgroundColor='#FAD723'>Win Ξ{parseFloat(expectedIncome).toFixed(2)} </RaisedButton>
+      return <RaisedButton backgroundColor='#FAD723'>Win Ξ{parseFloat(expectedIncome).toFixed(2)} </RaisedButton>
   }
 
   LinearProgressCustom = (props) => {
@@ -188,6 +223,7 @@ class Bet extends Component {
         <this.ExpectedGain/>
         <this.LinearProgressCustom mode="indeterminate" />
         <this.BetStatusDialog />
+        <this.Steps />
       </div>
     }
     return null;
