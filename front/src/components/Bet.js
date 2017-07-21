@@ -1,4 +1,6 @@
 import contract from 'truffle-contract';
+import lodash from 'lodash';
+
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, FlatButton } from 'material-ui'
@@ -97,7 +99,8 @@ class Bet extends Component {
         (this.props.category === 'all_bets'))
         return (
           <Card containerStyle={{ backgroundColor: '#097986' }}
-            onExpandChange={this.onExpand}
+            // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
+            onExpandChange={lodash.debounce(this.onExpand, 150)}
             expanded={this.state.isExpanded}
           >
           <CardHeader
