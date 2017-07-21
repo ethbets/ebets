@@ -66,7 +66,8 @@ class Ebets extends Component {
   }
 
   render() {
-    const listItems = this.state.bets.map((bet) => 
+    var listItems;
+    listItems = this.state.bets.map((bet) => 
       <Bet address={bet} key={bet.toString()} />
     );
     console.log("BETS", this.state.bets)
