@@ -1,10 +1,26 @@
-import './assets/stylesheets/base.css';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {render} from 'react-dom';
+import {Router, useRouterHistory} from 'react-router';
+import Routes from './Routes';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import {createHashHistory} from 'history';
 
-import App from 'containers/App';
+// Helpers for debugging
+window.React = React;
 
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
-ReactDOM.render(<App />, document.getElementById('root'));
+/**
+ * Render the main app component. You can read more about the react-router here:
+ * https://github.com/reactjs/react-router/blob/master/docs/guides/README.md
+ */
+render(
+  <Router
+    history={useRouterHistory(createHashHistory)({queryKey: false})}
+    onUpdate={() => window.scrollTo(0, 0)}
+  >
+    {Routes}
+  </Router>
+, document.getElementById('app'));

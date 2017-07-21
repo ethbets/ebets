@@ -211,8 +211,8 @@ class Bet extends Component {
     var betContractInstance = betContract.at(this.props.address);
     setAttributes(this.state, betContractInstance);
 
-    var betEvents = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
-    betEvents.watch((error, response) => {
+    var newBetEvent = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
+    newBetEvent.watch((error, response) => {
       if (response.args.for_team === false)
         this.setState(previousState => {
           return { team_0_bet_sum : previousState.team_0_bet_sum + response.args.amount.toNumber() }

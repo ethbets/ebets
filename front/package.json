@@ -18,7 +18,8 @@
     "react-addons-css-transition-group": "^15.6.0",
     "react-addons-transition-group": "^15.6.0",
     "react-dom": "^15.6.1",
-    "react-router-dom": "^4.1.1",
+    "react-router": "^3.0.0",
+    "history": "^2.0.0",
     "react-scripts": "1.0.10",
     "react-tap-event-plugin": "^2.0.1",
     "react-transition-group": "^2.1.0",
@@ -32,7 +33,7 @@
     "watch-css": "NODE_PATH=src npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "test": "NODE_PATH=src react-scripts test --env=jsdom",
     "eject": "NODE_PATH=src react-scripts eject",
-    "start-js": "NODE_PATH=src react-scripts start",
+    "start-js": "PORT=3001 NODE_PATH=src react-scripts start",
     "start": "NODE_PATH=src npm-run-all -p watch-css start-js",
     "build": "NODE_PATH=src npm run build-css && react-scripts build",
     "old-start": "NODE_PATH=src react-scripts start"

@@ -70,8 +70,10 @@ class Ebets extends Component {
       <Bet address={bet} key={bet.toString()} />
     );
     console.log("BETS", this.state.bets)
+    console.log(this.props);
     return (
-      <div>
+      <div style={{marginLeft: 210}}>
+        <h1 style={{marginLeft: 40}}>{this.props.location.pathname}</h1>
         <ul className='card'>
           {listItems}
         </ul>
