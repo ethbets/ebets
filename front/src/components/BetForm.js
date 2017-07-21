@@ -143,7 +143,7 @@ class BetForm extends Component {
                   </div>
     }
     return (
-      <div>
+      <div style={{marginLeft: 260}}>
         {status}
         <div className="form">
           <div className="formScreen">

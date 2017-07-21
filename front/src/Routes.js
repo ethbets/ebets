@@ -8,6 +8,7 @@ import {
 } from 'react-router';
 
 import Master from './components/Master';
+import FAQ from './components/FAQ';
 import Ebets from './components/Ebets';
 import CreateBet from './components/BetForm';
 
@@ -18,7 +19,8 @@ const Routes = (
       <Route path=':category' component={Ebets} />
       <Route path=':category/:subcategory' component={Ebets} />
     </Route>
-    <Route path='new_bet' component={Ebets} />
+    <Route path='new_bet' component={CreateBet} />
+    <Route path='faq' component={FAQ} />
   </Route>
 );
 
