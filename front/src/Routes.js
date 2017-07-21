@@ -12,7 +12,8 @@ import Ebets from './components/Ebets';
 const Routes = (
   <Route path='/' component={Master}>
     <Route path='category'>
-      <Route path=':name' component={Ebets} />
+      <Route path=':category' component={Ebets} />
+      <Route path=':category/:subcategory' component={Ebets} />
     </Route>
   </Route>
 );
