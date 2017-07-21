@@ -81,6 +81,37 @@ class Bet extends Component {
     })
   };
 
+  FilteredBet = () => {
+      var betTitle = 
+          <div className='inRows'>
+            <div className='pushLeft'> 
+              <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
+            </div> 
+            <Timer date={this.state.timestamp_match_begin}/>  
+        </div>;
+      console.log(this.state.category.toLowerCase(), this.props);
+      // My bets
+      if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
+        (this.props.category  === this.state.category) ||
+        (this.props.subcategory === this.state.category.toLowerCase()) ||
+        (this.props.category === 'all_bets'))
+        return (
+          <Card containerStyle={{ backgroundColor: '#097986' }}
+            onExpandChange={this.onExpand}
+            expanded={this.state.isExpanded}
+          >
+          <CardHeader
+            avatar={this.state.cat_url}
+            title={betTitle}
+            actAsExpander={true}
+            showExpandableButton={true}
+          />
+          <this.ExpandedBet/>
+          </Card>
+        );
+      return null;
+    }
+
   ExpectedGain = () => {
     var expectedIncome;
     var amount;
@@ -265,14 +296,6 @@ class Bet extends Component {
   if (!this.state.loadCompleted)
     return ( <div className="center"> <CircularProgress /> </div> ) ;
 
-    var betTitle = 
-        <div className='inRows'>
-          <div className='pushLeft'> 
-            <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
-          </div> 
-          <Timer date={this.state.timestamp_match_begin}/>  
-      </div>;
-
     var getState = (state) => {
       if (state === 0)
         return 'Open bet';
@@ -301,31 +324,7 @@ class Bet extends Component {
         return null;
     }
 
-    let FilteredBet = () => {
-      console.log(this.state.category.toLowerCase(), this.props);
-      // My bets
-      if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
-        (this.props.category  === this.state.category) ||
-        (this.props.subcategory === this.state.category.toLowerCase()) ||
-        (this.props.category === 'all_bets'))
-        return (
-          <Card containerStyle={{ backgroundColor: '#097986' }}
-            onExpandChange={this.onExpand}
-            expanded={this.state.isExpanded}
-          >
-          <CardHeader
-            avatar={this.state.cat_url}
-            title={betTitle}
-            actAsExpander={true}
-            showExpandableButton={true}
-          />
-          <this.ExpandedBet/>
-          </Card>
-        );
-      return null;
-    }
-
-    return <FilteredBet />
+    return <this.FilteredBet />
   }
 }
 
