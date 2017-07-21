@@ -9,6 +9,7 @@ import MenuItem from 'material-ui/MenuItem';
 import Dialog from 'material-ui/Dialog';
 import LinearProgress from 'material-ui/LinearProgress';
 import Avatar from 'material-ui/Avatar';
+import CircularProgress from 'material-ui/CircularProgress';
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
@@ -245,7 +246,7 @@ class Bet extends Component {
   render() {
 
   if (!this.state.loadCompleted)
-    return null;
+    return ( <div className="center"> <CircularProgress /> </div> ) ;
 
     var betTitle = 
       <div className='card'>
