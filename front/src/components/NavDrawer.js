@@ -60,37 +60,38 @@ class NavDrawer extends Component {
             />
           <Divider />
           <Subheader>Categories</Subheader>
-          <ListItem 
-            primaryText='Featured'
-            value='/category/featured'
-            href='#/category/featured'
-            />
           <ListItem
             primaryText='E-Sports'
             primaryTogglesNestedList={true}
             nestedItems={[
                 <ListItem
-                  primaryText="LOL"
-                  value="/category/esports/lol"
-                  href="#/category/esports/lol"
+                  primaryText='LOL'
+                  value='/category/esports/lol'
+                  href='#/category/esports/lol'
                 />,
                 <ListItem
-                  primaryText="CS-GO"
-                  value="/category/esports/csgo"
-                  href="#/category/esports/csgo"
+                  primaryText='CS-GO'
+                  value='/category/esports/csgo'
+                  href='#/category/esports/csgo'
                 />,
               ]}
           />
           <ListItem
-            primaryText="UFC"
-            value="/category/ufc"
-            href="#/category/ufc"
+            primaryText='UFC'
+            value='/category/ufc'
+            href='#/category/ufc'
           />
           <ListItem
-            primaryText="Football"
-            value="/category/football"
-            href="#/category/football"
+            primaryText='Football'
+            value='/category/football'
+            href='#/category/football'
           />
+          <Divider />
+          <ListItem 
+            primaryText='Unfeatured'
+            value='/category/unfeatured'
+            href='#/category/unfeatured'
+            />
         </SelectableList>
       </Drawer>
     );
