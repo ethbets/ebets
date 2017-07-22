@@ -36,7 +36,9 @@ root.post('/xpath', jsonParser, (req, res) => {
     if (response.statusCode === 200) {
       const payload = response.payload.toString();
       const doc = new Dom().parseFromString(payload);
-      const value = xpath.select(req.body.xpath, doc)[0].nodeValue;
+      var value = xpath.select(req.body.xpath, doc)
+      if (value !== undefined && value.length !== 0)
+        value = value[0].nodeValue;
       res.json({ xpathResult: value });
     }
   });
