@@ -111,6 +111,28 @@ class Bet extends Component {
     })
   };
 
+  callOracle = () => {
+  var callOraclePromise = this.state.contractInstance.update_result(
+    { from: this.state.web3.eth.accounts[0],
+      value: 20e9
+    }
+  );
+  callOraclePromise.then(tx => {
+    console.log(tx);
+    this.setState({
+      betStatusMessage: 'Transaction hash: ' + tx.tx + 
+      '\n\nAppended in block: ' + tx.receipt.blockNumber + '\n'
+    })
+  })
+  .catch(err => {
+    this.setState({betStatusMessage: err.toString()});
+  })
+  .then(() => {
+    this.setState({betHappened: true});
+    this.setState({betInProgress: false});
+  })
+};
+
   FilteredBet = () => {
       var betTitle = 
           <div className='inRows'>

@@ -1,4 +1,4 @@
 {
-    "url": "https://www.youtube.com/watch?v=9bZkp7q19f0",
-    "xpath": "//*[contains(@class, 'watch-view-count')]/text()"
+    "url": "https://twitter.com/oraclizeit/status/671316655893561344",
+    "xpath": "//*[contains(@class, 'tweet-text')]/text())"
 }
