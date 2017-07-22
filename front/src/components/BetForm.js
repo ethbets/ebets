@@ -10,7 +10,7 @@ import {Card, CardHeader, CardText} from 'material-ui/Card';
 import getWeb3 from 'utils/getWeb3';
 import EbetsJson from 'build/contracts/ebets.json';
 
-import betFields from './betFields';
+import betFields from 'components/betFields';
 
 const HARD_DEADLINE_PERIOD = 7
 const TERMINATE_DEADLINE_PERIOD = 14
@@ -29,13 +29,13 @@ class BetForm extends Component {
         message: ''
       },
       ...betFields,
+      timestamp_match_begin: currentDate,
+      timestamp_match_end: moment(currentDate).add(1, 'day').toDate(),
+      timestamp_hard_deadline: moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
+      timestamp_terminate_deadline: moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
       web3: null
     }
-    this.state.timestamp_match_begin = currentDate;
-    this.state.timestamp_match_end = moment(currentDate).add(1, 'day').toDate();
-    this.state.timestamp_hard_deadline = moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate();
-    this.state.timestamp_terminate_deadline = moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate();
-  };
+  }
 
   handleOnChange = event => {
     const target = event.target;
@@ -124,7 +124,7 @@ class BetForm extends Component {
     })
     .catch((error) => {
       console.log(error);
-      this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true} });
+      this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true } });
     });
   }
 

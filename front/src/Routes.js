@@ -2,8 +2,6 @@ import React from 'react';
 
 import {
   Route,
-  Redirect,
-  IndexRoute,
   IndexRedirect
 } from 'react-router';
 

@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import AppBar from 'material-ui/AppBar';
 import Drawer from 'material-ui/Drawer';
 import {List, ListItem, makeSelectable} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import Divider from 'material-ui/Divider';
-import {spacing, typography, zIndex} from 'material-ui/styles';
+import { zIndex } from 'material-ui/styles';
 
 import '../assets/stylesheets/base.css';
 

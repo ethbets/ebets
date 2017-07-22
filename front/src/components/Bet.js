@@ -4,13 +4,12 @@ import lodash from 'lodash';
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, FlatButton } from 'material-ui'
-import { Card, CardHeader, CardTitle } from 'material-ui/Card';
+import { Card, CardHeader } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Dialog from 'material-ui/Dialog';
 import LinearProgress from 'material-ui/LinearProgress';
-import Avatar from 'material-ui/Avatar';
 import CircularProgress from 'material-ui/CircularProgress';
 import {
   Step,
@@ -38,7 +37,6 @@ class Bet extends Component {
       loadCompleted: false,
       cat_url: '',
       stepIndex: 0,
-
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
@@ -238,7 +236,6 @@ class Bet extends Component {
   componentWillMount() {
     // Get network provider and web3 instance.
     // See utils/getWeb3 for more info.
-
     getWeb3
     .then(results => {
       this.setState({
@@ -251,8 +248,6 @@ class Bet extends Component {
     .catch(err => {
       console.log('Error finding web3', err);
     });
-
- 
   }
         
   instantiateContract() {
