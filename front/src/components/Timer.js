@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import betStates from './betStates';
+import { betTimeStates } from './betStates';
 
 class Clock extends React.Component {
   secondsToEnd = 0;
@@ -17,17 +17,17 @@ class Clock extends React.Component {
     });
     // Match is happening
     if (moment().unix() >= this.props.beginDate) {
-      if (this.props.parentState !== betStates.matchRunning && 
-          this.props.parentState !== betStates.matchEnded) {
+      if (this.props.parentState !== betTimeStates.matchRunning && 
+          this.props.parentState !== betTimeStates.matchEnded) {
         console.log(moment().unix(), this.props.endDate)
         console.log('nottifying match Running');
-        this.props.updateState(betStates.matchRunning);
+        this.props.updateState(betTimeStates.matchRunning);
       }
       // Match ended
       if (moment().unix() >= this.props.endDate) {
-        if (this.props.parentState !== betStates.matchEnded) {
+        if (this.props.parentState !== betTimeStates.matchEnded) {
           console.log('nottifying match end');
-          this.props.updateState(betStates.matchEnded);
+          this.props.updateState(betTimeStates.matchEnded);
           this.setState({notifiedParentAboutMatchEnd : true});
         }
       }
