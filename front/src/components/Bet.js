@@ -1,5 +1,6 @@
 import contract from 'truffle-contract';
 import lodash from 'lodash';
+import moment from 'moment';
 
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
@@ -20,12 +21,19 @@ import {
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
 import betFields from './betFields';
+import {betTimeStates, betState, stepperState, contractStates} from './betStates';
 import Timer from './Timer';
+var mockDateBegin = moment().unix() + 5;
+var mockDateEnd = moment().unix() + 10;
 
 class Bet extends Component {
+  
   constructor(props) {
     super(props);
     this.state = {
+      currentBetState: 0, // Overall current bet state (from time and contract state)
+      betShoudlBeAtState: 0, // Related to time
+      stepperState: 0,
       betOnTeam: null,
       open: false,
       betHappened: false,
@@ -40,6 +48,22 @@ class Bet extends Component {
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
+  }
+
+  updateBetShouldBeAtState(new_state) {
+    if (new_state === betTimeStates.matchRunning) {
+      this.setState({
+        currentBetState: betState.matchRunning,
+        stepperState: stepperState.matchRunning
+      });
+    }
+    else if (new_state === betTimeStates.matchEnded) {
+      this.setState({
+        currentBetState: betState.shouldCallOracle,
+        stepperState: stepperState.matchEnded
+    });
+    }
+    this.setState({betShoudlBeAtState: new_state});
   }
 
   handleCloseDialog = () => {
@@ -93,7 +117,13 @@ class Bet extends Component {
             <div className='pushLeft'> 
               <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
             </div> 
-            <Timer date={this.state.timestamp_match_begin}/>  
+            <Timer parentState={this.state.betShoudlBeAtState}
+                   updateState={this.updateBetShouldBeAtState.bind(this)}
+                   //beginDate={this.state.timestamp_match_begin}
+                   beginDate={mockDateBegin}
+                   //endDate={this.state.timestamp_match_end} 
+                   endDate={mockDateEnd}
+                   />
         </div>;
       console.log(this.state.category.toLowerCase(), this.props);
       // My bets
@@ -121,20 +151,22 @@ class Bet extends Component {
 
 
   Steps = () => {
-    var winner = '';
-    if (this.state.bet_state == 4)
-      this.setState({stepIndex : 1});
-    else if (this.state.bet_state == 1) {
-      this.setState({stepIndex : 2});
-      winner = this.state.team_0_title;
-    }
-    else if (this.state.bet_state == 2) {
-      this.setState({stepIndex : 2});
-      winner = this.state.team_1_title;
+    var BetDecision = () => {
+      if (this.state.currentBetState <= betState.shouldCallOracle)
+        return 'Result';
+      else if (this.state.currentBetState === betState.team0Won)
+        return `${this.state.team_0_title} won`;
+      else if (this.state.currentBetState === betState.oracleUndecided)
+        return 'Undecided';
+      else if (this.state.currentBetState === betState.team1Won)
+        return `${this.state.team_1_title} won`;
+      else if (this.state.currentBetState === betState.draw)
+        return 'Draw';
+      return null;
     }
 
     return (
-        <Stepper activeStep={this.state.stepIndex}>
+        <Stepper activeStep={this.state.stepperState}>
           <Step>
             <StepLabel>Place your bet!</StepLabel>
           </Step>
@@ -142,7 +174,13 @@ class Bet extends Component {
             <StepLabel>Match running</StepLabel>
           </Step>
           <Step>
-            <StepLabel>Withdraw</StepLabel>
+            <StepLabel>Call Oracle</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>{BetDecision()}</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Payout</StepLabel>
           </Step>
         </Stepper>
       );
@@ -205,6 +243,37 @@ class Bet extends Component {
   }
 
   ExpandedBet = (props) => {
+    var DynamicBetButton = () => {
+      if (this.state.currentBetState === betState.shouldCallOracle) {
+        return (
+        <RaisedButton
+          secondary={true}
+          className="betBtn"
+          onTouchTap={this.betOnTeam}
+        ><span>Call Oracle</span>
+        </RaisedButton>
+        )
+      }
+      else if (this.state.stepperState === stepperState.payout)
+        return (
+        <RaisedButton 
+          className="betBtn"
+          primary={true}
+          onTouchTap={this.betOnTeam}
+        ><span>Withdraw</span>
+        </RaisedButton>
+        )
+      return (
+        <RaisedButton 
+          disabled={(this.state.currentBetState !== betState.matchOpen)}
+          className="betBtn"
+          primary={true}
+          onTouchTap={this.betOnTeam}
+        ><span>Bet</span>
+        </RaisedButton>
+        )
+    }
+
     if (this.state.isExpanded) {
     return <div>
         <SelectField style={{ width: 160 }} className='test'
@@ -216,8 +285,14 @@ class Bet extends Component {
           <MenuItem value={0} primaryText={this.state.team_0_title} />
           <MenuItem value={1} primaryText={this.state.team_1_title} />
         </SelectField>
-        <TextField style={{ width: 80 }} id='betAmount' type='number' onChange={this.setBetValue}/>
-        <RaisedButton className="betBtn" primary={true} onTouchTap={this.betOnTeam}>BET</RaisedButton>
+        <TextField 
+          disabled={(this.state.currentBetState >= betState.matchRunning)} 
+          style={{ width: 80 }} 
+          id='betAmount' 
+          type='number' 
+          onChange={this.setBetValue}
+          />
+        <DynamicBetButton />
         <this.ExpectedGain/>
         <this.LinearProgressCustom mode="indeterminate" />
         <this.BetStatusDialog />
@@ -229,7 +304,6 @@ class Bet extends Component {
   
   onExpand = (expanded) => {
     // NOTE: Don't reference this.state in this.setState
-    console.log(this.props.address, this.state.isExpanded);
     this.setState(previousState => ({isExpanded: !previousState.isExpanded}));
   }
 
@@ -308,9 +382,45 @@ class Bet extends Component {
         }
       }
       else if (response.event === 'state_changed') {
-        this.setState({ bet_state: response.args.state });
+        var newOverAllState;
+        var newStepperState;
+        if (response.args.state === contractStates.OPEN) {
+          newOverAllState = betState.matchOpen;
+          newStepperState = stepperState.matchOpen
+        }
+        else if (response.args.state === contractStates.TEAM_ZERO_WON) {
+          newOverAllState = betState.team0Won;
+          if (this.state.betOnTeam)
+            newStepperState = stepperState.payout;
+        }
+        else if (response.args.state === contractStates.TEAM_ONE_WON) {
+          newOverAllState = betState.team1Won;
+          if (this.state.betOnTeam)
+            newStepperState = stepperState.payout;
+        }
+        else if (response.args.state === contractStates.DRAW) {
+          newOverAllState = betState.draw;
+          if (this.state.betOnTeam)
+            newStepperState = stepperState.payout;
+        }
+        else if (response.args.state === contractStates.ORACLE_UNDECIDED) {
+          newOverAllState = betState.oracleUndecided;
+          newStepperState = stepperState.matchDecision;
+        }
+        this.setState({
+          currentBetState: newOverAllState,
+          stepperState: newStepperState
+        });
       }
     });
+    setTimeout(() => {this.setState(previousState => {
+      var shouldPay = stepperState.matchDecision;
+      if (this.state.betOnTeam)
+        shouldPay = stepperState.payout;
+      return {
+        currentBetState: betState.draw,
+        stepperState: shouldPay
+    }})}, 15000);
   }
 // <CardText>
 //       <div>
@@ -330,18 +440,6 @@ class Bet extends Component {
   if (!this.state.loadCompleted)
     return ( <div className="center"> <CircularProgress /> </div> ) ;
 
-    var getState = (state) => {
-      if (state === 0)
-        return 'Open bet';
-      else if (state === 1)
-        return `${this.state.team_0_title} won`;
-      else if (state === 2)
-        return `${this.state.team_0_title} won`;
-      else if (state === 3)
-        return 'Draw';
-      else if (state === 4)
-        return 'Undecided';
-    }
     var total = this.state.team_0_bet_sum + this.state.team_1_bet_sum;
     var percentage0 = (this.state.team_0_bet_sum / total)*100;
     var percentage1 = (this.state.team_1_bet_sum / total)*100;

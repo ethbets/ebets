@@ -1,8 +1,9 @@
 import React from 'react';
 import moment from 'moment';
+import { betTimeStates } from './betStates';
 
 class Clock extends React.Component {
-
+  secondsToEnd = 0;
   constructor(props) {
     super(props);
     this.state = {
@@ -10,11 +11,27 @@ class Clock extends React.Component {
     };
     this.tick = this.tick.bind(this);
   }
-
   tick() {
     this.setState({
       dateTimestamp: this.state.dateTimestamp - 1000
     });
+    // Match is happening
+    if (moment().unix() >= this.props.beginDate) {
+      if (this.props.parentState !== betTimeStates.matchRunning && 
+          this.props.parentState !== betTimeStates.matchEnded) {
+        console.log(moment().unix(), this.props.endDate)
+        console.log('nottifying match Running');
+        this.props.updateState(betTimeStates.matchRunning);
+      }
+      // Match ended
+      if (moment().unix() >= this.props.endDate) {
+        if (this.props.parentState !== betTimeStates.matchEnded) {
+          console.log('nottifying match end');
+          this.props.updateState(betTimeStates.matchEnded);
+          this.setState({notifiedParentAboutMatchEnd : true});
+        }
+      }
+    }
   }
 
   componentDidMount() {
@@ -27,32 +44,36 @@ class Clock extends React.Component {
 
   render() {
     // Calculate the formatted date on the fly
-    var seconds = this.props.date - moment().unix();
-    var days = seconds / (60 * 60 * 24);
+    var secondsToBegin = this.props.beginDate - moment().unix();
+    
+    //secondsToBegin = (moment().unix() + 1033) - moment().unix();
+    //this.secondsToEnd = 10; 
+
+    var days = secondsToBegin / (60 * 60 * 24);
     days = Math.floor(days);
-    seconds -= days * (60 * 60 * 24);
-    var hours = seconds / (60 * 60);
+    secondsToBegin -= days * (60 * 60 * 24);
+    var hours = secondsToBegin / (60 * 60);
     hours = Math.floor(hours);
-    seconds -= hours * (60 * 60);
-    var minutes = seconds / 60;
+    secondsToBegin -= hours * (60 * 60);
+    var minutes = secondsToBegin / 60;
     minutes = Math.floor(minutes);
-    seconds -= minutes * 60;
+    secondsToBegin -= minutes * 60;
 
     if (days > 0)
       return(
-        <div className='pushRight'>Begins in: {days}d {hours}h {minutes}m {seconds}s</div>
+        <div className='pushRight'>Begins in: {days}d {hours}h {minutes}m {secondsToBegin}s</div>
       );
     else if (hours > 0)
       return(
-        <div className='pushRight'>Begins in: {hours}h {minutes}m {seconds}s</div>
+        <div className='pushRight'>Begins in: {hours}h {minutes}m {secondsToBegin}s</div>
       );
     else if (minutes > 0)
       return(
-        <div className='pushRight'>Begins in: {minutes}m {seconds}s</div>
+        <div className='pushRight'>Begins in: {minutes}m {secondsToBegin}s</div>
       );
     else
       return(
-        <div className='pushRight'>Begins in: {seconds}s</div>
+        <div className='pushRight'>Begins in: {secondsToBegin}s</div>
       );
   }
 }
