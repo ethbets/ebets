@@ -1,5 +1,6 @@
 import contract from 'truffle-contract';
 import lodash from 'lodash';
+import moment from 'moment';
 
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
@@ -21,12 +22,16 @@ import {
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
 import betFields from './betFields';
+import betStates from './betStates';
 import Timer from './Timer';
+var mockDateBegin = moment().unix() + 5;
+var mockDateEnd = moment().unix() + 10;
 
 class Bet extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      betShoudlBeAtState: 0, //Related to time
       betOnTeam: null,
       open: false,
       betHappened: false,
@@ -37,11 +42,14 @@ class Bet extends Component {
       amountToBet: 0,
       loadCompleted: false,
       cat_url: '',
-      stepIndex: 0,
 
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
+  }
+
+  updateBetShouldBeAtState(new_state) {
+    this.setState({betShoudlBeAtState: new_state});
   }
 
   handleCloseDialog = () => {
@@ -95,7 +103,13 @@ class Bet extends Component {
             <div className='pushLeft'> 
               <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
             </div> 
-            <Timer date={this.state.timestamp_match_begin}/>  
+            <Timer parentState={this.state.betShoudlBeAtState}
+                   updateState={this.updateBetShouldBeAtState.bind(this)}
+                   //beginDate={this.state.timestamp_match_begin}
+                   beginDate={mockDateBegin}
+                   //endDate={this.state.timestamp_match_end} 
+                   endDate={mockDateEnd}
+                   />
         </div>;
       console.log(this.state.category.toLowerCase(), this.props);
       // My bets
@@ -123,20 +137,8 @@ class Bet extends Component {
 
 
   Steps = () => {
-    var winner = '';
-    if (this.state.bet_state == 4)
-      this.setState({stepIndex : 1});
-    else if (this.state.bet_state == 1) {
-      this.setState({stepIndex : 2});
-      winner = this.state.team_0_title;
-    }
-    else if (this.state.bet_state == 2) {
-      this.setState({stepIndex : 2});
-      winner = this.state.team_1_title;
-    }
-
     return (
-        <Stepper activeStep={this.state.stepIndex}>
+        <Stepper activeStep={this.state.betShoudlBeAtState}>
           <Step>
             <StepLabel>Place your bet!</StepLabel>
           </Step>
@@ -231,7 +233,6 @@ class Bet extends Component {
   
   onExpand = (expanded) => {
     // NOTE: Don't reference this.state in this.setState
-    console.log(this.props.address, this.state.isExpanded);
     this.setState(previousState => ({isExpanded: !previousState.isExpanded}));
   }
 
