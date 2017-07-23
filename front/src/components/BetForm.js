@@ -6,11 +6,14 @@ import TextField from 'material-ui/TextField';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
+import {GridList, GridTile} from 'material-ui/GridList';
 
 import getWeb3 from 'utils/getWeb3';
 import EbetsJson from 'build/contracts/ebets.json';
 
 import betFields from 'components/betFields';
+import versusIcon from 'assets/imgs/icons/vs.png';
+import 'components/BetForm.css'
 
 const HARD_DEADLINE_PERIOD = 7
 const TERMINATE_DEADLINE_PERIOD = 14
@@ -20,8 +23,6 @@ class BetForm extends Component {
   constructor(props) {
     super(props)
 
-    const currentDate = moment().toDate();
-
     this.state = {
       alert: {
         open: false,
@@ -29,15 +30,21 @@ class BetForm extends Component {
         message: ''
       },
       ...betFields,
-      timestamp_match_begin: currentDate,
-      timestamp_match_end: moment(currentDate).add(1, 'day').toDate(),
-      timestamp_hard_deadline: moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
-      timestamp_terminate_deadline: moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
       web3: null
     }
   }
 
-  handleOnChange = event => {
+  initializeTimestamps = () => {
+      const currentDate = moment().toDate();
+      this.setState({
+        timestamp_match_begin: currentDate,
+        timestamp_match_end: moment(currentDate).add(1, 'day').toDate(),
+        timestamp_hard_deadline: moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
+        timestamp_terminate_deadline: moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate()
+      });
+  }
+
+  handleOnChange = (event) => {
     const target = event.target;
     let value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -66,9 +73,8 @@ class BetForm extends Component {
   };
 
   handleOnSubmit = event => {
-    console.log(this.state);
     event.preventDefault();
-    // TODO: handle form errors
+    // TODO: handle form validations
     this.createContract()
   }
 
@@ -91,6 +97,8 @@ class BetForm extends Component {
     .catch(() => {
       console.log('Error finding web3.');
     })
+
+    this.initializeTimestamps();
   }
 
   createContract() {
@@ -101,15 +109,20 @@ class BetForm extends Component {
     //create contract
     ebetsContract.deployed().then(instance => {
 
-      let createdBet = instance.create_bet(
-        this.state.title,
-        this.state.category,
-        this.state.team_0,
-        this.state.team_1,
+      const timestamps = [
         moment(this.state.timestamp_match_begin).unix(),
         moment(this.state.timestamp_match_end).unix(),
         moment(this.state.timestamp_hard_deadline).unix(),
-        moment(this.state.timestamp_terminate_deadline).unix(),
+        moment(this.state.timestamp_terminate_deadline).unix()
+      ];
+
+      let createdBet = instance.create_bet(
+        this.state.team_0_title,
+        this.state.team_1_title,
+        this.state.category,
+        this.state.team_0_id,
+        this.state.team_1_id,
+        timestamps,
         this.state.url_oraclize,
         /* TODO: accounts[0] can be changed by the user,
          * There should be a way so when the user changes, this is updated too.
@@ -143,92 +156,140 @@ class BetForm extends Component {
                   </div>
     }
     return (
-      <div style={{marginLeft: 260}}>
+      <div className="gridRoot">
         {status}
-        <div className="form">
-          <div className="formScreen">
-            <div className="formTitle">
-              <h1>Add Bet</h1>
-            </div>
-            <form onSubmit={this.handleOnSubmit} >
-              <div>
-                <TextField 
-                  name="title"
-                  value={this.state.title}
-                  placeholder="Title"
-                  onChange={this.handleOnChange}
-                /><br />
-                <TextField
-                  name="description"
-                  value={this.state.description}
-                  placeholder="Description"
-                  multiLine={true}
-                  rows={2}
-                  onChange={this.handleOnChange}
-                /><br />
-                <TextField
-                  name="category"
-                  value={this.state.category}
-                  placeholder="Category"
-                  onChange={this.handleOnChange}
-                /><br />
-                <TextField
-                  name="team_0"
-                  value={this.state.team_0}
-                  placeholder="Team 0"
-                  onChange={this.handleOnChange}
-                /><br />
-                <TextField
-                  name="team_1"
-                  value={this.state.team_1}
-                  placeholder="Team 1"
-                  onChange={this.handleOnChange}
-                /><br />
-                <DatePicker
-                  autoOk={true}
-                  floatingLabelText="Starts in"
-                  defaultDate={this.state.timestamp_match_begin}
-                  onChange={this.handleChangeTimestampBegin}
-                />
-                <DatePicker
-                  autoOk={true}
-                  floatingLabelText="Ends in"
-                  defaultDate={this.state.timestamp_match_end}
-                  onChange={this.handleChangetimestamp_match_end}
-                />
-                <TextField
-                  name="url_oraclize"
-                  value={this.state.url_oraclize}
-                  placeholder="Oraclize URL"
-                  onChange={this.handleOnChange}
-                /><br />
-                <Card>
-                  <CardHeader
-                    title="Advanced options"
-                    actAsExpander={true}
-                    showExpandableButton={true}
+        <div>
+          <form onSubmit={this.handleOnSubmit} >
+            <h1>Add Bet</h1>
+            <div>
+              <GridList
+                className='gridList'
+                cellHeight={'auto'}
+                cols={5}
+              >
+                <GridTile>
+                  <TextField
+                    fullWidth={true}
+                    name="team_0_title"
+                    value={this.state.team_0_title}
+                    placeholder="Team 0"
+                    onChange={this.handleOnChange}
                   />
-                  <CardText expandable={true}>
-                    <div>
+                </GridTile>
+                <GridTile>
+                  <TextField
+                    fullWidth={true}
+                    name="team_0_id"
+                    value={this.state.team_0_id}
+                    placeholder="Team 0 oracle id"
+                    onChange={this.handleOnChange}
+                  />
+                </GridTile>
+                <GridTile
+                  style={{width: 50, height: 50, marginLeft: 'auto', marginRight: 'auto'}}
+                >
+                  <img src={versusIcon} />
+                </GridTile>
+                <GridTile>
+                  <TextField
+                    fullWidth={true}
+                    name="team_1_title"
+                    value={this.state.team_1_title}
+                    placeholder="Team 1"
+                    onChange={this.handleOnChange}
+                  />
+                </GridTile>
+                <GridTile>
+                  <TextField
+                    fullWidth={true}
+                    name="team_1_id"
+                    value={this.state.team_1_id}
+                    placeholder="Team 1 oracle id"
+                    onChange={this.handleOnChange}
+                  />
+                </GridTile>
+                <GridTile
+                  style={{marginTop: '10px'}}
+                  cols={2.5}
+                >
+                  <TextField
+                    fullWidth={true}
+                    name="url_oraclize"
+                    value={this.state.url_oraclize}
+                    placeholder="Oraclize URL"
+                    onChange={this.handleOnChange}
+                  />
+                </GridTile>
+                <GridTile
+                  style={{marginTop: '10px'}}
+                  cols={2.5}
+                >
+                  {/*TODO: display a list of categories as select box*/}
+                  <TextField
+                    fullWidth={true}
+                    name="category"
+                    value={this.state.category}
+                    placeholder="Category"
+                    onChange={this.handleOnChange}
+                  />
+                </GridTile>
+              </GridList>
+              <GridList
+                className='gridList'
+                style={{flexWrap: 'nowrap'}}
+                cellHeight={'auto'}
+              >
+                <GridTile>
+                  <DatePicker
+                    autoOk={true}
+                    floatingLabelText="Starts in"
+                    defaultDate={this.state.timestamp_match_begin}
+                    onChange={this.handleChangeTimestampBegin}
+                  />
+                </GridTile>
+                <GridTile>
+                  <DatePicker
+                    autoOk={true}
+                    floatingLabelText="Ends in"
+                    defaultDate={this.state.timestamp_match_end}
+                    onChange={this.handleChangetimestamp_match_end}
+                  />
+                </GridTile>
+              </GridList>
+              <Card>
+                <CardHeader
+                  title="Advanced options"
+                  actAsExpander={true}
+                  showExpandableButton={true}
+                />
+                <CardText expandable={true}>
+                    <GridList
+                      style={{flexWrap: 'nowrap'}}
+                      cellHeight={'auto'}
+                      cols={2}
+                    >
+                    <GridTile>
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Hard deadline"
                         defaultDate={this.state.timestamp_hard_deadline}
                         onChange={this.handleChangetimestamp_hard_deadline}
                       />
+                    </GridTile>
+                    <GridTile>
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Terminate deadline"
                         defaultDate={this.state.timestamp_terminate_deadline}
                         onChange={this.handleChangeTimestampTeminateDeadline}
                       />
-                      </div>
-                  </CardText>
-                </Card><br />
-                <RaisedButton type="submit" label="Create" primary />
-              </div>
-            </form>
-          </div>
+                    </GridTile>
+                  </GridList>
+                </CardText>
+              </Card><br />
+            </div>
+            <RaisedButton type="submit" label="Create" primary />
+          </form>
         </div>
       </div>
     )

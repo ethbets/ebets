@@ -21,9 +21,7 @@ class FAQ extends Component {
           <li>Why your website is ugly?</li>
           <li>Where are the contracts?</li>
         </ul>
-        <img style={{flex: 1,
-
-    resizeMode: 'contain'}} src={HowDoesItWork} />
+        <img style={{flex: 1, resizeMode: 'contain'}} src={HowDoesItWork} />
       </div>
     );
   }

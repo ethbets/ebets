@@ -1,4 +1,4 @@
-var BETFIELDS = {
+let BETFIELDS = {
   bet_state: '',
   is_featured: false,
   team_0_title: '',
@@ -16,4 +16,5 @@ var BETFIELDS = {
   timestamp_terminate_deadline: 0,
   url_oraclize: '',
 };
+
 export default BETFIELDS;

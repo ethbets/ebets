@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
+    "form-schema-validation": "^1.6.0",
     "glob": "^7.1.2",
     "history": "^2.0.0",
     "lodash": "^4.17.4",
@@ -22,6 +23,7 @@
     "react-tap-event-plugin": "^2.0.1",
     "react-transition-group": "^2.1.0",
     "reactstrap": "^4.8.0",
+    "reflexbox": "^3.0.0-0",
     "truffle-contract": "^2.0.1",
     "web3": "^0.19.1",
     "webpack": "^3.2.0"
