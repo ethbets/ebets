@@ -25,6 +25,7 @@ contract Triunvirate is Governance {
       proposals[proposal].outcomes.push(outcome);
       return;
     }
+    GovernanceInterface proposalContract = GovernanceInterface(proposal);
     if (proposals[proposal].voted.length == 1) {
       require(proposals[proposal].voted[0] != msg.sender);
       // 0 voted x, 1 voted x
@@ -32,7 +33,7 @@ contract Triunvirate is Governance {
         proposals[proposal].voted.push(msg.sender);
         proposals[proposal].outcomes.push(outcome);
         ResolvedProposal(proposal, outcome);
-        proposal.__resolve(outcome);
+        proposalContract.__resolve(outcome);
         return;
       }
     }
@@ -40,12 +41,15 @@ contract Triunvirate is Governance {
             proposals[proposal].voted[1] != msg.sender);
     proposals[proposal].voted.push(msg.sender);
     proposals[proposal].outcomes.push(outcome);
+    uint decidedOutCome;
     // 0 voted x, 1 voted y 2 voted x
     if (outcome == proposals[proposal].outcomes[0] || 
         outcome == proposals[proposal].outcomes[1])
-      ResolvedProposal(proposal, outcome);
+      decidedOutCome = outcome;
     else
-      ResolvedProposal(proposal, 0);
+      decidedOutCome = 0;
+    proposalContract.__resolve(decidedOutCome);
+    ResolvedProposal(proposal, decidedOutCome);
   }
   function addProposal(address proposalAddress, uint deadline) {
     require(block.timestamp < deadline);
