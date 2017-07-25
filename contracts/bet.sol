@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 import './governanceInterface.sol';
 import './helpers.sol';
 
-contract Bet {
+contract Bet is ProposalInterface{
 
   modifier onlyOwner() {
     require(msg.sender == owner);

@@ -26,7 +26,7 @@ contract Triunvirate is Governance {
       proposals[proposal].outcomes.push(outcome);
       return;
     }
-    GovernanceInterface proposalContract = GovernanceInterface(proposal);
+    ProposalInterface proposalContract = ProposalInterface(proposal);
     if (proposals[proposal].voted.length == 1) {
       require(proposals[proposal].voted[0] != msg.sender);
       // 0 voted x, 1 voted x

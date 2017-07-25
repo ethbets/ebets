@@ -16,7 +16,7 @@ contract Monarchy is Governance {
   }
 
   function castVote(address proposal, uint outcome) isActiveMember {
-    GovernanceInterface proposalContract = GovernanceInterface(proposal);
+    ProposalInterface proposalContract = ProposalInterface(proposal);
     proposalContract.__resolve(outcome);
     ResolvedProposal(proposal, outcome);
   }

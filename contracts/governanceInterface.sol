@@ -1,5 +1,10 @@
 pragma solidity ^0.4.11;
 
+interface ProposalInterface {
+  // Callback to resolve Proposal
+  function __resolve(uint outcome);
+}
+
 interface GovernanceInterface {
 
   // Members can be added to the governance
@@ -15,7 +20,4 @@ interface GovernanceInterface {
   function castVote(address proposal, uint outcome);
   // Proposal should be solved by the deadline time
   function addProposal(address contractToDecide, uint deadline);
-
-  // Callback to resolve Proposal
-  function __resolve(uint outcome);
 }
