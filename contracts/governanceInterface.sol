@@ -14,7 +14,7 @@ interface GovernanceInterface {
   // Member cast vote for Proposal if enough are made can call ResolvedCall
   function castVote(address proposal, uint outcome);
   // Proposal should be solved by the deadline time
-  function addProposal(uint deadline);
+  function addProposal(address contractToDecide, uint deadline);
 
   // Callback to resolve Proposal
   function __resolve(uint outcome);

@@ -112,7 +112,7 @@ contract Bet {
   function updateResult() payable 
     matchIsOpenOrUndecided()
     afterMatchEnded() {
-    arbiter.addProposal(timestampArbiterDeadline);
+    arbiter.addProposal(this, timestampArbiterDeadline);
   }
   
   function toggleFeatured() onlyOwner() {
