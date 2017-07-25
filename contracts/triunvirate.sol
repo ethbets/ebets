@@ -23,14 +23,16 @@ contract Triunvirate is Governance {
       proposals[proposal].outcomes.push(outcome);
       return;
     }
-    require(proposals[proposal].voted[0] != msg.sender);
-    // 0 voted x, 1 voted x
-    if (proposals[proposal].outcomes[0] == outcome) {
-      proposals[proposal].voted.push(msg.sender);
-      proposals[proposal].outcomes.push(outcome);
-      ResolvedProposal(proposal, outcome);
-      //proposal.__resolve(outcome);
-      return;
+    if (proposals[proposal].voted.length == 1) {
+      require(proposals[proposal].voted[0] != msg.sender);
+      // 0 voted x, 1 voted x
+      if (proposals[proposal].outcomes[0] == outcome) {
+        proposals[proposal].voted.push(msg.sender);
+        proposals[proposal].outcomes.push(outcome);
+        ResolvedProposal(proposal, outcome);
+        //proposal.__resolve(outcome);
+        return;
+      }
     }
     require(proposals[proposal].voted[0] != msg.sender &&
             proposals[proposal].voted[1] != msg.sender);
