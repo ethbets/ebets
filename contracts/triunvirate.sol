@@ -24,8 +24,11 @@ contract Triunvirate is Governance {
       calls[call].voted.push(msg.sender);
       calls[call].outcomes.push(outcome);
       ResolvedCall(address, outcome);
+      call.__resolve(outcome);
       return;
     }
+    require(calls[call].voted[0] != msg.sender &&
+            calls[call].voted[1] != msg.sender);
     calls[call.voted.push].push(msg.sender);
     calls[call].outcomes.push(outcome);
     // 0 voted x, 1 voted y 2 voted x
