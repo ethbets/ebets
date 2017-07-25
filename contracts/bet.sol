@@ -235,5 +235,5 @@ contract Bet is ProposalInterface{
   /* Fallback just throws now
    * Can do something, maybe increase the value of both pools
   */
-  function () { assert(false); }
+  function () { require(false); }
 }
