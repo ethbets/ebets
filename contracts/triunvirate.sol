@@ -13,6 +13,8 @@ contract Triunvirate is Governance {
   }
 
   function Triunvirate(address[] _members) {
+    // A triunvirate!
+    require(_members.length == 3);
     for (uint i = 0; i < _members.length; ++i)
       members[_members[i]] = 1;
   }
@@ -30,7 +32,7 @@ contract Triunvirate is Governance {
         proposals[proposal].voted.push(msg.sender);
         proposals[proposal].outcomes.push(outcome);
         ResolvedProposal(proposal, outcome);
-        //proposal.__resolve(outcome);
+        proposal.__resolve(outcome);
         return;
       }
     }
@@ -47,6 +49,8 @@ contract Triunvirate is Governance {
   }
   function addProposal(address proposalAddress, uint deadline) {
     require(block.timestamp < deadline);
+    // Allow one proposal per bet
+    require(proposals[proposalAddress].deadline == 0);
     proposals[proposalAddress].quorumNeeded = 2;
     proposals[proposalAddress].deadline = deadline;
   }

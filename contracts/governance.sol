@@ -1,6 +1,7 @@
 pragma solidity ^0.4.11;
+import './governanceInterface.sol';
 
-contract Governance {
+contract Governance is GovernanceInterface{
   struct Proposal {
     uint quorumNeeded;
     uint deadline;
@@ -11,7 +12,7 @@ contract Governance {
   mapping (address => uint) public members;
   // Used in case of indecision
   address public higherInstance;
-  mapping (address => Proposal) proposals;
+  mapping (address => Proposal) public proposals;
 
   // Members can be added to the governance
   event AddedMember(address newMember);

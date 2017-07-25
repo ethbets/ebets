@@ -1,15 +1,15 @@
 pragma solidity ^0.4.11;
 
-import './usingOraclize.sol';
+import './governanceInterface.sol';
 import './helpers.sol';
 
-contract Bet is usingOraclize {
+contract Bet is GovernanceInterface {
   enum BET_STATES {
     OPEN,
     TEAM_ZERO_WON,
     TEAM_ONE_WON,
     DRAW,
-    ORACLE_UNDECIDED
+    UNDECIDED
     }
   
   BET_STATES public bet_state = BET_STATES.OPEN;
@@ -35,15 +35,13 @@ contract Bet is usingOraclize {
   uint8 constant TAX = 10;
   uint constant TIMESTAMP_MARGIN = 1000;
 
-  string public url_oraclize;
-
   event new_bet(bool for_team, address from, uint amount);
   event state_changed(BET_STATES state);
 
   function Bet(address _resolver, string _team_0_title, 
                string _team_1_title, string _category, 
-               string _team_0_id, string _team_1_id, uint[] _timestamps,
-               string _url_oraclize) {
+               string _team_0_id, string _team_1_id, uint[] _timestamps
+               ) {
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
     require(_timestamps[1] < _timestamps[2]);
@@ -61,13 +59,12 @@ contract Bet is usingOraclize {
     timestamp_match_end = _timestamps[1] + TIMESTAMP_MARGIN;
     timestamp_hard_deadline = _timestamps[2] + TIMESTAMP_MARGIN;
     timestamp_terminate_deadline = _timestamps[3] + TIMESTAMP_MARGIN;
-    url_oraclize = _url_oraclize;
   }
 
   function arbitrate(BET_STATES result) {
     require(block.timestamp >= timestamp_hard_deadline);
-    require(bet_state == BET_STATES.ORACLE_UNDECIDED);
-    require(result != BET_STATES.ORACLE_UNDECIDED);
+    require(bet_state == BET_STATES.UNDECIDED);
+    require(result != BET_STATES.UNDECIDED);
     require(result != BET_STATES.OPEN);
     
     bet_state = result;
@@ -78,7 +75,7 @@ contract Bet is usingOraclize {
     // Cannot call after hard deadline
     require(block.timestamp < timestamp_hard_deadline);
     // Oraclize should call this
-    require(msg.sender == oraclize_cbAddress());
+    // require(msg.sender == oraclize_cbAddress());
     // Must be called after the bet ends
     require(block.timestamp >= timestamp_match_end);
 
@@ -87,17 +84,17 @@ contract Bet is usingOraclize {
     else if (Helpers.string_equal(result, team_1_id))
       bet_state = BET_STATES.TEAM_ONE_WON;
     else
-      bet_state = BET_STATES.ORACLE_UNDECIDED;
+      bet_state = BET_STATES.UNDECIDED;
 
     state_changed(bet_state);
   }
 
   function update_result() payable {
     // Can call only when bet is open or undecided
-    require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.ORACLE_UNDECIDED);
+    require(bet_state == BET_STATES.OPEN || bet_state == BET_STATES.UNDECIDED);
     require(block.timestamp >= timestamp_match_end);
 
-    oraclize_query('URL', url_oraclize);
+    // oraclize_query('URL', url_oraclize);
   }
   
   function toggle_featured() {
