@@ -43,6 +43,10 @@ class Clock extends React.Component {
   }
 
   render() {
+
+    if (this.props.parentState !== betTimeStates.matchBegin)
+      return null;
+
     // Calculate the formatted date on the fly
     var secondsToBegin = this.props.beginDate - moment().unix();
     
