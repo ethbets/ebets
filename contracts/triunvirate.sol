@@ -3,43 +3,49 @@ import './governance.sol';
 
 contract Triunvirate is Governance {
   event AddedMember(address newMember);
-  event AddedCall(address reference, uint quorum);
-  event ResolvedCall(address reference, uint outcome);
+  event AddedProposal(address reference, uint quorum);
+  // 0 - Undecided, 1 - Team 0 won, 2 - Team 1 won, 3 - Draw
+  event ResolvedProposal(address reference, uint outcome);
+
+  modifier isActiveMember() {
+    require(members[msg.sender] >= 1);
+    _;
+  }
 
   function Triunvirate(address[] _members) {
     for (uint i = 0; i < _members.length; ++i)
       members[_members[i]] = 1;
   }
 
-  function castVote(address call, uint outcome) {
-    require(members[msg.sender] >= 1);
-    if (calls[call].voted.length == 0) {
-      calls[call].voted.push(msg.sender);
-      calls[call].outcomes.push(outcome);
+  function castVote(address proposal, uint outcome) isActiveMember {
+    if (proposals[proposal].voted.length == 0) {
+      proposals[proposal].voted.push(msg.sender);
+      proposals[proposal].outcomes.push(outcome);
       return;
     }
-    require(calls[call].voted[0] != msg.sender);
+    require(proposals[proposal].voted[0] != msg.sender);
     // 0 voted x, 1 voted x
-    if (calls[call].outcomes[0] == outcome) {
-      calls[call].voted.push(msg.sender);
-      calls[call].outcomes.push(outcome);
-      ResolvedCall(address, outcome);
-      call.__resolve(outcome);
+    if (proposals[proposal].outcomes[0] == outcome) {
+      proposals[proposal].voted.push(msg.sender);
+      proposals[proposal].outcomes.push(outcome);
+      ResolvedProposal(proposal, outcome);
+      //proposal.__resolve(outcome);
       return;
     }
-    require(calls[call].voted[0] != msg.sender &&
-            calls[call].voted[1] != msg.sender);
-    calls[call.voted.push].push(msg.sender);
-    calls[call].outcomes.push(outcome);
+    require(proposals[proposal].voted[0] != msg.sender &&
+            proposals[proposal].voted[1] != msg.sender);
+    proposals[proposal].voted.push(msg.sender);
+    proposals[proposal].outcomes.push(outcome);
     // 0 voted x, 1 voted y 2 voted x
-    if (outcome == calls[call].outcomes[0] || outcome == calls[call].outcomes[1])
-      ResolvedCall(address, outcome);
+    if (outcome == proposals[proposal].outcomes[0] || 
+        outcome == proposals[proposal].outcomes[1])
+      ResolvedProposal(proposal, outcome);
     else
-      ResolvedCall(address, -1);
+      ResolvedProposal(proposal, 0);
   }
-  function addCall(address callAddress, uint deadline) {
+  function addProposal(address proposalAddress, uint deadline) {
     require(block.timestamp < deadline);
-    calls[callAddress].quorumNeeded = 2;
-    calls[callAddress].deadline = deadline;
+    proposals[proposalAddress].quorumNeeded = 2;
+    proposals[proposalAddress].deadline = deadline;
   }
 }
