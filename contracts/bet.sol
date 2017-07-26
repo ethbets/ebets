@@ -1,7 +1,6 @@
 pragma solidity ^0.4.11;
 
 import './governanceInterface.sol';
-import './helpers.sol';
 
 contract Bet is ProposalInterface{
 
@@ -126,6 +125,7 @@ contract Bet is ProposalInterface{
   // 
   function bet(bool forTeam) payable 
     beforeMatchBegun() {
+    require(msg.sender != address(arbiter));
     uint prevSum;
     
     if (forTeam == false) {
