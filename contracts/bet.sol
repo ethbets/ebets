@@ -44,8 +44,9 @@ contract Bet is ProposalInterface{
     TEAM_ZERO_WON,
     TEAM_ONE_WON,
     DRAW,
-    UNDECIDED
-    }
+    UNDECIDED,
+    CALLED_RESOLVER
+  }
   
   BET_STATES public betState = BET_STATES.OPEN;
   address public owner; // Can be a parent contract
@@ -90,12 +91,12 @@ contract Bet is ProposalInterface{
     timestampArbiterDeadline = _timestamps[2] + TIMESTAMP_MARGIN;
   }
 
-  function __resolve(uint outcome) 
+  function __resolve(uint outcome)
     onlyArbiter() 
     afterMatchEnded()
     beforeResolverCanCall()
     matchIsOpenOrUndecided() {
-    
+    require(betState == BET_STATES.CALLED_RESOLVER);
     if (outcome == 1)
       betState = BET_STATES.TEAM_ZERO_WON;
     else if (outcome == 2)
@@ -108,10 +109,12 @@ contract Bet is ProposalInterface{
   }
 
   // Will create a Proposal on the arbiter
-  function updateResult() payable 
+  function updateResult() payable
     matchIsOpenOrUndecided()
     afterMatchEnded() {
+    require(betState != BET_STATES.CALLED_RESOLVER);
     arbiter.addProposal(this, timestampArbiterDeadline);
+    betState = BET_STATES.CALLED_RESOLVER;
   }
   
   function toggleFeatured() onlyOwner() {

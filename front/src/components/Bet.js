@@ -4,27 +4,21 @@ import moment from 'moment';
 
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
-import { RaisedButton, FlatButton } from 'material-ui'
+import { RaisedButton, Dialog, FlatButton } from 'material-ui'
 import { Card, CardHeader } from 'material-ui/Card';
-import TextField from 'material-ui/TextField';
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
-import LinearProgress from 'material-ui/LinearProgress';
+
 import CircularProgress from 'material-ui/CircularProgress';
-import {
-  Step,
-  Stepper,
-  StepLabel,
-} from 'material-ui/Stepper';
+import BetController from './BetController'
 
 import BetJson from 'build/contracts/Bet.json';
 import getWeb3 from 'utils/getWeb3';
 import betFields from './betFields';
 import {betTimeStates, betState, stepperState, contractStates} from './betStates';
 import Timer from './Timer';
-var mockDateBegin = moment().unix() + 5;
-var mockDateEnd = moment().unix() + 10;
+
+const MOCK = false;
+const mockDateBegin = moment().unix() + 5;
+const mockDateEnd = moment().unix() + 10;
 
 class Bet extends Component {
   
@@ -40,8 +34,6 @@ class Bet extends Component {
       betStatusMessage: '',
       betInProgress: false,
       isExpanded: false,
-      selectedTeam: '',
-      amountToBet: 0,
       loadCompleted: false,
       cat_url: '',
       stepIndex: 0,
@@ -50,103 +42,112 @@ class Bet extends Component {
     }
   }
 
-  updateBetShouldBeAtState(new_state) {
-    if (new_state === betTimeStates.matchRunning) {
+  updateBetShouldBeAtState(newState) {
+    if (newState === betTimeStates.matchRunning) {
       this.setState({
         currentBetState: betState.matchRunning,
         stepperState: stepperState.matchRunning
       });
     }
-    else if (new_state === betTimeStates.matchEnded) {
+    else if (newState === betTimeStates.matchEnded) {
       this.setState({
-        currentBetState: betState.shouldCallOracle,
+        currentBetState: betState.shouldCallArbiter,
         stepperState: stepperState.matchEnded
     });
     }
-    this.setState({betShoudlBeAtState: new_state});
+    this.setState({betShoudlBeAtState: newState});
   }
 
   handleCloseDialog = () => {
     this.setState({betHappened: false});
   };
 
-  setTeam = (event, index, value) => {
-    console.log(value);
-    this.setState({selectedTeam: value});
+  BetStatusDialog = () => {
+    const actions = [
+      <FlatButton
+        label="Ok"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.handleCloseDialog}
+      />
+    ];
+
+    return (
+      <Dialog
+        title="Bet status"
+        actions={actions}
+        modal={false}
+        open={this.state.betHappened}
+        onRequestClose={this.handleCloseDialog}
+      >
+      {this.state.betStatusMessage}
+      </Dialog>
+    )
+  }
+
+  transactionHappened = betPromisse => {
+    return betPromisse.then(tx => {
+      console.log('----->', this.setState, tx);
+      return this.setState({
+        betStatusMessage: `Transaction OK
+        \n\nTransaction hash: ${tx.tx}
+        \n\nAppended in block: ${tx.receipt.blockNumber}\n`
+      });
+    })
+    .catch(err => {
+      this.setState({betStatusMessage: `Transaction FAILED\n\nCause: ${err.toString()}`});
+    })
+    .then(() => {
+      this.setState({betHappened: true});
+      this.setState({betInProgress: false});
+    });
   };
 
-  setBetValue = (event, newValue) => {
-    this.setState({amountToBet : parseInt(newValue, 10)});
-  };
-
-  betOnTeam = () => {
-    console.log(this.state.contractInstance);
+  betOnTeam = (teamToBet, value) => {
+    console.log('props', teamToBet, value);
     if (this.state.contractInstance === undefined ||
-        this.state.selectedTeam === '' ||
-        this.state.amountToBet <= 0 ||
-        this.state.amountToBet === '') {
+        teamToBet === undefined ||
+        value === undefined ||
+        value <= 0) {
       console.log('Error');
       return;
     }
     this.setState({ betInProgress: true });
     var betPromisse = this.state.contractInstance.bet(
-      this.state.selectedTeam === 1,
+      teamToBet,
       { from: this.state.web3.eth.accounts[0],
-        value: this.state.amountToBet
+        value: value
       }
     );
-    betPromisse.then(tx => {
-      console.log(tx);
-      this.setState({
-        betStatusMessage: 'Transaction hash: ' + tx.tx + 
-        '\n\nAppended in block: ' + tx.receipt.blockNumber + '\n'
-      })
-    })
-    .catch(err => {
-      this.setState({betStatusMessage: err.toString()});
-    })
-    .then(() => {
-      this.setState({betHappened: true});
-      this.setState({betInProgress: false});
-    })
+    this.transactionHappened(betPromisse);
   };
 
-  callOracle = () => {
-  var callOraclePromise = this.state.contractInstance.update_result(
+  callArbiter = () => {
+  var callArbiterPromise = this.state.contractInstance.updateResult(
     { from: this.state.web3.eth.accounts[0],
       value: 20e9
     }
   );
-  callOraclePromise.then(tx => {
-    console.log(tx);
-    this.setState({
-      betStatusMessage: 'Transaction hash: ' + tx.tx + 
-      '\n\nAppended in block: ' + tx.receipt.blockNumber + '\n'
-    })
-  })
-  .catch(err => {
-    this.setState({betStatusMessage: err.toString()});
-  })
-  .then(() => {
-    this.setState({betHappened: true});
-    this.setState({betInProgress: false});
-  })
+  this.transactionHappened(callArbiterPromise);
 };
 
   FilteredBet = () => {
+    // FIXME: BUTTONS SHOULD BE PRESSED!
       var betTitle = 
-          <div className='inRows'>
-            <div className='pushLeft'> 
-              <RaisedButton primary={true}>{this.state.team_0_title} Ξ{this.state.team_0_bet_sum}</RaisedButton> vs <RaisedButton primary={true}>{this.state.team_1_title} Ξ{this.state.team_1_bet_sum}</RaisedButton>
-            </div> 
-            <Timer parentState={this.state.betShoudlBeAtState}
-                   updateState={this.updateBetShouldBeAtState.bind(this)}
-                   //beginDate={this.state.timestamp_match_begin}
-                   beginDate={mockDateBegin}
-                   //endDate={this.state.timestamp_match_end} 
-                   endDate={mockDateEnd}
-                   />
-        </div>;
+      <div className='inRows'>
+        <div className='pushLeft'>
+          <RaisedButton primary={true}>{this.state.team0Name} Ξ{this.state.team0BetSum}
+          </RaisedButton>
+          vs
+          <RaisedButton primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum}
+          </RaisedButton>
+        </div> 
+        <Timer parentState={this.state.betShoudlBeAtState}
+               updateState={this.updateBetShouldBeAtState.bind(this)}
+               beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
+               endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
+        />
+      </div>;
       console.log(this.state.category.toLowerCase(), this.props);
       // My bets
       if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
@@ -165,166 +166,25 @@ class Bet extends Component {
             actAsExpander={true}
             showExpandableButton={true}
           />
-          <this.ExpandedBet/>
+          <BetController
+            currentBetState={this.state.currentBetState}
+            team0Name={this.state.team0Name}
+            team1Name={this.state.team1Name}
+            stepperState={this.state.stepperState}
+            isExpanded={this.state.isExpanded}
+            betOnTeam={this.state.betOnTeam}
+            team0BetSum={this.state.team0BetSum}
+            team1BetSum={this.state.team1BetSum}
+            betOnTeamFunction={this.betOnTeam.bind(this)}
+            betHappened={this.state.betHappened}
+          />
+          <this.BetStatusDialog />
           </Card>
         );
       return null;
     }
-
-
-  Steps = () => {
-    var BetDecision = () => {
-      if (this.state.currentBetState <= betState.shouldCallOracle)
-        return 'Result';
-      else if (this.state.currentBetState === betState.team0Won)
-        return `${this.state.team_0_title} won`;
-      else if (this.state.currentBetState === betState.oracleUndecided)
-        return 'Undecided';
-      else if (this.state.currentBetState === betState.team1Won)
-        return `${this.state.team_1_title} won`;
-      else if (this.state.currentBetState === betState.draw)
-        return 'Draw';
-      return null;
-    }
-
-    return (
-        <Stepper activeStep={this.state.stepperState}>
-          <Step>
-            <StepLabel>Place your bet!</StepLabel>
-          </Step>
-          <Step>
-            <StepLabel>Match running</StepLabel>
-          </Step>
-          <Step>
-            <StepLabel>Call Oracle</StepLabel>
-          </Step>
-          <Step>
-            <StepLabel>{BetDecision()}</StepLabel>
-          </Step>
-          <Step>
-            <StepLabel>Payout</StepLabel>
-          </Step>
-        </Stepper>
-      );
-  }
-
-  ExpectedGain = () => {
-    var expectedIncome;
-    var amount;
-    var winnerPool;
-    var loserPool;
-
-    if (this.state.selectedTeam === '')
-      return null;
-
-    if (this.state.selectedTeam === 0) {
-      amount = this.state.amountToBet;
-      expectedIncome = this.state.amountToBet;
-      loserPool = this.state.team_1_bet_sum - 0.02*this.state.team_1_bet_sum;
-      winnerPool = expectedIncome + this.state.team_0_bet_sum;
-    }
-    else {
-      amount = this.state.amountToBet;
-      expectedIncome = this.state.amountToBet;
-      loserPool = this.state.team_0_bet_sum - 0.02*this.state.team_0_bet_sum;
-      winnerPool = expectedIncome + this.state.team_1_bet_sum;
-    }
     
-    expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
-    if (amount === 0 || isNaN(amount))
-      return null
-    else
-      return <RaisedButton backgroundColor='#FAD723'>Win Ξ{parseFloat(expectedIncome).toFixed(2)} </RaisedButton>
-  }
-
-  LinearProgressCustom = (props) => {
-    if (this.state.betInProgress)
-      return <LinearProgress mode="indeterminate" />;
-    return null;
-  };
-
-  BetStatusDialog = (props) => {
-    const actions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        keyboardFocused={true}
-        onTouchTap={this.handleCloseDialog}
-      />
-    ];
-
-    return <Dialog
-          title="Bet status"
-          actions={actions}
-          modal={false}
-          open={this.state.betHappened}
-          onRequestClose={this.handleCloseDialog}
-        >
-        {this.state.betStatusMessage}
-        </Dialog>
-  }
-
-  ExpandedBet = (props) => {
-    var DynamicBetButton = () => {
-      if (this.state.currentBetState === betState.shouldCallOracle) {
-        return (
-        <RaisedButton
-          secondary={true}
-          className="betBtn"
-          onTouchTap={this.betOnTeam}
-        ><span>Call Oracle</span>
-        </RaisedButton>
-        )
-      }
-      else if (this.state.stepperState === stepperState.payout)
-        return (
-        <RaisedButton 
-          className="betBtn"
-          primary={true}
-          onTouchTap={this.betOnTeam}
-        ><span>Withdraw</span>
-        </RaisedButton>
-        )
-      return (
-        <RaisedButton 
-          disabled={(this.state.currentBetState !== betState.matchOpen)}
-          className="betBtn"
-          primary={true}
-          onTouchTap={this.betOnTeam}
-        ><span>Bet</span>
-        </RaisedButton>
-        )
-    }
-
-    if (this.state.isExpanded) {
-    return <div>
-        <SelectField style={{ width: 160 }} className='test'
-          floatingLabelText="Team"
-          value={this.state.selectedTeam}
-          onChange={this.setTeam}
-          disabled={this.state.betOnTeam !== null}
-        >
-          <MenuItem value={0} primaryText={this.state.team_0_title} />
-          <MenuItem value={1} primaryText={this.state.team_1_title} />
-        </SelectField>
-        <TextField 
-          disabled={(this.state.currentBetState >= betState.matchRunning)} 
-          style={{ width: 80 }} 
-          id='betAmount' 
-          type='number' 
-          onChange={this.setBetValue}
-          />
-        <DynamicBetButton />
-        <this.ExpectedGain/>
-        <this.LinearProgressCustom mode="indeterminate" />
-        <this.BetStatusDialog />
-        <this.Steps />
-      </div>
-    }
-    return null;
-  }
-  
-  onExpand = (expanded) => {
+  onExpand = () => {
     // NOTE: Don't reference this.state in this.setState
     this.setState(previousState => ({isExpanded: !previousState.isExpanded}));
   }
@@ -353,8 +213,8 @@ class Bet extends Component {
       self.setState({contractInstance: contractInstance});
       var promises = Object.keys(attributeNames).map(async (attr) => {
         if (attr in betFields
-            && attr !== 'bets_to_team_0' // Cannot get mapping keys, no prob: get from events
-            && attr !== 'bets_to_team_1') { // idem
+            && attr !== 'betsToTeam0' // Cannot get mapping keys, no prob: get from events
+            && attr !== 'betsToTeam1') { // idem
 
           var res = await betContractInstance[attr]();
           if (typeof res === 'object') // Handle BigNumber
@@ -376,18 +236,6 @@ class Bet extends Component {
 
     var betContractInstance = betContract.at(this.props.address);
     setAttributes(this.state, betContractInstance);
-
-    var newBetEvent = betContractInstance.new_bet({fromBlock: 0, toBlock: 'latest'});
-    newBetEvent.watch((error, response) => {
-      if (response.args.for_team === false)
-        this.setState(previousState => {
-          return { team_0_bet_sum : previousState.team_0_bet_sum + response.args.amount.toNumber() }
-        });
-      else
-        this.setState(previousState => {
-          return { team_1_bet_sum : previousState.team_1_bet_sum + response.args.amount.toNumber() };
-        });
-    });
       
     var allBetEvents = betContractInstance.allEvents({
       fromBlock: 0,
@@ -395,15 +243,21 @@ class Bet extends Component {
     });
 
     allBetEvents.watch((error, response) => {
-      if (response.event === 'new_bet') {
+      if (response.event === 'NewBet') {
+        if (response.args.for_team === false)
+          this.setState(previousState => (
+            { team0BetSum : previousState.team0BetSum + response.args.amount.toNumber()}));
+        else
+         this.setState(previousState => (
+            { team1BetSum : previousState.team1BetSum + response.args.amount.toNumber()}));
+
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState({
             betOnTeam: response.args.for_team,
-            selectedTeam: (response.args.for_team) ? 1 : 0
           });
         }
       }
-      else if (response.event === 'state_changed') {
+      else if (response.event === 'stateChanged') {
         var newOverAllState;
         var newStepperState;
         if (response.args.state === contractStates.OPEN) {
@@ -425,9 +279,13 @@ class Bet extends Component {
           if (this.state.betOnTeam)
             newStepperState = stepperState.payout;
         }
-        else if (response.args.state === contractStates.ORACLE_UNDECIDED) {
-          newOverAllState = betState.oracleUndecided;
+        else if (response.args.state === contractStates.UNDECIDED) {
+          newOverAllState = betState.arbiterUndecided;
           newStepperState = stepperState.matchDecision;
+        }
+        else if (response.args.state === contractStates.CALLED_RESOLVER) {
+          newOverAllState = betState.calledArbiter;
+          newStepperState = stepperState.matchEnded;
         }
         this.setState({
           currentBetState: newOverAllState,
@@ -435,36 +293,24 @@ class Bet extends Component {
         });
       }
     });
-    setTimeout(() => {this.setState(previousState => {
-      var shouldPay = stepperState.matchDecision;
-      if (this.state.betOnTeam)
-        shouldPay = stepperState.payout;
-      return {
-        currentBetState: betState.draw,
-        stepperState: shouldPay
-    }})}, 15000);
+    if (MOCK)
+      setTimeout(() => {this.setState(() => {
+        var shouldPay = stepperState.matchDecision;
+        if (this.state.betOnTeam)
+          shouldPay = stepperState.payout;
+        return {
+          currentBetState: betState.draw,
+          stepperState: shouldPay
+      }})}, 15000);
   }
-// <CardText>
-//       <div>
-//       <GridList cols={5} cellHeight={20}>
-//         <GridTile>{this.state.category}</GridTile>
-//         <GridTile>Ξ{this.state.team_0_bet_sum}</GridTile>
-//         <GridTile>{this.state.team_0} vs {this.state.team_1}</GridTile>
-//         <GridTile>Ξ{this.state.team_1_bet_sum}</GridTile>
-//         <GridTile>{ getState(this.state.bet_state) }</GridTile>
-//       </GridList>
-//       <this.ExpandedBet/>
-//       </div>
-//       </CardText>
-//       <ProgressBar /> 
   render() {
 
   if (!this.state.loadCompleted)
     return ( <div className="center"> <CircularProgress /> </div> ) ;
 
-    var total = this.state.team_0_bet_sum + this.state.team_1_bet_sum;
-    var percentage0 = (this.state.team_0_bet_sum / total)*100;
-    var percentage1 = (this.state.team_1_bet_sum / total)*100;
+    var total = this.state.team0BetSum + this.state.team1BetSum;
+    var percentage0 = (this.state.team0BetSum / total)*100;
+    var percentage1 = (this.state.team1BetSum / total)*100;
     isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
     isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
 

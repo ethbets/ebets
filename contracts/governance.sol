@@ -17,7 +17,7 @@ contract Governance is GovernanceInterface{
   // Members can be added to the governance
   event AddedMember(address newMember);
   // Contract referenced in the Proposal quorum*100 needed in percentage
-  event AddedProposal(address reference, uint quorum);
+  event AddedProposal(address reference, uint deadline, uint quorum);
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
@@ -26,5 +26,5 @@ contract Governance is GovernanceInterface{
   // Member cast vote for Proposal if enough are made can call ResolvedCall
   function castVote(address proposal, uint outcome);
   // Proposal should be solved by the deadline time
-  function addProposal(uint deadline);
+  function addProposal(address proposalAddress, uint deadline);
 }

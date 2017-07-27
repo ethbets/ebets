@@ -56,6 +56,11 @@ class NavDrawer extends Component {
             value='/new_bet'
             href='#/new_bet'
             />
+            <ListItem 
+            primaryText='Arbiters'
+            value='/arbiters'
+            href='#/arbiters'
+            />
           <Divider />
           <Subheader>Categories</Subheader>
           <ListItem

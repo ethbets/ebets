@@ -1,19 +1,23 @@
 pragma solidity ^0.4.11;
 
-interface ProposalInterface {
+contract ProposalInterface {
   // Callback to resolve Proposal
   function __resolve(uint outcome);
 }
 
-interface GovernanceInterface {
+contract GovernanceInterface {
 
-  // Members can be added to the governance
+  // Members can be added/removed to the governance
   event AddedMember(address newMember);
+  event RemovedMember(address removedMember);
   // Contract referenced in the Proposal quorum*100 needed in percentage
-  event AddedProposal(address reference, uint quorum);
+  event AddedProposal(address reference, uint deadline, uint quorum);
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
+  function isMember(address user) constant returns(bool isMember);
+  function getName() constant returns(string name);
+  
   function addMember(address member);
   function removeMember(address member);
   // Member cast vote for Proposal if enough are made can call ResolvedCall

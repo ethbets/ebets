@@ -11,7 +11,8 @@ const BETSTATES = {
     TEAM_ZERO_WON: 1,
     TEAM_ONE_WON: 2,
     DRAW: 3,
-    ORACLE_UNDECIDED: 4
+    UNDECIDED: 4,
+    CALLED_RESOLVER: 5
   },
 
   /* 0: Match not started
@@ -27,12 +28,13 @@ const BETSTATES = {
   betState: {
     matchOpen: 0,
     matchRunning: 1,
-    shouldCallOracle: 2,
-    oracleUndecided: 3,
+    shouldCallArbiter: 2,
+    arbiterUndecided: 3,
     team0Won: 4,
     team1Won: 5,
     draw: 6,
     betExpired: 7,
+    calledArbiter: 8
   },
   stepperState: {
     matchOpen: 0,

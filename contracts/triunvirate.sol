@@ -58,4 +58,8 @@ contract Triunvirate is Governance {
     require(proposals[proposalAddress].deadline == 0);
     proposals[proposalAddress].deadline = deadline;
   }
+  
+  // Static triunvirate
+  function addMember(address member) {}
+  function removeMember(address member) {}
 }

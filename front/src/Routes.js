@@ -9,6 +9,7 @@ import Master from './components/Master';
 import FAQ from './components/FAQ';
 import Ebets from './components/Ebets';
 import CreateBet from './components/BetForm';
+//import Arbiter from './components/Arbiter';
 
 const Routes = (
   <Route path='/' component={Master}> 
