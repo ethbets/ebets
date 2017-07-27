@@ -34,6 +34,19 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "getName",
+      "outputs": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -68,6 +81,24 @@
       ],
       "name": "addProposal",
       "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "isMember",
+      "outputs": [
+        {
+          "name": "isMember",
+          "type": "bool"
+        }
+      ],
       "payable": false,
       "type": "function"
     },
@@ -164,10 +195,22 @@
       ],
       "name": "ResolvedProposal",
       "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "removedMember",
+          "type": "address"
+        }
+      ],
+      "name": "RemovedMember",
+      "type": "event"
     }
   ],
   "unlinked_binary": "0x",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1501068840300
+  "updated_at": 1501168921010
 }

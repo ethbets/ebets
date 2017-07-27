@@ -8,6 +8,6 @@ module.exports = {
       gas: 4100000,
       gasPrice: 5010000004,
       from: "0x82De95A2c2805731a404C4F652514929cdB463bb"
-    }
+    },
   }
 };

@@ -69,7 +69,7 @@ contract Bet is ProposalInterface{
   uint8 constant TAX = 10;
   uint constant TIMESTAMP_MARGIN = 1000;
 
-  event NewBet(bool for_team, address from, uint amount);
+  event NewBet(bool forTeam, address from, uint amount);
   event StateChanged(BET_STATES state);
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 

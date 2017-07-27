@@ -30,8 +30,9 @@ class BetController extends Component {
 
   Steps = () => {
     var BetDecision = () => {
-      if (this.props.currentBetState <= betState.shouldCallArbiter)
-        return 'Wait Arbiter';
+      if (this.props.currentBetState <= betState.shouldCallArbiter || 
+        this.props.currentBetState === betState.calledArbiter)
+        return 'Result';
       else if (this.props.currentBetState === betState.team0Won)
         return `${this.props.team0Name} won`;
       else if (this.props.currentBetState === betState.arbiterUndecided)
@@ -42,6 +43,13 @@ class BetController extends Component {
         return 'Draw';
       return null;
     };
+    var CallArbiter = () => {
+      if (this.props.currentBetState === betState.calledArbiter)
+        return 'Called Arbiter';
+      else
+        return 'Call Arbiter';
+    };
+    
     // TODO: I don't think BetDecision() works
     // TODO: Change Call Arbiter to Arbiter Called when the arbiter is called
     return (
@@ -53,7 +61,7 @@ class BetController extends Component {
             <StepLabel>Match running</StepLabel>
           </Step>
           <Step>
-            <StepLabel>Call Arbiter</StepLabel>
+            <StepLabel>{CallArbiter()}</StepLabel>
           </Step>
           <Step>
             <StepLabel>{BetDecision()}</StepLabel>
@@ -111,16 +119,16 @@ class BetController extends Component {
         amount = this.state.amountToBet;
         expectedIncome = this.state.amountToBet;
         loserPool = this.props.team1BetSum - 0.02*this.props.team1BetSum;
-        winnerPool = expectedIncome + this.props.team0BetSum;
+        winnerPool = this.props.team0BetSum.plus(expectedIncome);
       }
       else {
         amount = this.state.amountToBet;
         expectedIncome = this.state.amountToBet;
         loserPool = this.props.team0BetSum - 0.02*this.props.team0BetSum;
-        winnerPool = expectedIncome + this.props.team1BetSum;
+        winnerPool = this.props.team1BetSum.plus(expectedIncome);
       }
     
-      expectedIncome +=  (expectedIncome/winnerPool)*loserPool;
+      expectedIncome +=  (winnerPool.times(expectedIncome)).times(loserPool);
       if (amount === 0 || isNaN(amount))
         return null
       else

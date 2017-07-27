@@ -17,7 +17,7 @@ import betFields from './betFields';
 import {betTimeStates, betState, stepperState, contractStates} from './betStates';
 import Timer from './Timer';
 
-const MOCK = false;
+const MOCK = true;
 const mockDateBegin = moment().unix() + 5;
 const mockDateEnd = moment().unix() + 10;
 
@@ -94,7 +94,6 @@ class Bet extends Component {
 
   transactionHappened = betPromisse => {
     return betPromisse.then(tx => {
-      console.log('----->', this.setState, tx);
       return this.setState({
         betStatusMessage: `Transaction OK
         \n\nTransaction hash: ${tx.tx}
@@ -111,12 +110,11 @@ class Bet extends Component {
   };
 
   betOnTeam = (teamToBet, value) => {
-    console.log('props', teamToBet, value);
     if (this.state.contractInstance === undefined ||
         teamToBet === undefined ||
         value === undefined ||
         value <= 0) {
-      console.log('Error');
+      console.error('Error');
       return;
     }
     this.setState({ betInProgress: true });
@@ -143,10 +141,10 @@ class Bet extends Component {
       var betTitle = 
       <div className='inRows'>
         <div className='pushLeft'>
-          <RaisedButton primary={true}>{this.state.team0Name} Ξ{this.state.team0BetSum}
+          <RaisedButton primary={true}>{this.state.team0Name} Ξ{this.state.team0BetSum.toString()}
           </RaisedButton>
           vs
-          <RaisedButton primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum}
+          <RaisedButton primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum.toString()}
           </RaisedButton>
         </div> 
         <Timer parentState={this.state.betShoudlBeAtState}
@@ -155,7 +153,6 @@ class Bet extends Component {
                endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
         />
       </div>;
-      console.log(this.state.category.toLowerCase(), this.props);
       // My bets
       if ((this.props.category  === 'my_bets' && this.state.betOnTeam !== null) ||
         (this.props.category  === this.state.category) ||
@@ -198,19 +195,16 @@ class Bet extends Component {
   }
 
   componentWillMount() {
-    // Get network provider and web3 instance.
-    // See utils/getWeb3 for more info.
     getWeb3
     .then(results => {
       this.setState({
         web3: results.web3
       });
 
-      // Instantiate contract once web3 provided.
       this.instantiateContract();
     })
     .catch(err => {
-      console.log('Error finding web3', err);
+      console.error('Error finding web3', err);
     });
   }
         
@@ -225,11 +219,10 @@ class Bet extends Component {
             && attr !== 'betsToTeam1') { // idem
 
           var res = await betContractInstance[attr]();
-          if (typeof res === 'object') // Handle BigNumber
-            res = res.toNumber();
+          if (typeof res === 'object') // Handle BigNumber 
+            objs[attr] = res;
           else
-            res = res.toString();
-          objs[attr] = res;
+            objs[attr] = res.toString();
           // self.setState(obj);
         }
       });
@@ -252,16 +245,16 @@ class Bet extends Component {
 
     allBetEvents.watch((error, response) => {
       if (response.event === 'NewBet') {
-        if (response.args.for_team === false)
+        if (response.args.forTeam === false)
           this.setState(previousState => (
-            { team0BetSum : previousState.team0BetSum + response.args.amount.toNumber()}));
+            { team0BetSum : previousState.team0BetSum.plus(response.args.amount)}));
         else
          this.setState(previousState => (
-            { team1BetSum : previousState.team1BetSum + response.args.amount.toNumber()}));
+            { team1BetSum : previousState.team1BetSum.plus(response.args.amount)}));
 
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState({
-            betOnTeam: response.args.for_team,
+            betOnTeam: response.args.forTeam,
           });
         }
       }
@@ -301,15 +294,21 @@ class Bet extends Component {
         });
       }
     });
-    if (MOCK)
+    if (MOCK) {
       setTimeout(() => {this.setState(() => {
-        var shouldPay = stepperState.matchDecision;
-        if (this.state.betOnTeam)
-          shouldPay = stepperState.payout;
         return {
-          currentBetState: betState.draw,
-          stepperState: shouldPay
+          currentBetState: betState.calledArbiter,
+        stepperState: stepperState.matchEnded
       }})}, 15000);
+      setTimeout(() => {this.setState(() => {
+      var shouldPay = stepperState.matchDecision;
+      if (this.state.betOnTeam)
+        shouldPay = stepperState.payout;
+      return {
+        currentBetState: betState.draw,
+        stepperState: shouldPay
+    }})}, 20000);
+    }
   }
   render() {
 
