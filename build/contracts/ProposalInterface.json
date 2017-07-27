@@ -1,0 +1,22 @@
+{
+  "contract_name": "ProposalInterface",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "outcome",
+          "type": "uint256"
+        }
+      ],
+      "name": "__resolve",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1501068840300
+}
