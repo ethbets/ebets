@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
-import LinearProgress from 'material-ui/LinearProgress';
 
 import { RaisedButton, FlatButton } from 'material-ui'
 import {
@@ -65,12 +64,6 @@ class BetController extends Component {
         </Stepper>
       );
   }
-
-  LinearProgressCustom = () => {
-    if (this.props.betInProgress)
-      return <LinearProgress mode="indeterminate" />;
-    return null;
-  };
   
   DynamicBetButton = () => {
     if (this.props.currentBetState === betState.shouldCallArbiter ||

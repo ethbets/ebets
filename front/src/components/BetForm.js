@@ -9,7 +9,7 @@ import {Card, CardHeader, CardText} from 'material-ui/Card';
 import {GridList, GridTile} from 'material-ui/GridList';
 
 import getWeb3 from 'utils/getWeb3';
-import EbetsJson from 'build/contracts/Ebets.json';
+import EbetsJson from 'build/contracts/ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
