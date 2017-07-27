@@ -6,6 +6,7 @@ import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { RaisedButton, Dialog, FlatButton } from 'material-ui'
 import { Card, CardHeader } from 'material-ui/Card';
+import LinearProgress from 'material-ui/LinearProgress';
 
 import CircularProgress from 'material-ui/CircularProgress';
 import BetController from './BetController'
@@ -41,6 +42,12 @@ class Bet extends Component {
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
   }
+
+  LinearProgressCustom = () => {
+    if (this.state.betInProgress)
+      return <LinearProgress mode="indeterminate" />;
+    return null;
+  };
 
   updateBetShouldBeAtState(newState) {
     if (newState === betTimeStates.matchRunning) {
@@ -179,6 +186,7 @@ class Bet extends Component {
             betHappened={this.state.betHappened}
           />
           <this.BetStatusDialog />
+          <this.LinearProgressCustom mode="indeterminate" />
           </Card>
         );
       return null;
