@@ -66,7 +66,7 @@ contract Bet is ProposalInterface{
   // Self-destruct is possible if time > timestampArbiterDeadline
   uint public timestampArbiterDeadline;
 
-  uint8 constant TAX = 10;
+  uint8 public constant TAX = 10;
   uint constant TIMESTAMP_MARGIN = 1000;
 
   event NewBet(bool forTeam, address from, uint amount);

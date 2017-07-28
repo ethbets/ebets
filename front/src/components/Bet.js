@@ -191,6 +191,7 @@ class Bet extends Component {
             hasBetOnTeam={this.state.hasBetOnTeam}
             team0BetSum={this.state.team0BetSum}
             team1BetSum={this.state.team1BetSum}
+            tax={this.state.TAX}
             betOnTeamFunction={this.betOnTeam.bind(this)}
             betHappened={this.state.betHappened}
             isArbiter={this.state.isArbiter}
@@ -347,7 +348,6 @@ class Bet extends Component {
     }
   }
   render() {
-
   if (!this.state.loadCompleted)
     return ( <div className="center"> <CircularProgress /> </div> ) ;
 

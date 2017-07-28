@@ -13,7 +13,7 @@ contract Monarchy is Governance {
     members[msg.sender] = 1;
   }
   function isMember(address user) constant returns(bool isMember) {
-    return (members[msg.sender] == 1);
+    return (members[user] == 1);
   }
   function getName() constant returns(string name) {
     return name;

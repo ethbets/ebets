@@ -115,6 +115,18 @@ class BetController extends Component {
       )
   }
 
+  ArbiterButton = () => {
+    return (
+    <RaisedButton
+      disabled={this.props.currentBetState !== betState.calledArbiter}
+      secondary={true}
+      className="betBtn"
+      onTouchTap={this.callArbiter}
+    ><span>Vote</span>
+    </RaisedButton>
+    )
+  }
+
   ComputeGain = (amount, winnerPool, loserPool, tax) => {
     var BigNumber = require('bignumber.js');
     var profit = amount.dividedBy(winnerPool).times(loserPool);
@@ -129,7 +141,6 @@ class BetController extends Component {
     var amount;
     var winnerPool;
     var loserPool;
-    const tax = 0.1; //FIXME get from contract
 
     if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
       return null;
@@ -147,7 +158,7 @@ class BetController extends Component {
       winnerPool = this.props.team1BetSum;
     }
     winnerPool = winnerPool.plus(amount);
-    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, tax);
+    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, this.props.tax);
 
     if (amount.isZero(0) || isNaN(amount))
       return null;
@@ -199,29 +210,52 @@ class BetController extends Component {
 
   render() {
     if (this.props.isExpanded) {
-    return <div>
-        <div className='betRow'>
-        <SelectField style={{ width: 160 }} className='test'
-          floatingLabelText='Team'
-          value={(this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
-          onChange={this.setTeam}
-          disabled={this.props.hasBetOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
-        >
-          <MenuItem value={false} primaryText={this.props.team0Name} />
-          <MenuItem value={true} primaryText={this.props.team1Name} />
-        </SelectField> 
-        <TextField 
-          disabled={(this.props.currentBetState >= betState.matchRunning)} 
-          style={{ width: 80 }}
-          id='betAmount' 
-          type='number'
-          onChange={this.setBetValue}
-          />
-        <this.DynamicBetButton />
-        <this.ExpectedGain/>
+      if (this.props.isArbiter) {
+        return (
+        <div>
+          <div className='betRow'>
+            <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+            Vote on match outcome:
+          </Chip>
+          <SelectField style={{ width: 160 }} className='test'
+            floatingLabelText='Team'
+            value={this.state.selectedTeam}
+            onChange={this.setTeam}
+            disabled={this.props.currentBetState !== betState.calledArbiter}
+          >
+            <MenuItem value={false} primaryText={this.props.team0Name} />
+            <MenuItem value={true} primaryText={this.props.team1Name} />
+          </SelectField>
+          <this.ArbiterButton />
+          </div>
         </div>
-        <this.Steps />
-      </div>
+      )
+      }
+      return (
+        <div>
+          <div className='betRow'>
+          <SelectField style={{ width: 160 }} className='test'
+            floatingLabelText='Team'
+            value={(this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
+            onChange={this.setTeam}
+            disabled={this.props.hasBetOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
+          >
+            <MenuItem value={false} primaryText={this.props.team0Name} />
+            <MenuItem value={true} primaryText={this.props.team1Name} />
+          </SelectField> 
+          <TextField 
+            disabled={(this.props.currentBetState >= betState.matchRunning)} 
+            style={{ width: 80 }}
+            id='betAmount' 
+            type='number'
+            onChange={this.setBetValue}
+            />
+          <this.DynamicBetButton />
+          <this.ExpectedGain/>
+          </div>
+          <this.Steps />
+        </div>
+      )
     }
     return null;
   }

@@ -13,6 +13,7 @@ let BETFIELDS = {
   timestampMatchBegin: 0,
   timestampMatchEnd: 0,
   timestampArbiterDeadline: 0,
+  TAX: 0
 };
 
 export default BETFIELDS;
