@@ -7,8 +7,10 @@ import { Progress } from 'reactstrap';
 import { RaisedButton, Dialog, FlatButton } from 'material-ui'
 import { Card, CardHeader } from 'material-ui/Card';
 import LinearProgress from 'material-ui/LinearProgress';
-
+import Avatar from 'material-ui/Avatar';
+import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
+
 import BetController from './BetController'
 
 import BetJson from 'build/contracts/Bet.json';
@@ -36,7 +38,7 @@ class Bet extends Component {
       betInProgress: false,
       isExpanded: false,
       loadCompleted: false,
-      cat_url: '',
+      cat_url: null,
       stepIndex: 0,
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
@@ -137,15 +139,14 @@ class Bet extends Component {
 };
 
   FilteredBet = () => {
-    // FIXME: BUTTONS SHOULD BE PRESSED!
       var betTitle = 
       <div className='inRows'>
         <div className='pushLeft'>
-          <RaisedButton primary={true}>{this.state.team0Name} Ξ{this.state.team0BetSum.toString()}
-          </RaisedButton>
+          <span>{this.state.team0Name} Ξ{this.state.team0BetSum.toString()}
+          </span>
           vs
-          <RaisedButton primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum.toString()}
-          </RaisedButton>
+          <span primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum.toString()}
+          </span>
         </div> 
         <Timer parentState={this.state.betShoudlBeAtState}
                updateState={this.updateBetShouldBeAtState.bind(this)}
@@ -159,13 +160,13 @@ class Bet extends Component {
         (this.props.subcategory === this.state.category.toLowerCase()) ||
         (this.props.category === 'all_bets'))
         return (
-          <Card containerStyle={{ backgroundColor: '#097986' }}
+          <Card
             // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
             onExpandChange={lodash.debounce(this.onExpand, 150)}
             expanded={this.state.isExpanded}
           >
           <CardHeader
-            avatar={this.state.cat_url}
+            avatar={(this.state.cat_url != null) ? this.state.cat_url : <Avatar icon={<ImagePhotoCamera />} /> }
             title={betTitle}
             actAsExpander={true}
             showExpandableButton={true}
@@ -227,7 +228,12 @@ class Bet extends Component {
         }
       });
       Promise.all(promises).then(res => {
-        objs.cat_url = require('assets/imgs/' + objs.category + '.png')
+        try {
+          objs.cat_url = require('assets/imgs/' + objs.category + '.png');
+        }
+        catch (err) {
+          objs.cat_url = null;
+        }
         self.setState(objs);
       })
     }
