@@ -19,7 +19,8 @@ class BetController extends Component {
     super(props);
     this.state = {
       selectedTeam: null,
-      amountToBet: 0
+      amountToBet: 0,
+      isArbiter: false
     }
   }
 

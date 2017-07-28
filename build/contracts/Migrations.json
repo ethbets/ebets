@@ -64,10 +64,10 @@
     "42": {
       "events": {},
       "links": {},
-      "address": "0xa2515c7a1487cbb974ae2e4b002521c81c778047",
-      "updated_at": 1501170053129
+      "address": "0x645ad034cb839305e365bd571616ad54d36fb0b8",
+      "updated_at": 1501182172848
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1501170053129
+  "updated_at": 1501182172848
 }

@@ -34,33 +34,26 @@ class Ebets extends Component {
   }
 
   instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
-
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(this.state.web3.currentProvider);
 
-    // Declaring this for later so we can chain functions on SimpleStorage.
-    var ebetsContractInstance;
-
     // Get accounts.
-    this.state.web3.eth.getAccounts((error, accounts) => {
-      ebetsContract.deployed().then(instance => {
-        ebetsContractInstance = instance;
-
+    this.state.web3.eth.getAccounts((error) => {
+      if (error) throw 'Unable to get accounts';
+      console.log('EBETSContract', ebetsContract.deployed());
+      ebetsContract.deployed()
+      .then(instance => {
         //events
-        var betsEvents = ebetsContractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
-
+        var betsEvents = instance.allEvents({fromBlock: 0, toBlock: 'latest'});
         betsEvents.watch((error, response) => {
           this.setState(previousState => {
             return { bets: previousState.bets.concat(response.args.bet_addr) }
           });
         });
+      })
+      .catch(err => {
+        console.error(err);
       });
     });
   }

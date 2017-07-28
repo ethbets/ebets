@@ -21,6 +21,9 @@ import betFields from './betFields';
 import {betTimeStates, betState, stepperState, contractStates} from './betStates';
 import Timer from './Timer';
 
+import MonarchyJson from 'build/contracts/Monarchy.json';
+
+
 const MOCK = true;
 const mockDateBegin = moment().unix() + 5;
 const mockDateEnd = moment().unix() + 10;
@@ -249,7 +252,16 @@ class Bet extends Component {
     }
 
     const betContract = contract(BetJson);
+    const monarchyContract = contract(MonarchyJson);
     betContract.setProvider(this.state.web3.currentProvider);
+    monarchyContract.setProvider(this.state.web3.currentProvider);
+    monarchyContract.deployed().then(instance => {
+      return instance.isMember(this.state.web3.eth.accounts[0])
+    })
+    .then(isMember => {
+      this.setState({ isMember : isMember});
+      return isMember;
+    })
 
     var betContractInstance = betContract.at(this.props.address);
     setAttributes(this.state, betContractInstance);
