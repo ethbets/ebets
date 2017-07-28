@@ -23,8 +23,7 @@ import Timer from './Timer';
 
 import MonarchyJson from 'build/contracts/Monarchy.json';
 
-
-const MOCK = false;
+const MOCK = true;
 const mockDateBegin = moment().unix() + 5;
 const mockDateEnd = moment().unix() + 10;
 
