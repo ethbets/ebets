@@ -79,8 +79,8 @@ class Clock extends React.Component {
 
     return(
         <div className='pushRight'>
-          <Chip backgroundColor={MColors.blueGrey50}>
-            {result_str}
+          <Chip backgroundColor={MColors.white}>
+            Begins in: {result_str}
           </Chip>
         </div>
       );
