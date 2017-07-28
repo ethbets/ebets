@@ -27,7 +27,7 @@ class BetController extends Component {
   setTeam = (event, index, value) => {
     this.setState({selectedTeam: value});
   };
-  
+
   setBetValue = (event, newValue) => {
     this.setState({amountToBet : parseInt(newValue)});
   };
@@ -164,34 +164,29 @@ class BetController extends Component {
     if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
       return 0;
 
-    var hasBetTeam0 = this.props.hasBetTeam0;
-    var hasBetTeam1 = this.props.hasBetTeam1;
+    if (this.props.hasBetOnTeam === null)
+      return 0;
+
+    amount = this.props.hasBetOnTeam.amount;
+    console.log('AMOUNT');
+    console.log(amount);
+    if (this.props.currentBetState === betState.draw)
+      return amount;
+
+    var hasBetTeam0 = !this.props.hasBetOnTeam.team;
+    var hasBetTeam1 = this.props.hasBetOnTeam.team;
     var team0BetSum = this.props.team0BetSum;
     var team1BetSum = this.props.team1BetSum;
 
-    if ((hasBetTeam0 === undefined || hasBetTeam0 <= 0) &&
-        (hasBetTeam1 === undefined || hasBetTeam1 <= 0))
+    if ((this.props.currentBetState === betState.team0Won && hasBetTeam1) ||
+        (this.props.currentBetState === betState.team1Won && hasBetTeam0))
       return 0;
 
-    if (this.props.currentBetState === betState.draw) {
-      if (hasBetTeam0 === undefined || hasBetTeam1 <= 0)
-        amount = hasBetTeam1;
-      else
-        amount = hasBetTeam0;
-      return amount;
-    }
-
     if (this.props.currentBetState === betState.team0Won) {
-      if (hasBetTeam0 === undefined || hasBetTeam0 <= 0)
-        return 0;
-      amount = hasBetTeam0;
       winnerPool = team0BetSum;
       loserPool = team1BetSum;
     }
-    else { // if (this.props.currentBetState === betState.team1Won)
-      if (hasBetTeam1 === undefined || hasBetTeam1 <= 0)
-        return 0;
-      amount = hasBetTeam1;
+    else if (this.props.currentBetState === betState.team1Won) {
       winnerPool = team1BetSum;
       loserPool = team0BetSum;
     }
