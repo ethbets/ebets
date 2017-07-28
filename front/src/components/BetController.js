@@ -223,8 +223,9 @@ class BetController extends Component {
             onChange={this.setTeam}
             disabled={this.props.currentBetState !== betState.calledArbiter}
           >
-            <MenuItem value={false} primaryText={this.props.team0Name} />
-            <MenuItem value={true} primaryText={this.props.team1Name} />
+            <MenuItem value={0} primaryText={this.props.team0Name} />
+            <MenuItem value={1} primaryText={this.props.team1Name} />
+            <MenuItem value={2} primaryText='Draw' />
           </SelectField>
           <this.ArbiterButton />
           </div>
