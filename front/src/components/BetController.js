@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import Avatar from 'material-ui/Avatar';
+import Chip from 'material-ui/Chip';
+import * as MColors from 'material-ui/styles/colors';
 
 import { RaisedButton, FlatButton } from 'material-ui'
 import {
@@ -86,13 +89,16 @@ class BetController extends Component {
       </RaisedButton>
       )
     }
-    else if (this.props.stepperState === stepperState.payout)
+    else if ((this.props.currentBetState >= betState.team0Won &&
+                this.props.currentBetState <= betState.draw) ||
+              this.props.stepperState === stepperState.payout)
       return (
       <RaisedButton 
         className="betBtn"
         primary={true}
         onTouchTap={this.betOnTeam}
-      ><span>Withdraw</span>
+        disabled={(this.props.stepperState === stepperState.payout)}
+      ><span>Withdraw Ξ{this.FinalGain()}</span>
       </RaisedButton>
       )
     return (
@@ -105,41 +111,95 @@ class BetController extends Component {
       </RaisedButton>
       )
   }
-  
-    ExpectedGain = () => {
-      var expectedIncome;
-      var amount;
-      var winnerPool;
-      var loserPool;
 
-      if (this.state.selectedTeam === null)
-        return null;
+  ComputeGain = (amount, winnerPool, loserPool, tax) => {
+    var profit = (amount / winnerPool) * loserPool;
+    if (profit > 0)
+      profit -= profit * tax;
+    return (amount + profit);
+  }
 
-      if (this.state.selectedTeam === false) {
-        amount = this.state.amountToBet;
-        expectedIncome = this.state.amountToBet;
-        loserPool = this.props.team1BetSum - 0.02*this.props.team1BetSum;
-        winnerPool = this.props.team0BetSum.plus(expectedIncome);
-      }
-      else {
-        amount = this.state.amountToBet;
-        expectedIncome = this.state.amountToBet;
-        loserPool = this.props.team0BetSum - 0.02*this.props.team0BetSum;
-        winnerPool = this.props.team1BetSum.plus(expectedIncome);
-      }
-    
-      expectedIncome +=  (winnerPool.times(expectedIncome)).times(loserPool);
-      if (amount === 0 || isNaN(amount))
-        return null
-      else
-        return <RaisedButton backgroundColor='#FAD723'>
-          Win Ξ{parseFloat(expectedIncome).toFixed(2)}
-        </RaisedButton>
+  ExpectedGain = () => {
+    console.log(this.props.hasBetTeam0);
+    var expectedIncome;
+    var amount;
+    var winnerPool;
+    var loserPool;
+    const tax = 0.1; //FIXME get from contract
+
+    if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
+      return null;
+
+    amount = this.state.amountToBet;
+    if (this.state.selectedTeam === false) {
+      loserPool = this.props.team1BetSum;
+      winnerPool = this.props.team0BetSum;
     }
+    else {
+      loserPool = this.props.team0BetSum;
+      winnerPool = this.props.team1BetSum;
+    }
+    winnerPool += amount;
+    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, tax);
+
+    if (amount === 0 || isNaN(amount))
+      return null;
+    else
+      return (
+      <Chip backgroundColor={MColors.yellow500}>
+        <Avatar size={32} backgroundColor={MColors.yellow800}>Ξ</Avatar>
+        Win {parseFloat(expectedIncome).toFixed(2)}
+      </Chip>
+      );
+  }
+
+  FinalGain = () => {
+    var amount;
+    var winnerPool;
+    var loserPool;
+    const tax = 0.1; //FIXME get from contract
+
+    if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
+      return 0;
+
+    var hasBetTeam0 = 12;//this.props.hasBetTeam0;
+    var hasBetTeam1 = this.props.hasBetTeam1;
+    var team0BetSum = this.props.team0BetSum;
+    var team1BetSum = this.props.team1BetSum;
+
+    if ((hasBetTeam0 === undefined || hasBetTeam0 <= 0) &&
+        (hasBetTeam1 === undefined || hasBetTeam1 <= 0))
+      return 0;
+
+    if (this.props.currentBetState === betState.draw) {
+      if (hasBetTeam0 === undefined || hasBetTeam1 <= 0)
+        amount = hasBetTeam1;
+      else
+        amount = hasBetTeam0;
+      return amount;
+    }
+
+    if (this.props.currentBetState === betState.team0Won) {
+      if (hasBetTeam0 === undefined || hasBetTeam0 <= 0)
+        return 0;
+      amount = hasBetTeam0;
+      winnerPool = team0BetSum;
+      loserPool = team1BetSum;
+    }
+    else { // if (this.props.currentBetState === betState.team1Won)
+      if (hasBetTeam1 === undefined || hasBetTeam1 <= 0)
+        return 0;
+      amount = hasBetTeam1;
+      winnerPool = team1BetSum;
+      loserPool = team0BetSum;
+    }
+    return this.ComputeGain(amount, winnerPool, loserPool, tax);
+  }
 
   render() {
     if (this.props.isExpanded) {
     return <div>
+        <div className='betRow'>
         <SelectField style={{ width: 160 }} className='test'
           floatingLabelText='Team'
           value={(this.props.betOnTeam !== null) ? this.props.betOnTeam : this.state.selectedTeam}
@@ -158,6 +218,7 @@ class BetController extends Component {
           />
         <this.DynamicBetButton />
         <this.ExpectedGain/>
+        </div>
         <this.Steps />
       </div>
     }

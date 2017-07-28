@@ -27,6 +27,20 @@
   justify-content: space-between;
 }
 
+.betRow {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+
+  -webkit-flex-flow: row;
+  flex-flow: row;
+  
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
 .bet {
   display: -webkit-box;
   display: -moz-box;
@@ -130,8 +144,3 @@ a {
 .betValue {
   width: 1px;
 }
-
-.winValue {
-  background-color: #FAD723;
-}
- 

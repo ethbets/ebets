@@ -144,15 +144,15 @@ class Bet extends Component {
       var betTitle = 
       <div className='inRows'>
         <div className='pushLeft'>
-          <Chip backgroundColor={MColors.lightGreen300}>
-            <Avatar size={32} backgroundColor={MColors.lightGreen600}>Ξ</Avatar>
+          <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+            <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {this.state.team0BetSum.toString()}
           </Chip>
           <Chip backgroundColor={MColors.white}>
             {this.state.team0Name} vs {this.state.team1Name}
           </Chip>
-          <Chip backgroundColor={MColors.lightGreen300}>
-            <Avatar size={32} backgroundColor={MColors.lightGreen600}>Ξ</Avatar>
+          <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+            <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {this.state.team1BetSum.toString()}
           </Chip>
         </div> 
@@ -190,6 +190,8 @@ class Bet extends Component {
             team1BetSum={this.state.team1BetSum}
             betOnTeamFunction={this.betOnTeam.bind(this)}
             betHappened={this.state.betHappened}
+            hasBetTeam0={this.state.betsToTeam0[this.state.web3.eth.accounts[0]]}
+            hasBetTeam1={this.state.betsToTeam1[this.state.web3.eth.accounts[0]]}
           />
           <this.BetStatusDialog />
           <this.LinearProgressCustom mode="indeterminate" />
