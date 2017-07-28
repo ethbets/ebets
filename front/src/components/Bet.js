@@ -288,7 +288,7 @@ class Bet extends Component {
             else
               previousState.hasBetOnTeam = {
                 team: response.args.forTeam,
-                amount: previousState.hasBetOnTeam.amount +response.args.amount
+                amount: previousState.hasBetOnTeam.amount.add(response.args.amount)
               }
           });
         }
