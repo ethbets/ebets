@@ -175,7 +175,7 @@ class BetController extends Component {
 
     amount = this.props.hasBetOnTeam.amount;
     if (this.props.currentBetState === betState.draw)
-      return amount;
+      return amount.toNumber();
 
     var hasBetTeam0 = !this.props.hasBetOnTeam.team;
     var hasBetTeam1 = this.props.hasBetOnTeam.team;

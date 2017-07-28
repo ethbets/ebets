@@ -43,6 +43,7 @@ class Bet extends Component {
       isExpanded: false,
       loadCompleted: false,
       cat_url: null,
+      isArbiter: false,
       stepIndex: 0,
       ...betFields,
       web3: null, // TODO: REMOVE WEB3, DO STATIC
@@ -192,6 +193,7 @@ class Bet extends Component {
             team1BetSum={this.state.team1BetSum}
             betOnTeamFunction={this.betOnTeam.bind(this)}
             betHappened={this.state.betHappened}
+            isArbiter={this.state.isArbiter}
           />
           <this.BetStatusDialog />
           <this.LinearProgressCustom mode="indeterminate" />
@@ -255,9 +257,9 @@ class Bet extends Component {
     monarchyContract.deployed().then(instance => {
       return instance.isMember(this.state.web3.eth.accounts[0])
     })
-    .then(isMember => {
-      this.setState({ isMember : isMember});
-      return isMember;
+    .then(isArbiter => {
+      this.setState({ isArbiter : isArbiter});
+      return isArbiter;
     })
 
     var betContractInstance = betContract.at(this.props.address);
