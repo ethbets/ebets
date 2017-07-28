@@ -128,7 +128,7 @@ contract Bet is ProposalInterface{
   // 
   function bet(bool forTeam) payable 
     beforeMatchBegun() {
-    require(msg.sender != address(arbiter));
+    require(!arbiter.isMember(msg.sender));
     uint prevSum;
     
     if (forTeam == false) {
