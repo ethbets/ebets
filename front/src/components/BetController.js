@@ -91,16 +91,18 @@ class BetController extends Component {
     }
     else if ((this.props.currentBetState >= betState.team0Won &&
                 this.props.currentBetState <= betState.draw) ||
-              this.props.stepperState === stepperState.payout)
+              this.props.stepperState === stepperState.payout) {
+      var gain = this.FinalGain();
       return (
       <RaisedButton 
         className="betBtn"
         primary={true}
         onTouchTap={this.betOnTeam}
-        disabled={(this.props.stepperState === stepperState.payout)}
-      ><span>Withdraw Ξ{this.FinalGain()}</span>
+        disabled={(this.props.stepperState === stepperState.payout) || (gain <= 0)}
+      ><span>Withdraw Ξ{gain}</span>
       </RaisedButton>
       )
+    }
     return (
       <RaisedButton 
         disabled={(this.props.currentBetState !== betState.matchOpen)}
@@ -162,7 +164,7 @@ class BetController extends Component {
     if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
       return 0;
 
-    var hasBetTeam0 = 12;//this.props.hasBetTeam0;
+    var hasBetTeam0 = this.props.hasBetTeam0;
     var hasBetTeam1 = this.props.hasBetTeam1;
     var team0BetSum = this.props.team0BetSum;
     var team1BetSum = this.props.team1BetSum;
