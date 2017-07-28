@@ -8,6 +8,8 @@ import { RaisedButton, Dialog, FlatButton } from 'material-ui'
 import { Card, CardHeader } from 'material-ui/Card';
 import LinearProgress from 'material-ui/LinearProgress';
 import Avatar from 'material-ui/Avatar';
+import Chip from 'material-ui/Chip';
+import * as MColors from 'material-ui/styles/colors';
 import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
 
@@ -142,11 +144,17 @@ class Bet extends Component {
       var betTitle = 
       <div className='inRows'>
         <div className='pushLeft'>
-          <span>{this.state.team0Name} Ξ{this.state.team0BetSum.toString()}
-          </span>
-          vs
-          <span primary={true}>{this.state.team1Name} Ξ{this.state.team1BetSum.toString()}
-          </span>
+          <Chip backgroundColor={MColors.lightGreen300}>
+            <Avatar size={32} backgroundColor={MColors.lightGreen600}>Ξ</Avatar>
+            {this.state.team0BetSum.toString()}
+          </Chip>
+          <Chip backgroundColor={MColors.white}>
+            {this.state.team0Name} vs {this.state.team1Name}
+          </Chip>
+          <Chip backgroundColor={MColors.lightGreen300}>
+            <Avatar size={32} backgroundColor={MColors.lightGreen600}>Ξ</Avatar>
+            {this.state.team1BetSum.toString()}
+          </Chip>
         </div> 
         <Timer parentState={this.state.betShoudlBeAtState}
                updateState={this.updateBetShouldBeAtState.bind(this)}

@@ -1,5 +1,9 @@
 import React from 'react';
 import moment from 'moment';
+
+import Chip from 'material-ui/Chip';
+import * as MColors from 'material-ui/styles/colors';
+
 import { betTimeStates } from './betStates';
 
 class Clock extends React.Component {
@@ -63,22 +67,24 @@ class Clock extends React.Component {
     minutes = Math.floor(minutes);
     secondsToBegin -= minutes * 60;
 
+    var result_str;
     if (days > 0)
-      return(
-        <div className='pushRight'>Begins in: {days}d {hours}h {minutes}m {secondsToBegin}s</div>
-      );
+      result_str = days + 'd ' + hours + 'h ' + minutes + 'm ' + secondsToBegin + 's';
     else if (hours > 0)
-      return(
-        <div className='pushRight'>Begins in: {hours}h {minutes}m {secondsToBegin}s</div>
-      );
+      result_str = hours + 'h ' + minutes + 'm ' + secondsToBegin + 's';
     else if (minutes > 0)
-      return(
-        <div className='pushRight'>Begins in: {minutes}m {secondsToBegin}s</div>
-      );
+      result_str = minutes + 'm ' + secondsToBegin + 's';
     else
-      return(
-        <div className='pushRight'>Begins in: {secondsToBegin}s</div>
+      result_str = secondsToBegin + 's';
+
+    return(
+        <div className='pushRight'>
+          <Chip backgroundColor={MColors.blueGrey50}>
+            {result_str}
+          </Chip>
+        </div>
       );
+
   }
 }
 export default Clock;
