@@ -99,8 +99,8 @@ class BetController extends Component {
         className="betBtn"
         primary={true}
         onTouchTap={this.betOnTeam}
-        disabled={(this.props.stepperState === stepperState.payout) || (gain <= 0)}
-      ><span>Withdraw Ξ{gain}</span>
+        disabled={(this.props.stepperState === stepperState.payout) || (gain.lte(0))}
+      ><span>Withdraw Ξ{gain.toString()}</span>
       </RaisedButton>
       )
     }
@@ -116,13 +116,15 @@ class BetController extends Component {
   }
 
   ComputeGain = (amount, winnerPool, loserPool, tax) => {
-    var profit = (amount / winnerPool) * loserPool;
-    if (profit > 0)
-      profit -= profit * tax;
-    return (amount + profit);
+    var BigNumber = require('bignumber.js');
+    var profit = amount.dividedBy(winnerPool).times(loserPool);
+    if (profit.gt(0))
+      profit = profit.minus(profit.times(new BigNumber(tax)))
+    return amount.plus(profit);
   }
 
   ExpectedGain = () => {
+    var BigNumber = require('bignumber.js');
     var expectedIncome;
     var amount;
     var winnerPool;
@@ -132,7 +134,10 @@ class BetController extends Component {
     if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
       return null;
 
-    amount = this.state.amountToBet;
+    if (this.state.amountToBet <= 0)
+      return null;
+
+    amount = new BigNumber(this.state.amountToBet);
     if (this.state.selectedTeam === false) {
       loserPool = this.props.team1BetSum;
       winnerPool = this.props.team0BetSum;
@@ -141,35 +146,34 @@ class BetController extends Component {
       loserPool = this.props.team0BetSum;
       winnerPool = this.props.team1BetSum;
     }
-    winnerPool += amount;
+    winnerPool = winnerPool.plus(amount);
     expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, tax);
 
-    if (amount === 0 || isNaN(amount))
+    if (amount.isZero(0) || isNaN(amount))
       return null;
     else
       return (
       <Chip backgroundColor={MColors.yellow500}>
         <Avatar size={32} backgroundColor={MColors.yellow800}>Ξ</Avatar>
-        Win {parseFloat(expectedIncome).toFixed(2)}
+        Win {parseFloat(expectedIncome.toString()).toFixed(2)}
       </Chip>
       );
   }
 
   FinalGain = () => {
+    var BigNumber = require('bignumber.js');
     var amount;
     var winnerPool;
     var loserPool;
     const tax = 0.1; //FIXME get from contract
 
     if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
-      return 0;
+      return new BigNumber(0);
 
     if (this.props.hasBetOnTeam === null)
-      return 0;
+      return new BigNumber(0);
 
     amount = this.props.hasBetOnTeam.amount;
-    console.log('AMOUNT');
-    console.log(amount);
     if (this.props.currentBetState === betState.draw)
       return amount;
 
