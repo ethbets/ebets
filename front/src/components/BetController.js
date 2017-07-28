@@ -123,7 +123,6 @@ class BetController extends Component {
   }
 
   ExpectedGain = () => {
-    console.log(this.props.hasBetTeam0);
     var expectedIncome;
     var amount;
     var winnerPool;
@@ -205,9 +204,9 @@ class BetController extends Component {
         <div className='betRow'>
         <SelectField style={{ width: 160 }} className='test'
           floatingLabelText='Team'
-          value={(this.props.betOnTeam !== null) ? this.props.betOnTeam : this.state.selectedTeam}
+          value={(this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
           onChange={this.setTeam}
-          disabled={this.props.betOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
+          disabled={this.props.hasBetOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
         >
           <MenuItem value={false} primaryText={this.props.team0Name} />
           <MenuItem value={true} primaryText={this.props.team1Name} />
