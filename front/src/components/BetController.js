@@ -141,6 +141,8 @@ class BetController extends Component {
     var amount;
     var winnerPool;
     var loserPool;
+    var tax = new BigNumber(this.props.tax);
+    tax = tax.dividedBy(100);
 
     if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
       return null;
@@ -158,7 +160,7 @@ class BetController extends Component {
       winnerPool = this.props.team1BetSum;
     }
     winnerPool = winnerPool.plus(amount);
-    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, this.props.tax);
+    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, tax);
 
     if (amount.isZero(0) || isNaN(amount))
       return null;
@@ -176,7 +178,8 @@ class BetController extends Component {
     var amount;
     var winnerPool;
     var loserPool;
-    const tax = 0.1; //FIXME get from contract
+    var tax = new BigNumber(this.props.tax);
+    tax = tax.dividedBy(100);
 
     if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
       return new BigNumber(0);
@@ -186,7 +189,7 @@ class BetController extends Component {
 
     amount = this.props.hasBetOnTeam.amount;
     if (this.props.currentBetState === betState.draw)
-      return amount.toNumber();
+      return amount;
 
     var hasBetTeam0 = !this.props.hasBetOnTeam.team;
     var hasBetTeam1 = this.props.hasBetOnTeam.team;
