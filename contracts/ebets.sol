@@ -10,7 +10,7 @@ contract Ebets {
   }
 
   address owner;
-  event createdBet(address bet_addr);
+  event createdBet(address betAddr, string indexed category);
   
   function Ebets() {
     owner = msg.sender;
@@ -24,7 +24,7 @@ contract Ebets {
     // Featured by default for resolver
     if (msg.sender == owner)
       bet.toggleFeatured();
-    createdBet(bet);
+    createdBet(bet, category);
   }
   function modifyCategory(Bet bet, string newCategory) onlyOwner(){
     bet.modifyCategory(newCategory);
