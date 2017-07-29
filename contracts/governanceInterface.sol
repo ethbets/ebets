@@ -17,6 +17,7 @@ contract GovernanceInterface {
 
   function isMember(address user) constant returns(bool isMember);
   function getName() constant returns(string name);
+  function getHigherInstance() constant returns(address instanceAddress);
   
   function addMember(address member);
   function removeMember(address member);

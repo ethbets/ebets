@@ -111,9 +111,9 @@ contract Bet is ProposalInterface{
     matchIsOpenOrUndecided()
     afterTimestamp(timestampMatchEnd) {
     require(betState != BET_STATES.CALLED_RESOLVER);
-    arbiter.addProposal(this, timestampArbiterDeadline);
     betState = BET_STATES.CALLED_RESOLVER;
     StateChanged(betState);
+    arbiter.addProposal(this, timestampArbiterDeadline);
   }
   
   function toggleFeatured() onlyOwner() {
