@@ -47,9 +47,10 @@ class Clock extends React.Component {
   render() {
     var deltaSeconds;
     var msgString;
-    if (this.props.parentState < betTimeStates.matchBegin) {
-      deltaSeconds = this.props.beginDate - moment().unix();
-      msgString = 'Begins in: '
+
+    if (this.props.parentState <= betTimeStates.matchBegin) {
+      deltaSeconds = this.props.beginDate.toNumber() - moment().unix();
+      msgString = 'Begins in: ';
     }
     else if (this.props.parentState === betTimeStates.matchRunning) {
       deltaSeconds = this.props.endDate.toNumber() - moment().unix();
