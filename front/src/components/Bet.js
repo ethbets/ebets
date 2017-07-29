@@ -21,9 +21,9 @@ import betFields from './betFields';
 import {betTimeStates, betState, stepperState, contractStates} from './betStates';
 import Timer from './Timer';
 
-import MonarchyJson from 'build/contracts/Monarchy.json';
+import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 
-const MOCK = true;
+const MOCK = false;
 const mockDateBegin = moment().unix() + 5;
 const mockDateEnd = moment().unix() + 10;
 
@@ -116,6 +116,9 @@ class Bet extends Component {
     });
   };
 
+  /* Begin
+   * Functions to interact with contract
+   */
   betOnTeam = (teamToBet, value) => {
     if (this.state.contractInstance === undefined ||
         teamToBet === undefined ||
@@ -129,19 +132,27 @@ class Bet extends Component {
       teamToBet,
       { from: this.state.web3.eth.accounts[0],
         value: value
-      }
-    );
+      });
     this.transactionHappened(betPromisse);
   };
-
   callArbiter = () => {
     var callArbiterPromise = this.state.contractInstance.updateResult(
       { from: this.state.web3.eth.accounts[0],
         value: 20e9
-      }
-    );
+      });
     this.transactionHappened(callArbiterPromise);
   };
+  callVote = () => {
+    var callVotePromise = this.state.arbiterInstance.castVote(
+      { from: this.state.web3.eth.accounts[0],
+        value: 20e9
+      });
+    this.transactionHappened(callVotePromise);
+  }
+  withdraw = () => {
+
+  }
+  // End of contract interaction functions
 
   FilteredBet = () => {
     var betTitle = 
@@ -193,6 +204,9 @@ class Bet extends Component {
             team1BetSum={this.state.team1BetSum}
             tax={this.state.TAX}
             betOnTeamFunction={this.betOnTeam.bind(this)}
+            callArbiterFunction={this.callArbiter.bind(this)}
+            callVoteFunction={this.callVote.bind(this)}
+            withdrawFunction={this.withdraw(this)}
             betHappened={this.state.betHappened}
             isArbiter={this.state.isArbiter}
           />
@@ -222,7 +236,7 @@ class Bet extends Component {
     });
   }
         
-  instantiateContract() {
+  async instantiateContract() {
     var self = this;
     var objs = {loadCompleted: true};
     function setAttributes(attributeNames, contractInstance) {
@@ -240,7 +254,7 @@ class Bet extends Component {
           // self.setState(obj);
         }
       });
-      Promise.all(promises).then(res => {
+      return Promise.all(promises).then(res => {
         try {
           objs.cat_url = require('assets/imgs/' + objs.category + '.png');
         }
@@ -252,19 +266,22 @@ class Bet extends Component {
     }
 
     const betContract = contract(BetJson);
-    const monarchyContract = contract(MonarchyJson);
+    const arbiterContract = contract(GovernanceInterfaceJson);
+    arbiterContract.setProvider(this.state.web3.currentProvider);
     betContract.setProvider(this.state.web3.currentProvider);
-    monarchyContract.setProvider(this.state.web3.currentProvider);
-    monarchyContract.deployed().then(instance => {
-      return instance.isMember(this.state.web3.eth.accounts[0])
-    })
-    .then(isArbiter => {
-      this.setState({ isArbiter : isArbiter});
-      return isArbiter;
-    })
 
     var betContractInstance = betContract.at(this.props.address);
-    setAttributes(this.state, betContractInstance);
+    const governanceAddress = await betContractInstance.arbiter();
+    
+    const arbiterInstance = arbiterContract.at(governanceAddress);
+    const isArbiter = await arbiterInstance.isMember(this.state.web3.eth.accounts[0]);
+
+    await setAttributes(this.state, betContractInstance);
+    this.setState({
+      isArbiter: isArbiter,
+      arbiterInstance: arbiterInstance,
+      betContractInstance: betContractInstance
+    });
       
     var allBetEvents = betContractInstance.allEvents({
       fromBlock: 0,

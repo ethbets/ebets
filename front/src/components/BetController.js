@@ -47,7 +47,7 @@ class BetController extends Component {
         return 'Draw';
       return null;
     };
-    var CallArbiter = () => {
+    var CallArbiterName = () => {
       if (this.props.currentBetState === betState.calledArbiter)
         return 'Called Arbiter';
       else
@@ -65,7 +65,7 @@ class BetController extends Component {
             <StepLabel>Match running</StepLabel>
           </Step>
           <Step>
-            <StepLabel>{CallArbiter()}</StepLabel>
+            <StepLabel>{CallArbiterName()}</StepLabel>
           </Step>
           <Step>
             <StepLabel>{BetDecision()}</StepLabel>
@@ -85,7 +85,7 @@ class BetController extends Component {
         disabled={this.props.currentBetState === betState.calledArbiter}
         secondary={true}
         className="betBtn"
-        onTouchTap={this.callArbiter}
+        onTouchTap={() => this.props.callArbiterFunction()}
       ><span>Call Arbiter</span>
       </RaisedButton>
       )
@@ -98,7 +98,7 @@ class BetController extends Component {
       <RaisedButton 
         className="betBtn"
         primary={true}
-        onTouchTap={this.betOnTeam}
+        onTouchTap={() => this.props.withdrawFunction()}
         disabled={(this.props.stepperState === stepperState.payout) || (gain.lte(0))}
       ><span>Withdraw Ξ{gain.toString()}</span>
       </RaisedButton>
@@ -115,16 +115,31 @@ class BetController extends Component {
       )
   }
 
-  ArbiterButton = () => {
+  ArbiterExpandedMatch = () => {
     return (
-    <RaisedButton
-      disabled={this.props.currentBetState !== betState.calledArbiter}
-      secondary={true}
-      className="betBtn"
-      onTouchTap={this.callArbiter}
-    ><span>Vote</span>
-    </RaisedButton>
-    )
+      <div className='betRow'>
+        <div>
+          Who won the match?
+        </div>
+        <SelectField style={{ width: 160 }} className='test'
+          floatingLabelText='Team'
+          value={this.state.selectedTeam}
+          onChange={this.setTeam}
+          disabled={this.props.currentBetState !== betState.calledArbiter}
+        >
+          <MenuItem value={0} primaryText={this.props.team0Name} />
+          <MenuItem value={1} primaryText={this.props.team1Name} />
+          <MenuItem value={2} primaryText='Draw' />
+        </SelectField>
+        <RaisedButton
+          disabled={this.props.currentBetState !== betState.calledArbiter}
+          secondary={true}
+          className="betBtn"
+          onTouchTap={() => this.props.callVoteFunction(this.state.selectedTeam)}
+        ><span>Vote</span>
+        </RaisedButton>
+      </div>
+    );
   }
 
   ComputeGain = (amount, winnerPool, loserPool, tax) => {
@@ -213,27 +228,11 @@ class BetController extends Component {
 
   render() {
     if (this.props.isExpanded) {
+      /*
+       * Arbiters can vote on the match's outcome
+       */
       if (this.props.isArbiter) {
-        return (
-        <div>
-          <div className='betRow'>
-            <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
-            Vote on match outcome:
-          </Chip>
-          <SelectField style={{ width: 160 }} className='test'
-            floatingLabelText='Team'
-            value={this.state.selectedTeam}
-            onChange={this.setTeam}
-            disabled={this.props.currentBetState !== betState.calledArbiter}
-          >
-            <MenuItem value={0} primaryText={this.props.team0Name} />
-            <MenuItem value={1} primaryText={this.props.team1Name} />
-            <MenuItem value={2} primaryText='Draw' />
-          </SelectField>
-          <this.ArbiterButton />
-          </div>
-        </div>
-      )
+        return <this.ArbiterExpandedMatch />
       }
       return (
         <div>
