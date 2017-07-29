@@ -48,7 +48,6 @@ class Bet extends Component {
       web3: null, // TODO: REMOVE WEB3, DO STATIC
     }
   }
-  ebetsArbiters = new EbetsArbiters();
 
   LinearProgressCustom = () => {
     if (this.state.betInProgress)
@@ -216,6 +215,7 @@ class Bet extends Component {
             withdrawFunction={this.withdraw.bind(this)}
             betHappened={this.state.betHappened}
             isArbiter={this.state.isArbiter}
+            arbiterInfo={this.state.arbiterInfo}
           />
           <this.BetStatusDialog />
           <this.LinearProgressCustom mode="indeterminate" />
@@ -281,11 +281,10 @@ class Bet extends Component {
       arbiterInstance: arbiterInstance,
       arbiterInfo: {
         name: await arbiterInstance.getName(),
-        verified: this.ebetsArbiters.isVerifiedArbiter(arbiterInstance.address)
+        verified: EbetsArbiters.isVerifiedArbiter(arbiterInstance.address)
       },
       betContractInstance: betContractInstance
     });
-      
     var allBetEvents = betContractInstance.allEvents({
       fromBlock: 0,
       toBlock: 'latest'

@@ -4,6 +4,12 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
+import Badge from 'material-ui/Badge';
+import IconButton from 'material-ui/IconButton';
+import DoneIcon from 'material-ui/svg-icons/action/done';
+import WarningIcon from 'material-ui/svg-icons/alert/warning';
+import {red500, greenA200} from 'material-ui/styles/colors';
+
 import * as MColors from 'material-ui/styles/colors';
 
 import { RaisedButton, FlatButton } from 'material-ui'
@@ -226,6 +232,23 @@ class BetController extends Component {
     return this.ComputeGain(amount, winnerPool, loserPool, tax);
   }
 
+  ArbiterInfo = () => {
+    var badgeContent;
+    if (this.props.arbiterInfo.verified)
+      badgeContent = <IconButton tooltip='Verified!'><DoneIcon color={greenA200}/></IconButton>
+    else
+      badgeContent = <IconButton tooltip='Not verified'><WarningIcon color={red500}/></IconButton>
+    return (
+      <div>
+        <Badge
+          badgeContent={badgeContent}
+        >
+        Using arbiter {this.props.arbiterInfo.name}
+        </Badge>
+    </div>
+    )
+  }
+
   render() {
     if (this.props.isExpanded) {
       /*
@@ -255,6 +278,7 @@ class BetController extends Component {
             />
           <this.DynamicBetButton />
           <this.ExpectedGain/>
+          <this.ArbiterInfo/>
           </div>
           <this.Steps />
         </div>
