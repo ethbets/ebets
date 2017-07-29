@@ -12,16 +12,12 @@ contract Bet is ProposalInterface{
     require(msg.sender == address(arbiter));
     _;
   }
-  modifier beforeMatchBegun() {
-    require(block.timestamp < timestampMatchBegin);
+  modifier beforeTimestamp(uint timestamp) {
+    require(block.timestamp < timestamp);
     _;
   }
-  modifier afterMatchEnded() {
-    require(block.timestamp >= timestampMatchEnd);
-    _;
-  }
-  modifier beforeResolverCanCall() {
-    require(block.timestamp < timestampArbiterDeadline);
+  modifier afterTimestamp(uint timestamp) {
+    require(block.timestamp >= timestamp);
     _;
   }
   modifier matchIsOpenOrUndecided() {
@@ -63,13 +59,14 @@ contract Bet is ProposalInterface{
 
   uint public timestampMatchBegin;
   uint public timestampMatchEnd;
-  // Self-destruct is possible if time > timestampArbiterDeadline
   uint public timestampArbiterDeadline;
+  // Self-destruct is possible if time > timestampSelfDestructDeadline
+  uint public timestampSelfDestructDeadline;
 
   uint8 public constant TAX = 10;
   uint constant TIMESTAMP_MARGIN = 1000;
 
-  event NewBet(bool forTeam, address from, uint amount);
+  event NewBet(bool forTeam, address indexed from, uint amount);
   event StateChanged(BET_STATES state);
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 
@@ -79,6 +76,7 @@ contract Bet is ProposalInterface{
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
     require(_timestamps[1] < _timestamps[2]);
+    require(_timestamps[2] < _timestamps[3]);
 
     isFeatured = false;
     owner = msg.sender;
@@ -89,12 +87,13 @@ contract Bet is ProposalInterface{
     timestampMatchBegin = _timestamps[0] - TIMESTAMP_MARGIN;
     timestampMatchEnd = _timestamps[1] + TIMESTAMP_MARGIN;
     timestampArbiterDeadline = _timestamps[2] + TIMESTAMP_MARGIN;
+    timestampSelfDestructDeadline = _timestamps[3] + TIMESTAMP_MARGIN;
   }
 
   function __resolve(uint outcome)
     onlyArbiter() 
-    afterMatchEnded()
-    beforeResolverCanCall()
+    afterTimestamp(timestampMatchEnd)
+    beforeTimestamp(timestampArbiterDeadline)
     matchIsOpenOrUndecided() {
     require(betState == BET_STATES.CALLED_RESOLVER);
     if (outcome == 1)
@@ -111,7 +110,7 @@ contract Bet is ProposalInterface{
   // Will create a Proposal on the arbiter
   function updateResult() payable
     matchIsOpenOrUndecided()
-    afterMatchEnded() {
+    afterTimestamp(timestampMatchEnd) {
     require(betState != BET_STATES.CALLED_RESOLVER);
     arbiter.addProposal(this, timestampArbiterDeadline);
     betState = BET_STATES.CALLED_RESOLVER;
@@ -127,7 +126,7 @@ contract Bet is ProposalInterface{
   
   // 
   function bet(bool forTeam) payable 
-    beforeMatchBegun() {
+    beforeTimestamp(timestampMatchBegin) {
     require(!arbiter.isMember(msg.sender));
     uint prevSum;
     
@@ -153,10 +152,10 @@ contract Bet is ProposalInterface{
     NewBet(forTeam, msg.sender, msg.value);
   }
 
-  // The commented code works allows money withdraw before the match begins.
+  // The commented code allows money withdraw before the match begins.
   // It was decided that this will not be allowed.
   function withdraw() 
-    afterMatchEnded()
+    afterTimestamp(timestampMatchEnd)
     matchIsDecided()
     {
     if (betState == BET_STATES.DRAW) {
@@ -230,8 +229,22 @@ contract Bet is ProposalInterface{
     msg.sender.transfer(senderProfit);
   }
   
-  function close() {
-    require(block.timestamp > timestampArbiterDeadline);
+  /* After the arbiter deadline and before the self-destruct
+   * deadline, anyone can set the bet state to DRAW.
+   * this is in the unlikely event if the arbiter don't
+   * decide in time, every one can collect the funds.
+  */
+  function close()
+    afterTimestamp(timestampArbiterDeadline)
+    beforeTimestamp(timestampSelfDestructDeadline) {
+    betState = BET_STATES.DRAW;
+  }
+
+  /* Selfdestructs the bet and return what it has in the account
+   * as a fee to the bet's owner.
+   */
+  function terminate()
+    afterTimestamp(timestampSelfDestructDeadline) {
     selfdestruct(owner);
   }
 
