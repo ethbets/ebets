@@ -23,16 +23,14 @@ class Clock extends React.Component {
     if (moment().unix() >= this.props.beginDate) {
       if (this.props.parentState !== betTimeStates.matchRunning && 
           this.props.parentState !== betTimeStates.matchEnded) {
-        console.log(moment().unix(), this.props.endDate)
-        console.log('nottifying match Running');
+        console.log('Nottifying match Running');
         this.props.updateState(betTimeStates.matchRunning);
       }
       // Match ended
-      if (moment().unix() >= this.props.endDate) {
+      if (moment().unix() >= this.props.endDate.toNumber()) {
         if (this.props.parentState !== betTimeStates.matchEnded) {
-          console.log('nottifying match end');
+          console.log('Nottifying match end');
           this.props.updateState(betTimeStates.matchEnded);
-          this.setState({notifiedParentAboutMatchEnd : true});
         }
       }
     }
@@ -47,40 +45,48 @@ class Clock extends React.Component {
   }
 
   render() {
+    var deltaSeconds;
+    var msgString;
+    if (this.props.parentState < betTimeStates.matchBegin) {
+      deltaSeconds = this.props.beginDate - moment().unix();
+      msgString = 'Begins in: '
+    }
+    else if (this.props.parentState === betTimeStates.matchRunning) {
+      deltaSeconds = this.props.endDate.toNumber() - moment().unix();
+      msgString = 'Ends in: '
+    }
+    else if (this.props.parentState === betTimeStates.matchEnded) {
+      deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
+      msgString = 'Resolver must answer in: '
+    }
 
-    if (this.props.parentState !== betTimeStates.matchBegin)
-      return null;
-
-    // Calculate the formatted date on the fly
-    var secondsToBegin = this.props.beginDate - moment().unix();
-    
     //secondsToBegin = (moment().unix() + 1033) - moment().unix();
     //this.secondsToEnd = 10; 
 
-    var days = secondsToBegin / (60 * 60 * 24);
+    var days = deltaSeconds / (60 * 60 * 24);
     days = Math.floor(days);
-    secondsToBegin -= days * (60 * 60 * 24);
-    var hours = secondsToBegin / (60 * 60);
+    deltaSeconds -= days * (60 * 60 * 24);
+    var hours = deltaSeconds / (60 * 60);
     hours = Math.floor(hours);
-    secondsToBegin -= hours * (60 * 60);
-    var minutes = secondsToBegin / 60;
+    deltaSeconds -= hours * (60 * 60);
+    var minutes = deltaSeconds / 60;
     minutes = Math.floor(minutes);
-    secondsToBegin -= minutes * 60;
+    deltaSeconds -= minutes * 60;
 
     var result_str;
     if (days > 0)
-      result_str = days + 'd ' + hours + 'h ' + minutes + 'm ' + secondsToBegin + 's';
+      result_str = days + 'd ' + hours + 'h ' + minutes + 'm ' + deltaSeconds + 's';
     else if (hours > 0)
-      result_str = hours + 'h ' + minutes + 'm ' + secondsToBegin + 's';
+      result_str = hours + 'h ' + minutes + 'm ' + deltaSeconds + 's';
     else if (minutes > 0)
-      result_str = minutes + 'm ' + secondsToBegin + 's';
+      result_str = minutes + 'm ' + deltaSeconds + 's';
     else
-      result_str = secondsToBegin + 's';
+      result_str = deltaSeconds + 's';
 
     return(
         <div className='pushRight'>
           <Chip backgroundColor={MColors.white}>
-            Begins in: {result_str}
+            {msgString} {result_str}
           </Chip>
         </div>
       );

@@ -10,9 +10,10 @@ let BETFIELDS = {
   team1BetSum: new BigNumber(0),
   betsToTeam0: {},
   betsToTeam1: {},
-  timestampMatchBegin: 0,
-  timestampMatchEnd: 0,
-  timestampArbiterDeadline: 0,
+  timestampMatchBegin: new BigNumber(0),
+  timestampMatchEnd: new BigNumber(0),
+  timestampArbiterDeadline: new BigNumber(0),
+  timestampSelfDestructDeadline: new BigNumber(0),
   TAX: 0
 };
 

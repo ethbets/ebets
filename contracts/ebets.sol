@@ -10,7 +10,11 @@ contract Ebets {
   }
 
   address owner;
-  event createdBet(address betAddr, string indexed category);
+  /* 
+   * TODO: INDEX category! There is an issue with web3 that prevents us to do it
+   * right now: https://github.com/ethereum/web3.js/issues/434
+  */
+  event createdBet(address betAddr, string category);
   
   function Ebets() {
     owner = msg.sender;

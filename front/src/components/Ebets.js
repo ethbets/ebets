@@ -8,8 +8,6 @@ import Bet from 'components/Bet';
 class Ebets extends Component {
   constructor(props) {
     super(props);
-    console.log('called ebets');
-
     this.state = {
       bets: [],
       web3: null
@@ -34,18 +32,17 @@ class Ebets extends Component {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(this.state.web3.currentProvider);
-
+    
     // Get accounts.
     this.state.web3.eth.getAccounts((error) => {
       if (error) throw 'Unable to get accounts';
-      console.log('EBETSContract', ebetsContract.deployed());
       ebetsContract.deployed()
       .then(instance => {
         //events
         var betsEvents = instance.allEvents({fromBlock: 0, toBlock: 'latest'});
         betsEvents.watch((error, response) => {
           this.setState(previousState => {
-            return { bets: previousState.bets.concat(response.args.bet_addr) }
+            return { bets: previousState.bets.concat(response.args.betAddr) }
           });
         });
       })

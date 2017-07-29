@@ -50,7 +50,6 @@ contract Bet is ProposalInterface{
   bool public isFeatured;
   string public team0Name;
   string public team1Name;
-  string public description;
   string public category;
   uint public team0BetSum;
   uint public team1BetSum;
@@ -114,6 +113,7 @@ contract Bet is ProposalInterface{
     require(betState != BET_STATES.CALLED_RESOLVER);
     arbiter.addProposal(this, timestampArbiterDeadline);
     betState = BET_STATES.CALLED_RESOLVER;
+    StateChanged(betState);
   }
   
   function toggleFeatured() onlyOwner() {

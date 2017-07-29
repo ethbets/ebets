@@ -3,6 +3,7 @@ const BETSTATES = {
     matchBegin: 0,
     matchRunning: 1,
     matchEnded: 2,
+    matchCalledOracle: 3,
     TIMESTAMP_MARGIN: 1000
   },
 
