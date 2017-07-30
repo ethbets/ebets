@@ -10,14 +10,14 @@ const stateTransitionFunctions = {
     }
     else if (currentState === contractStates.TEAM_ZERO_WON) {
       newOverAllState = betState.team0Won;
-      if (hasBetOnTeam !== null)
+      if (hasBetOnTeam === false)
         newStepperState = stepperState.payout;
       else
         newStepperState = stepperState.matchDecision;
     }
     else if (currentState === contractStates.TEAM_ONE_WON) {
       newOverAllState = betState.team1Won;
-      if (hasBetOnTeam !== null)
+      if (hasBetOnTeam === true)
         newStepperState = stepperState.payout;
       else
         newStepperState = stepperState.matchDecision;

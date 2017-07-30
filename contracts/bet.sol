@@ -83,10 +83,11 @@ contract Bet is ProposalInterface{
     team0Name = _team0Name;
     team1Name = _team1Name;
     category = _category;
-    timestampMatchBegin = _timestamps[0] - TIMESTAMP_MARGIN;
-    timestampMatchEnd = _timestamps[1] + TIMESTAMP_MARGIN;
-    timestampArbiterDeadline = _timestamps[2] + TIMESTAMP_MARGIN;
-    timestampSelfDestructDeadline = _timestamps[3] + TIMESTAMP_MARGIN;
+    // TODO: PUT BACK TIMESTAMP_MARGIN SUMS
+    timestampMatchBegin = _timestamps[0];// - TIMESTAMP_MARGIN;
+    timestampMatchEnd = _timestamps[1];// + TIMESTAMP_MARGIN;
+    timestampArbiterDeadline = _timestamps[2];// + TIMESTAMP_MARGIN;
+    timestampSelfDestructDeadline = _timestamps[3];// + TIMESTAMP_MARGIN;
   }
 
   function __resolve(uint outcome)
@@ -123,7 +124,6 @@ contract Bet is ProposalInterface{
     category = newCategory;
   }
   
-  // 
   function bet(bool forTeam) payable 
     beforeTimestamp(timestampMatchBegin) {
     require(!arbiter.isMember(msg.sender));
@@ -158,7 +158,7 @@ contract Bet is ProposalInterface{
     matchIsDecided()
     {
     if (betState == BET_STATES.DRAW) {
-      collectBet();
+      msg.sender.transfer(collectOriginalBet());
     }
     else {
       collectProfit();
@@ -166,17 +166,17 @@ contract Bet is ProposalInterface{
   }
 
   // Transfers the user's initial bet back
-  function collectBet() internal betInSomeTeam() {
+  function collectOriginalBet() internal betInSomeTeam() returns(uint) {
     uint amount;
     if (betsToTeam0[msg.sender] > 0) {
       amount = betsToTeam0[msg.sender];
       betsToTeam0[msg.sender] = 0;
-      msg.sender.transfer(amount);
+      return amount;
     }
     else { // if (betsToTeam1[msg.sender] > 0)
       amount = betsToTeam1[msg.sender];
       betsToTeam1[msg.sender] = 0;
-      msg.sender.transfer(amount);
+      return amount;
     }
   }
 
@@ -213,19 +213,19 @@ contract Bet is ProposalInterface{
     // Approach two:
     // Better precision, since multiplication is done first, but may overflow
     //uint sender_profit = (bet * profit) / sum;
-
+    
     var mulTax = (senderProfit * TAX);
     require(mulTax >= senderProfit); // Overflow
     var tax = mulTax / 100;
     assert(tax <= senderProfit);
-
+    
     var notaxProfit = senderProfit;
     senderProfit -= tax;
     assert(senderProfit <= notaxProfit);
 
-    owner.transfer(tax);
-    collectBet();
-    msg.sender.transfer(senderProfit);
+    // We can collect the bet tax by ourselves when the bet self-destructs
+    // owner.transfer(tax);
+    msg.sender.transfer(senderProfit + collectOriginalBet());
   }
   
   /* After the arbiter deadline and before the self-destruct

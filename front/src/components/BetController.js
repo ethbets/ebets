@@ -13,7 +13,7 @@ import {red500, greenA200} from 'material-ui/styles/colors';
 
 import * as MColors from 'material-ui/styles/colors';
 
-import { RaisedButton, FlatButton } from 'material-ui'
+import RaisedButton from 'material-ui/RaisedButton'
 import {
   Step,
   Stepper,
@@ -85,6 +85,7 @@ class BetController extends Component {
   }
   
   DynamicBetButton = () => {
+    
     if (this.props.currentBetState === betState.shouldCallArbiter ||
         this.props.currentBetState === betState.calledArbiter) {
       return (
@@ -106,7 +107,7 @@ class BetController extends Component {
         className="betBtn"
         primary={true}
         onTouchTap={() => this.props.withdrawFunction()}
-        disabled={(this.props.stepperState === stepperState.payout) || (gain.lte(0))}
+        disabled={(this.props.stepperState !== stepperState.payout)}
       ><span>Withdraw Ξ{gain.toString()}</span>
       </RaisedButton>
       )
@@ -217,7 +218,7 @@ class BetController extends Component {
 
     if ((this.props.currentBetState === betState.team0Won && hasBetTeam1) ||
         (this.props.currentBetState === betState.team1Won && hasBetTeam0))
-      return 0;
+      return new BigNumber(0);
 
     if (this.props.currentBetState === betState.team0Won) {
       winnerPool = team0BetSum;
@@ -260,9 +261,9 @@ class BetController extends Component {
           <div className='betRow'>
           <SelectField style={{ width: 160 }} className='test'
             floatingLabelText='Team'
-            value={(this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
+            value={(this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
             onChange={this.setTeam}
-            disabled={this.props.hasBetOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
+            disabled={this.props.hasBetOnTeam.team !== null || this.props.currentBetState >= betState.matchRunning}
           >
             <MenuItem value={false} primaryText={this.props.team0Name} />
             <MenuItem value={true} primaryText={this.props.team1Name} />

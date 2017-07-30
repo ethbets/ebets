@@ -1,10 +1,10 @@
 import contract from 'truffle-contract';
-import _ from 'lodash';
+import lodash from 'lodash';
 import moment from 'moment';
 
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
-import { RaisedButton, Dialog, FlatButton } from 'material-ui'
+import { Dialog, FlatButton } from 'material-ui'
 import { Card, CardHeader } from 'material-ui/Card';
 import LinearProgress from 'material-ui/LinearProgress';
 import Avatar from 'material-ui/Avatar';
@@ -62,7 +62,7 @@ class Bet extends Component {
 
   updateStateFromTimer(newState) {
     if (newState === betTimeStates.matchOpen) {
-      if (this.state.currentBetState <= betState.matchOpen)
+      if (this.state.currentBetState !== betState.matchOpen)
         this.setState({
           currentBetState: betState.matchOpen,
           stepperState: stepperState.matchOpen
@@ -138,6 +138,7 @@ class Bet extends Component {
   }
 
   transactionHappened = betPromisse => {
+    var err = null;
     this.setState({ transactionInProcess: true });
     return betPromisse.then(tx => {
       return this.setState({
@@ -146,12 +147,15 @@ class Bet extends Component {
         \n\nAppended in block: ${tx.receipt.blockNumber}\n`
       });
     })
-    .catch(err => {
+    .catch(_err => {
+      err = _err;
       this.setState({betStatusMessage: `Transaction FAILED\n\nCause: ${err.toString()}`});
     })
     .then(() => {
       this.setState({betHappened: true});
       this.setState({transactionInProcess: false});
+      if (err !== null)
+        throw err;
     });
   };
 
@@ -166,7 +170,7 @@ class Bet extends Component {
       console.error('Error');
       return;
     }
-    var betPromisse = this.state.betContractInstance.bet(
+    const betPromisse = this.state.betContractInstance.bet(
       teamToBet,
       { from: this.state.web3.eth.accounts[0],
         value: value
@@ -174,28 +178,39 @@ class Bet extends Component {
     this.transactionHappened(betPromisse);
   };
   callArbiter = () => {
-    var callArbiterPromise = this.state.betContractInstance.updateResult(
+    const callArbiterPromise = this.state.betContractInstance.updateResult(
       { from: this.state.web3.eth.accounts[0]
       });
     this.transactionHappened(callArbiterPromise);
   };
   callVote = (onTeam) => {
-    var callVotePromise = this.state.arbiterContractInstance.castVote(
+    const callVotePromise = this.state.arbiterContractInstance.castVote(
       this.props.address, onTeam,
       { from: this.state.web3.eth.accounts[0],
       });
     this.transactionHappened(callVotePromise);
   }
   withdraw = () => {
-    var withdrawPromise = this.state.betContractInstance.withdraw(
+    const withdrawPromise = this.state.betContractInstance.withdraw(
     { from: this.state.web3.eth.accounts[0],
     });
-    this.transactionHappened(withdrawPromise);
+    this.transactionHappened(withdrawPromise)
+    .then(() => {
+      this.setState({
+        hasBetOnTeam : {
+          team : null,
+          amount : new BigNumber(0),
+          stepperState: stepperState.matchDecision
+        }
+      });
+    })
+    .catch(() => {
+    })
   }
   // End of contract interaction functions
 
   FilteredBet = () => {
-    var betTitle = 
+    const betTitle = 
       <div className='inRows'>
         <div className='pushLeft'>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
@@ -229,7 +244,7 @@ class Bet extends Component {
         return (
           <Card
             // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
-            onExpandChange={_.debounce(this.onExpand, 150)}
+            onExpandChange={lodash.debounce(this.onExpand, 150)}
             expanded={this.state.isExpanded}
           >
           <CardHeader
@@ -283,9 +298,8 @@ class Bet extends Component {
   }
         
   async instantiateContract() {
-    var self = this;
     var objs = {loadCompleted: true};
-    function setAttributes(attributeNames, contractInstance) {
+    async function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {
         if (attr in betFields
             && attr !== 'betsToTeam0' // Cannot get mapping keys, no prob: get from events
@@ -293,15 +307,8 @@ class Bet extends Component {
           objs[attr] = await contractInstance[attr]()
         }
       });
-      return Promise.all(promises).then(res => {
-        try {
-          objs.cat_url = require('assets/imgs/' + objs.category + '.png');
-        }
-        catch (err) {
-          objs.cat_url = null;
-        }
-        self.setState(objs);
-      })
+      await Promise.all(promises);
+      return objs;
     }
 
     const betContract = contract(BetJson);
@@ -314,7 +321,30 @@ class Bet extends Component {
     
     const arbiterContractInstance = arbiterContract.at(governanceAddress);
     const isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
-    await setAttributes(this.state, betContractInstance);
+
+    var stateObjects = await setAttributes(this.state, betContractInstance);
+    stateObjects['cat_url'] = require('assets/imgs/' + stateObjects.category + '.png');
+    
+    const betsToTeam0 = await betContractInstance.betsToTeam0(this.state.web3.eth.accounts[0]);
+    const betsToTeam1 = await betContractInstance.betsToTeam1(this.state.web3.eth.accounts[0]);
+    
+    const betToTeam = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
+                      ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
+
+    const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
+      stateObjects.betState.toNumber(), betToTeam);
+
+    this.setState({
+      ...stateObjects,
+      hasBetOnTeam : {
+        team : betToTeam,
+        amount : (betToTeam === false) ? betsToTeam0 : 
+                 (betToTeam === true) ? betsToTeam1 : new BigNumber(0)
+      },
+      currentBetState: newStates.newOverAllState,
+      stepperState: newStates.newStepperState
+    });
+
     this.setState({
       isArbiter: isArbiter,
       arbiterContractInstance: arbiterContractInstance,
@@ -325,18 +355,18 @@ class Bet extends Component {
       betContractInstance: betContractInstance
     });
     var allBetEvents = betContractInstance.allEvents({
-      fromBlock: 0,
+      fromBlock: 'latest',
       toBlock: 'latest'
     });
-
+    
     allBetEvents.watch((error, response) => {
       if (response.event === 'NewBet') {
         if (response.args.forTeam === false)
           this.setState(previousState => (
-            { team0BetSum : previousState.team0BetSum.plus(response.args.amount) }));
+            { team0BetSum : previousState.team0BetSum.plus(response.args.amount)}));
         else
          this.setState(previousState => (
-            { team1BetSum : previousState.team1BetSum.plus(response.args.amount) }));
+            { team1BetSum : previousState.team1BetSum.plus(response.args.amount)}));
 
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState(previousState => {
