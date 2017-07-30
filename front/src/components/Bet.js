@@ -1,5 +1,5 @@
 import contract from 'truffle-contract';
-import lodash from 'lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 import React, { Component } from 'react';
@@ -190,7 +190,7 @@ class Bet extends Component {
         return (
           <Card
             // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
-            onExpandChange={lodash.debounce(this.onExpand, 150)}
+            onExpandChange={_.debounce(this.onExpand, 150)}
             expanded={this.state.isExpanded}
           >
           <CardHeader
@@ -294,10 +294,10 @@ class Bet extends Component {
       if (response.event === 'NewBet') {
         if (response.args.forTeam === false)
           this.setState(previousState => (
-            { team0BetSum : previousState.team0BetSum.plus(response.args.amount)}));
+            { team0BetSum : previousState.team0BetSum.plus(response.args.amount) }));
         else
          this.setState(previousState => (
-            { team1BetSum : previousState.team1BetSum.plus(response.args.amount)}));
+            { team1BetSum : previousState.team1BetSum.plus(response.args.amount) }));
 
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState(previousState => {
