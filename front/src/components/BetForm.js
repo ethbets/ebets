@@ -10,20 +10,19 @@ import {Card, CardHeader, CardText} from 'material-ui/Card';
 import {GridList, GridTile} from 'material-ui/GridList';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import BigNumber from 'bignumber.js';
 
 import getWeb3 from 'utils/getWeb3';
 import EbetsArbiters from 'utils/ebetsArbiters';
-import EbetsJson from 'build/contracts/ebets.json';
+import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
 import 'assets/stylesheets/BetForm.css'
 
+//TODO: put this in a configruation file
 const ARBITER_DEADLINE_PERIOD = 7
 const SELF_DESTRUCT_DEADLINE_PERIOD = 14
-const ARBITER_ADDRESSES = EbetsArbiters.addresses();
-// TODO Get all categories
-const CATEGORIES = ["E-Sports", "UFC"];
 
 class BetForm extends Component {
 
@@ -37,9 +36,20 @@ class BetForm extends Component {
         message: ''
       },
       ...betFields,
-      arbiterAddress: "",
+      allCategories: [],
+      arbiterAddresses: [],
+      selectedArbiterAddress: "",
       web3: null
     }
+  }
+
+  setArbiterAddresses = () => {
+    this.setState({ arbiterAddresses: EbetsArbiters.addresses() });
+  }
+
+  setCategories = () => {
+    // TODO: get all categories, don't make this hardcoded
+    this.setState({ allCategories: ["E-Sports", "UFC"] });
   }
 
   initializeTimestamps = () => {
@@ -66,7 +76,7 @@ class BetForm extends Component {
 
   handleArbiterAddressChange = (event, index, value) => {
     // TODO: handle optional textfield input
-    this.setState({ arbiterAddress: value });
+    this.setState({ selectedArbiterAddress: value });
   }
 
   handleCategoryChange = (event, index, value) => {
@@ -128,6 +138,8 @@ class BetForm extends Component {
     })
 
     this.initializeTimestamps();
+    this.setArbiterAddresses();
+    this.setCategories();
   }
 
   createContract() {
@@ -139,16 +151,16 @@ class BetForm extends Component {
     ebetsContract.deployed().then(instance => {
 
       const timestamps = [
-        moment(this.state.timestampMatchBegin).unix(),
-        moment(this.state.timestampMatchEnd).unix(),
-        moment(this.state.timestampArbiterDeadline).unix(),
-        moment(this.state.timestampSelfDestructDeadline).unix()
+        new BigNumber(moment(this.state.timestampMatchBegin).unix()),
+        new BigNumber(moment(this.state.timestampMatchEnd).unix()),
+        new BigNumber(moment(this.state.timestampArbiterDeadline).unix()),
+        new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
       ];
-      console.log(this.state)
+
       let createdBet = instance.createBet(
-        this.state.arbiterAddresses,
-        this.state.team_0_title,
-        this.state.team_1_title,
+        this.state.selectedArbiterAddress,
+        this.state.team0Name,
+        this.state.team1Name,
         this.state.category,
         timestamps,
         /* TODO: accounts[0] can be changed by the user,
@@ -197,8 +209,8 @@ class BetForm extends Component {
                 <GridTile>
                   <TextField
                     fullWidth={true}
-                    name="team_0_title"
-                    value={this.state.team_0_title}
+                    name="team0Name"
+                    value={this.state.team0Name}
                     floatingLabelText="Team 0"
                     onChange={this.handleOnChange}
                   />
@@ -211,8 +223,8 @@ class BetForm extends Component {
                 <GridTile>
                   <TextField
                     fullWidth={true}
-                    name="team_1_title"
-                    value={this.state.team_1_title}
+                    name="team1Name"
+                    value={this.state.team1Name}
                     floatingLabelText="Team 1"
                     onChange={this.handleOnChange}
                   />
@@ -227,7 +239,7 @@ class BetForm extends Component {
                     value={this.state.category}
                     onChange={this.handleCategoryChange}
                   >
-                    {this.menuItem(CATEGORIES, this.state.category)}
+                    {this.menuItem(this.state.allCategories, this.state.category)}
                   </SelectField>
                 </GridTile>
                 <GridTile
@@ -237,10 +249,10 @@ class BetForm extends Component {
                   <SelectField
                     autoWidth={true}
                     floatingLabelText="Arbiter Address"
-                    value={this.state.arbiterAddress}
+                    value={this.state.selectedArbiterAddress}
                     onChange={this.handleArbiterAddressChange}
                   >
-                    {this.menuItem(ARBITER_ADDRESSES, this.state.arbiterAddress)}
+                    {this.menuItem(this.state.arbiterAddresses, this.state.selectedArbiterAddress)}
                   </SelectField>
                 </GridTile>
               </GridList>
