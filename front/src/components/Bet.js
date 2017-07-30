@@ -24,8 +24,8 @@ import {betTimeStates, betState, stepperState, contractStates} from './betStates
 import Timer from './Timer';
 import EbetsArbiters from 'utils/ebetsArbiters';
 
+const MOCK = false;
 var BigNumber = require('bignumber.js');
-const MOCK = true;
 const mockDateBegin = new BigNumber(moment().unix() + 5);
 const mockDateEnd = new BigNumber(moment().unix() + 10);
 const mockResolverDeadline = new BigNumber(moment().unix() + 25);
@@ -354,38 +354,11 @@ class Bet extends Component {
       }
       else if (response.event === 'StateChanged') {
         const responseState = response.args.state.toNumber();
-        var newOverAllState;
-        var newStepperState;
-        if (responseState === contractStates.OPEN) {
-          newOverAllState = betState.matchOpen;
-          newStepperState = stepperState.matchOpen
-        }
-        else if (responseState === contractStates.TEAM_ZERO_WON) {
-          newOverAllState = betState.team0Won;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (responseState === contractStates.TEAM_ONE_WON) {
-          newOverAllState = betState.team1Won;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (responseState === contractStates.DRAW) {
-          newOverAllState = betState.draw;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (responseState === contractStates.UNDECIDED) {
-          newOverAllState = betState.arbiterUndecided;
-          newStepperState = stepperState.matchDecision;
-        }
-        else if (responseState === contractStates.CALLED_RESOLVER) {
-          newOverAllState = betState.calledArbiter;
-          newStepperState = stepperState.matchEnded;
-        }
+        var newStates = stateTransitionFunctions.fromBetStateToCurrentState(
+          responseState, this.state.hasBetOnTeam);
         this.setState({
-          currentBetState: newOverAllState,
-          stepperState: newStepperState
+          currentBetState: newStates.newOverAllState,
+          stepperState: newStates.newStepperState
         });
       }
     });
