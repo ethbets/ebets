@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import contract from 'truffle-contract';
 import MonarchyContract from 'build/contracts/Monarchy.json';
 
-const EbetsArbiters = {
+let EbetsArbiters = {
 
   isVerifiedArbiter : (arbiterAddress) => {
     // That is very naive, but is enough for now
@@ -10,6 +11,10 @@ const EbetsArbiters = {
         return true;
     }
     return false;
+  },
+
+  addresses: () => {
+    return _.map(MonarchyContract.networks, 'address');
   }
 }
 
