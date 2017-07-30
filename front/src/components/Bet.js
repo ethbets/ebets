@@ -57,6 +57,8 @@ class Bet extends Component {
   };
 
   updateBetShouldBeAtState(newState) {
+    if (this.state.currentBetState === betState.calledArbiter)
+      return;
     if (newState === betTimeStates.matchRunning) {
       this.setState({
         currentBetState: betState.matchRunning,
@@ -172,7 +174,7 @@ class Bet extends Component {
             {this.state.team1BetSum.toString()}
           </Chip>
         </div> 
-        <Timer parentState={this.state.betShoudlBeAtState}
+        <Timer parentState={this.state.currentBetState}
                updateState={this.updateBetShouldBeAtState.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
                endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
@@ -274,15 +276,15 @@ class Bet extends Component {
     var betContractInstance = betContract.at(this.props.address);
     const governanceAddress = await betContractInstance.arbiter();
     
-    const arbiterInstance = arbiterContract.at(governanceAddress);
-    const isArbiter = await arbiterInstance.isMember(this.state.web3.eth.accounts[0]);
+    const arbiterContractInstance = arbiterContract.at(governanceAddress);
+    const isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
     await setAttributes(this.state, betContractInstance);
     this.setState({
       isArbiter: isArbiter,
-      arbiterInstance: arbiterInstance,
+      arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {
-        name: await arbiterInstance.getName(),
-        verified: EbetsArbiters.isVerifiedArbiter(arbiterInstance.address)
+        name: await arbiterContractInstance.getName(),
+        verified: EbetsArbiters.isVerifiedArbiter(arbiterContractInstance.address)
       },
       betContractInstance: betContractInstance
     });
@@ -315,33 +317,34 @@ class Bet extends Component {
           });
         }
       }
-      else if (response.event === 'stateChanged') {
+      else if (response.event === 'StateChanged') {
+        const responseState = response.args.state.toNumber();
         var newOverAllState;
         var newStepperState;
-        if (response.args.state === contractStates.OPEN) {
+        if (responseState === contractStates.OPEN) {
           newOverAllState = betState.matchOpen;
           newStepperState = stepperState.matchOpen
         }
-        else if (response.args.state === contractStates.TEAM_ZERO_WON) {
+        else if (responseState === contractStates.TEAM_ZERO_WON) {
           newOverAllState = betState.team0Won;
           if (this.state.hasBetOnTeam !== null)
             newStepperState = stepperState.payout;
         }
-        else if (response.args.state === contractStates.TEAM_ONE_WON) {
+        else if (responseState === contractStates.TEAM_ONE_WON) {
           newOverAllState = betState.team1Won;
           if (this.state.hasBetOnTeam !== null)
             newStepperState = stepperState.payout;
         }
-        else if (response.args.state === contractStates.DRAW) {
+        else if (responseState === contractStates.DRAW) {
           newOverAllState = betState.draw;
           if (this.state.hasBetOnTeam !== null)
             newStepperState = stepperState.payout;
         }
-        else if (response.args.state === contractStates.UNDECIDED) {
+        else if (responseState === contractStates.UNDECIDED) {
           newOverAllState = betState.arbiterUndecided;
           newStepperState = stepperState.matchDecision;
         }
-        else if (response.args.state === contractStates.CALLED_RESOLVER) {
+        else if (responseState === contractStates.CALLED_RESOLVER) {
           newOverAllState = betState.calledArbiter;
           newStepperState = stepperState.matchEnded;
         }

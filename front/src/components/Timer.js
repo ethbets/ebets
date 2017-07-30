@@ -4,7 +4,7 @@ import moment from 'moment';
 import Chip from 'material-ui/Chip';
 import * as MColors from 'material-ui/styles/colors';
 
-import { betTimeStates } from './betStates';
+import { betTimeStates, betState } from './betStates';
 
 class Clock extends React.Component {
   secondsToEnd = 0;
@@ -23,13 +23,11 @@ class Clock extends React.Component {
     if (moment().unix() >= this.props.beginDate) {
       if (this.props.parentState !== betTimeStates.matchRunning && 
           this.props.parentState !== betTimeStates.matchEnded) {
-        console.log('Nottifying match Running');
         this.props.updateState(betTimeStates.matchRunning);
       }
       // Match ended
       if (moment().unix() >= this.props.endDate.toNumber()) {
         if (this.props.parentState !== betTimeStates.matchEnded) {
-          console.log('Nottifying match end');
           this.props.updateState(betTimeStates.matchEnded);
         }
       }
@@ -47,18 +45,28 @@ class Clock extends React.Component {
   render() {
     var deltaSeconds;
     var msgString;
-
-    if (this.props.parentState <= betTimeStates.matchBegin) {
+    if (this.props.parentState === betState.matchOpen) {
       deltaSeconds = this.props.beginDate.toNumber() - moment().unix();
       msgString = 'Begins in: ';
     }
-    else if (this.props.parentState === betTimeStates.matchRunning) {
+    else if (this.props.parentState === betState.matchRunning) {
       deltaSeconds = this.props.endDate.toNumber() - moment().unix();
       msgString = 'Ends in: '
     }
-    else if (this.props.parentState === betTimeStates.matchEnded) {
+    else if (this.props.parentState === betState.shouldCallArbiter ||
+             this.props.parentState === betState.calledArbiter) {
       deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
-      msgString = 'Resolver must answer in: '
+      msgString = 'Arbiter must answer in: '
+    }
+    else if (this.props.parentState === betState.betExpired) {
+      deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+      msgString = 'Bet expired, must decide to draw in: '
+    }
+    else if (this.props.parentState === betState.draw) {
+      // Bet expired!
+      if (moment().unix() > this.props.terminateDeadline.toNumber())
+      deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+      msgString = 'Bet terminated, can call self-destruct!'
     }
 
     //secondsToBegin = (moment().unix() + 1033) - moment().unix();

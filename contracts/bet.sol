@@ -90,7 +90,7 @@ contract Bet is ProposalInterface{
   }
 
   function __resolve(uint outcome)
-    onlyArbiter() 
+    onlyArbiter()
     afterTimestamp(timestampMatchEnd)
     beforeTimestamp(timestampArbiterDeadline)
     matchIsOpenOrUndecided() {
