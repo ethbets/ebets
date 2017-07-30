@@ -20,7 +20,7 @@ import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import getWeb3 from 'utils/getWeb3';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
-import {betTimeStates, betState, stepperState, contractStates} from './betStates';
+import {betTimeStates, betState, stepperState} from './betStates';
 import Timer from './Timer';
 import EbetsArbiters from 'utils/ebetsArbiters';
 

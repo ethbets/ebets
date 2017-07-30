@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
@@ -149,7 +150,6 @@ class BetController extends Component {
   }
 
   ComputeGain = (amount, winnerPool, loserPool, tax) => {
-    var BigNumber = require('bignumber.js');
     var profit = amount.dividedBy(winnerPool).times(loserPool);
     if (profit.gt(0))
       profit = profit.minus(profit.times(new BigNumber(tax)))
@@ -157,7 +157,6 @@ class BetController extends Component {
   }
 
   ExpectedGain = () => {
-    var BigNumber = require('bignumber.js');
     var expectedIncome;
     var amount;
     var winnerPool;
@@ -195,7 +194,6 @@ class BetController extends Component {
   }
 
   FinalGain = () => {
-    var BigNumber = require('bignumber.js');
     var amount;
     var winnerPool;
     var loserPool;
