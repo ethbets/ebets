@@ -19,18 +19,28 @@ class Clock extends React.Component {
     this.setState({
       dateTimestamp: this.state.dateTimestamp - 1000
     });
-    // Match is happening
-    if (moment().unix() >= this.props.beginDate) {
-      if (this.props.parentState !== betTimeStates.matchRunning && 
-          this.props.parentState !== betTimeStates.matchEnded) {
-        this.props.updateState(betTimeStates.matchRunning);
-      }
-      // Match ended
-      if (moment().unix() >= this.props.endDate.toNumber()) {
-        if (this.props.parentState !== betTimeStates.matchEnded) {
-          this.props.updateState(betTimeStates.matchEnded);
-        }
-      }
+    // Match open
+    if (moment().unix() < this.props.beginDate) {
+      this.props.updateState(betTimeStates.matchOpen);
+    }
+    // Match running
+    else if ((moment().unix() >= this.props.beginDate) &&
+        (moment().unix() < this.props.endDate)) {
+      this.props.updateState(betTimeStates.matchRunning);
+    }// Match end
+    else if ((moment().unix() >= this.props.endDate) &&
+        (moment().unix() < this.props.resolverDeadline)) {
+      this.props.updateState(betTimeStates.matchEnded);
+    }
+    // Match expired
+    else if ((moment().unix() >= this.props.resolverDeadline) &&
+        (moment().unix() < this.props.terminateDeadline)) {
+      this.props.updateState(betTimeStates.matchExpired);
+    }
+    // Match can selfdestruct
+    else if (moment().unix() > this.props.terminateDeadline) {
+      this.props.updateState(betTimeStates.matchDestruct);
+      clearInterval(this.interval);
     }
   }
 
@@ -53,8 +63,11 @@ class Clock extends React.Component {
       deltaSeconds = this.props.endDate.toNumber() - moment().unix();
       msgString = 'Ends in: '
     }
-    else if (this.props.parentState === betState.shouldCallArbiter ||
-             this.props.parentState === betState.calledArbiter) {
+    else if (this.props.parentState === betState.shouldCallArbiter) {
+      deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
+      msgString = 'Should call arbiter in: '
+    }
+    else if (this.props.parentState === betState.calledArbiter) {
       deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
       msgString = 'Arbiter must answer in: '
     }
@@ -62,15 +75,23 @@ class Clock extends React.Component {
       deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
       msgString = 'Bet expired, must decide to draw in: '
     }
-    else if (this.props.parentState === betState.draw) {
+    else {
       // Bet expired!
-      if (moment().unix() > this.props.terminateDeadline.toNumber())
-      deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
-      msgString = 'Bet terminated, can call self-destruct!'
+      if (moment().unix() > this.props.terminateDeadline.toNumber()) {
+        msgString = 'Bet terminated, can call self-destruct!'
+        return (
+          <div className='pushRight'>
+            <Chip backgroundColor={MColors.white}>
+              {msgString}
+            </Chip>
+          </div>
+        );
+      }
+      else {
+        deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+        msgString = 'Have decision, must collect reward in: '
+      }
     }
-
-    //secondsToBegin = (moment().unix() + 1033) - moment().unix();
-    //this.secondsToEnd = 10; 
 
     var days = deltaSeconds / (60 * 60 * 24);
     days = Math.floor(days);
@@ -99,7 +120,6 @@ class Clock extends React.Component {
           </Chip>
         </div>
       );
-
   }
 }
 export default Clock;

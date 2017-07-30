@@ -1,9 +1,10 @@
 const BETSTATES = {
   betTimeStates : {
-    matchBegin: 0,
+    matchOpen: 0,
     matchRunning: 1,
     matchEnded: 2,
-    matchCalledOracle: 3,
+    matchExpired: 3,
+    matchDestruct: 4,
     TIMESTAMP_MARGIN: 1000
   },
 
@@ -35,7 +36,8 @@ const BETSTATES = {
     team1Won: 5,
     draw: 6,
     betExpired: 7,
-    calledArbiter: 8
+    calledArbiter: 8,
+    betTerminate: 9,
   },
   stepperState: {
     matchOpen: 0,

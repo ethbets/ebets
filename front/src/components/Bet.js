@@ -24,9 +24,12 @@ import {betTimeStates, betState, stepperState, contractStates} from './betStates
 import Timer from './Timer';
 import EbetsArbiters from 'utils/ebetsArbiters';
 
-const MOCK = false;
-const mockDateBegin = moment().unix() + 5;
-const mockDateEnd = moment().unix() + 10;
+var BigNumber = require('bignumber.js');
+const MOCK = true;
+const mockDateBegin = new BigNumber(moment().unix() + 5);
+const mockDateEnd = new BigNumber(moment().unix() + 10);
+const mockResolverDeadline = new BigNumber(moment().unix() + 25);
+const mockTerminateDeadline = new BigNumber(moment().unix() + 30);
 class Bet extends Component {
   
   constructor(props) {
@@ -56,22 +59,54 @@ class Bet extends Component {
     return null;
   };
 
-  updateBetShouldBeAtState(newState) {
-    if (this.state.currentBetState === betState.calledArbiter)
-      return;
-    if (newState === betTimeStates.matchRunning) {
-      this.setState({
-        currentBetState: betState.matchRunning,
-        stepperState: stepperState.matchRunning
-      });
+  updateStateFromTimer(newState) {
+    if (newState === betTimeStates.matchOpen) {
+      if (this.state.currentBetState <= betState.matchOpen)
+        this.setState({
+          currentBetState: betState.matchOpen,
+          stepperState: stepperState.matchOpen
+        });
+    }
+    else if (newState === betTimeStates.matchRunning) {
+      if (this.state.currentBetState <= betState.matchRunning)
+        this.setState({
+          currentBetState: betState.matchRunning,
+          stepperState: stepperState.matchRunning
+        });
     }
     else if (newState === betTimeStates.matchEnded) {
-      this.setState({
-        currentBetState: betState.shouldCallArbiter,
-        stepperState: stepperState.matchEnded
-    });
+      if ((this.state.currentBetState !== betState.calledArbiter) &&
+          (this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.arbiterUndecided) &&
+          (this.state.currentBetState !== betState.shouldCallArbiter))
+        this.setState({
+          currentBetState: betState.shouldCallArbiter,
+          stepperState: stepperState.matchEnded
+        });
     }
-    this.setState({betShoudlBeAtState: newState});
+    else if (newState === betTimeStates.matchExpired) {
+      if ((this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.arbiterUndecided) &&
+          (this.state.currentBetState !== betState.betExpired))
+      this.setState({
+        currentBetState: betState.betExpired,
+        stepperState: stepperState.matchEnded
+      });
+    }
+    else if (newState === betTimeStates.matchDestruct) {
+      if ((this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.betTerminate))
+      this.setState({
+        currentBetState: betState.betTerminate,
+        stepperState: stepperState.matchEnded
+      });
+    }
   }
 
   handleCloseDialog = () => {
@@ -175,11 +210,11 @@ class Bet extends Component {
           </Chip>
         </div> 
         <Timer parentState={this.state.currentBetState}
-               updateState={this.updateBetShouldBeAtState.bind(this)}
+               updateState={this.updateStateFromTimer.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
                endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
-               resolverDeadline={this.state.timestampArbiterDeadline}
-               terminateDeadline={this.state.timestampSelfDestructDeadline}
+               resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
+               terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
       </div>;
       // My bets        
@@ -365,7 +400,7 @@ class Bet extends Component {
       if (this.state.hasBetOnTeam !== null)
         shouldPay = stepperState.payout;
       return {
-        currentBetState: betState.draw,
+        currentBetState: betState.team0Won,
         stepperState: shouldPay
     }})}, 20000);
     }
