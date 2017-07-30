@@ -48,4 +48,4 @@ const BETSTATES = {
   }
 }
 
-module.exports = {...BETSTATES};
+module.exports = BETSTATES;

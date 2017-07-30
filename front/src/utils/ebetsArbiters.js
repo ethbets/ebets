@@ -1,15 +1,14 @@
-import contract from 'truffle-contract';
-import MonarchyContract from 'build/contracts/Monarchy.json';
-
+import ArbitersJson from './ebetsArbiters.json';
+// CHANGE THIS WHEN THE NETWORK IS MAINNET
+const NETWORK_ID = '42';
 const EbetsArbiters = {
-
-  isVerifiedArbiter : (arbiterAddress) => {
-    // That is very naive, but is enough for now
-    for (var networkId in  MonarchyContract.networks) {
-      if (arbiterAddress === MonarchyContract.networks[networkId].address)
+  isVerifiedArbiter: async (address) => {
+    
+    for (var arbiter in ArbitersJson) {
+      if (ArbitersJson[arbiter][NETWORK_ID] === address)
         return true;
+      return false;
     }
-    return false;
   }
 }
 

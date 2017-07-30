@@ -18,6 +18,10 @@ contract Monarchy is Governance {
   function getName() constant returns(string) {
     return name;
   }
+  function getHigherInstance() constant returns(address instanceAddress) {
+    return higherInstance;
+  }
+
 
   function castVote(address proposal, uint outcome) onlyMonarch() {
     ProposalInterface proposalContract = ProposalInterface(proposal);

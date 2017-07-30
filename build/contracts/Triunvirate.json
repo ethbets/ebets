@@ -129,6 +129,19 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [],
+      "name": "getHigherInstance",
+      "outputs": [
+        {
+          "name": "instanceAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -278,9 +291,9 @@
           "type": "event"
         }
       },
-      "updated_at": 1501412941197
+      "updated_at": 1501422645384
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1501412941197
+  "updated_at": 1501422645384
 }

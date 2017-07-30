@@ -4,7 +4,7 @@ import moment from 'moment';
 import Chip from 'material-ui/Chip';
 import * as MColors from 'material-ui/styles/colors';
 
-import { betTimeStates, betState } from './betStates';
+import { betTimeStates, betState } from 'utils/betStates';
 
 class Clock extends React.Component {
   secondsToEnd = 0;

@@ -13,25 +13,26 @@ import * as MColors from 'material-ui/styles/colors';
 import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
 
-import BetController from './BetController'
+import BetController from './BetController';
 
 import BetJson from 'build/contracts/Bet.json';
 import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import getWeb3 from 'utils/getWeb3';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
-import {betTimeStates, betState, stepperState} from './betStates';
+import {betTimeStates, betState, stepperState} from 'utils/betStates';
 import Timer from './Timer';
 import EbetsArbiters from 'utils/ebetsArbiters';
 
+
+import BigNumber from 'bignumber.js';
 const MOCK = false;
-var BigNumber = require('bignumber.js');
 const mockDateBegin = new BigNumber(moment().unix() + 5);
 const mockDateEnd = new BigNumber(moment().unix() + 10);
 const mockResolverDeadline = new BigNumber(moment().unix() + 25);
 const mockTerminateDeadline = new BigNumber(moment().unix() + 30);
+
 class Bet extends Component {
-  
   constructor(props) {
     super(props);
     this.state = {
@@ -42,7 +43,7 @@ class Bet extends Component {
       open: false,
       betHappened: false,
       betStatusMessage: '',
-      betInProgress: false,
+      transactionInProcess: false,
       isExpanded: false,
       loadCompleted: false,
       cat_url: null,
@@ -54,7 +55,7 @@ class Bet extends Component {
   }
 
   LinearProgressCustom = () => {
-    if (this.state.betInProgress)
+    if (this.state.transactionInProcess)
       return <LinearProgress mode="indeterminate" />;
     return null;
   };
@@ -137,6 +138,7 @@ class Bet extends Component {
   }
 
   transactionHappened = betPromisse => {
+    this.setState({ transactionInProcess: true });
     return betPromisse.then(tx => {
       return this.setState({
         betStatusMessage: `Transaction OK
@@ -149,7 +151,7 @@ class Bet extends Component {
     })
     .then(() => {
       this.setState({betHappened: true});
-      this.setState({betInProgress: false});
+      this.setState({transactionInProcess: false});
     });
   };
 
@@ -164,7 +166,6 @@ class Bet extends Component {
       console.error('Error');
       return;
     }
-    this.setState({ betInProgress: true });
     var betPromisse = this.state.betContractInstance.bet(
       teamToBet,
       { from: this.state.web3.eth.accounts[0],

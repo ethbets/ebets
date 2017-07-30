@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import EbetsJson from 'build/contracts/ebets.json';
+import EbetsJson from 'build/contracts/Ebets.json';
 import getWeb3 from 'utils/getWeb3';
 
 import Bet from 'components/Bet';
@@ -32,7 +32,6 @@ class Ebets extends Component {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(this.state.web3.currentProvider);
-    
     // Get accounts.
     this.state.web3.eth.getAccounts((error) => {
       if (error) throw 'Unable to get accounts';

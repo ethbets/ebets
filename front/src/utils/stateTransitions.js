@@ -1,33 +1,39 @@
-import {stepperState, contractStates} from '../components/betStates';
+import {stepperState, contractStates, betState} from './betStates';
 
 const stateTransitionFunctions = {
-  fromBetStateToCurrentState: (betState, hasBetOnTeam) => {
+  fromBetStateToCurrentState: (currentState, hasBetOnTeam) => {
     var newOverAllState;
     var newStepperState;
-    if (betState === contractStates.OPEN) {
+    if (currentState === contractStates.OPEN) {
         newOverAllState = betState.matchOpen;
         newStepperState = stepperState.matchOpen
     }
-    else if (betState === contractStates.TEAM_ZERO_WON) {
+    else if (currentState === contractStates.TEAM_ZERO_WON) {
       newOverAllState = betState.team0Won;
       if (hasBetOnTeam !== null)
         newStepperState = stepperState.payout;
+      else
+        newStepperState = stepperState.matchDecision;
     }
-    else if (betState === contractStates.TEAM_ONE_WON) {
+    else if (currentState === contractStates.TEAM_ONE_WON) {
       newOverAllState = betState.team1Won;
       if (hasBetOnTeam !== null)
         newStepperState = stepperState.payout;
+      else
+        newStepperState = stepperState.matchDecision;
     }
-    else if (betState === contractStates.DRAW) {
+    else if (currentState === contractStates.DRAW) {
       newOverAllState = betState.draw;
       if (hasBetOnTeam !== null)
         newStepperState = stepperState.payout;
+      else
+        newStepperState = stepperState.matchDecision;
     }
-    else if (betState === contractStates.UNDECIDED) {
+    else if (currentState === contractStates.UNDECIDED) {
       newOverAllState = betState.arbiterUndecided;
       newStepperState = stepperState.matchDecision;
     }
-    else if (betState === contractStates.CALLED_RESOLVER) {
+    else if (currentState === contractStates.CALLED_RESOLVER) {
       newOverAllState = betState.calledArbiter;
       newStepperState = stepperState.matchEnded;
     }
