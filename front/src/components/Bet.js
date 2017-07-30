@@ -13,21 +13,26 @@ import * as MColors from 'material-ui/styles/colors';
 import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
 
-import BetController from './BetController'
+import BetController from './BetController';
 
 import BetJson from 'build/contracts/Bet.json';
 import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import getWeb3 from 'utils/getWeb3';
+import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
-import {betTimeStates, betState, stepperState, contractStates} from './betStates';
+import {betTimeStates, betState, stepperState} from 'utils/betStates';
 import Timer from './Timer';
 import EbetsArbiters from 'utils/ebetsArbiters';
 
+
+import BigNumber from 'bignumber.js';
 const MOCK = false;
-const mockDateBegin = moment().unix() + 5;
-const mockDateEnd = moment().unix() + 10;
+const mockDateBegin = new BigNumber(moment().unix() + 5);
+const mockDateEnd = new BigNumber(moment().unix() + 10);
+const mockResolverDeadline = new BigNumber(moment().unix() + 25);
+const mockTerminateDeadline = new BigNumber(moment().unix() + 30);
+
 class Bet extends Component {
-  
   constructor(props) {
     super(props);
     this.state = {
@@ -38,7 +43,7 @@ class Bet extends Component {
       open: false,
       betHappened: false,
       betStatusMessage: '',
-      betInProgress: false,
+      transactionInProcess: false,
       isExpanded: false,
       loadCompleted: false,
       cat_url: null,
@@ -50,25 +55,59 @@ class Bet extends Component {
   }
 
   LinearProgressCustom = () => {
-    if (this.state.betInProgress)
+    if (this.state.transactionInProcess)
       return <LinearProgress mode="indeterminate" />;
     return null;
   };
 
-  updateBetShouldBeAtState(newState) {
-    if (newState === betTimeStates.matchRunning) {
-      this.setState({
-        currentBetState: betState.matchRunning,
-        stepperState: stepperState.matchRunning
-      });
+  updateStateFromTimer(newState) {
+    if (newState === betTimeStates.matchOpen) {
+      if (this.state.currentBetState <= betState.matchOpen)
+        this.setState({
+          currentBetState: betState.matchOpen,
+          stepperState: stepperState.matchOpen
+        });
+    }
+    else if (newState === betTimeStates.matchRunning) {
+      if (this.state.currentBetState <= betState.matchRunning)
+        this.setState({
+          currentBetState: betState.matchRunning,
+          stepperState: stepperState.matchRunning
+        });
     }
     else if (newState === betTimeStates.matchEnded) {
-      this.setState({
-        currentBetState: betState.shouldCallArbiter,
-        stepperState: stepperState.matchEnded
-    });
+      if ((this.state.currentBetState !== betState.calledArbiter) &&
+          (this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.arbiterUndecided) &&
+          (this.state.currentBetState !== betState.shouldCallArbiter))
+        this.setState({
+          currentBetState: betState.shouldCallArbiter,
+          stepperState: stepperState.matchEnded
+        });
     }
-    this.setState({betShoudlBeAtState: newState});
+    else if (newState === betTimeStates.matchExpired) {
+      if ((this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.arbiterUndecided) &&
+          (this.state.currentBetState !== betState.betExpired))
+      this.setState({
+        currentBetState: betState.betExpired,
+        stepperState: stepperState.matchEnded
+      });
+    }
+    else if (newState === betTimeStates.matchDestruct) {
+      if ((this.state.currentBetState !== betState.draw) &&
+          (this.state.currentBetState !== betState.team0Won) &&
+          (this.state.currentBetState !== betState.team1Won) &&
+          (this.state.currentBetState !== betState.betTerminate))
+      this.setState({
+        currentBetState: betState.betTerminate,
+        stepperState: stepperState.matchEnded
+      });
+    }
   }
 
   handleCloseDialog = () => {
@@ -99,6 +138,7 @@ class Bet extends Component {
   }
 
   transactionHappened = betPromisse => {
+    this.setState({ transactionInProcess: true });
     return betPromisse.then(tx => {
       return this.setState({
         betStatusMessage: `Transaction OK
@@ -111,7 +151,7 @@ class Bet extends Component {
     })
     .then(() => {
       this.setState({betHappened: true});
-      this.setState({betInProgress: false});
+      this.setState({transactionInProcess: false});
     });
   };
 
@@ -126,7 +166,6 @@ class Bet extends Component {
       console.error('Error');
       return;
     }
-    this.setState({ betInProgress: true });
     var betPromisse = this.state.betContractInstance.bet(
       teamToBet,
       { from: this.state.web3.eth.accounts[0],
@@ -171,12 +210,12 @@ class Bet extends Component {
             {this.state.team1BetSum.toString()}
           </Chip>
         </div> 
-        <Timer parentState={this.state.betShoudlBeAtState}
-               updateState={this.updateBetShouldBeAtState.bind(this)}
+        <Timer parentState={this.state.currentBetState}
+               updateState={this.updateStateFromTimer.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
                endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
-               resolverDeadline={this.state.timestampArbiterDeadline}
-               terminateDeadline={this.state.timestampSelfDestructDeadline}
+               resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
+               terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
       </div>;
       // My bets        
@@ -273,15 +312,15 @@ class Bet extends Component {
     var betContractInstance = betContract.at(this.props.address);
     const governanceAddress = await betContractInstance.arbiter();
     
-    const arbiterInstance = arbiterContract.at(governanceAddress);
-    const isArbiter = await arbiterInstance.isMember(this.state.web3.eth.accounts[0]);
+    const arbiterContractInstance = arbiterContract.at(governanceAddress);
+    const isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
     await setAttributes(this.state, betContractInstance);
     this.setState({
       isArbiter: isArbiter,
-      arbiterInstance: arbiterInstance,
+      arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {
-        name: await arbiterInstance.getName(),
-        verified: EbetsArbiters.isVerifiedArbiter(arbiterInstance.address)
+        name: await arbiterContractInstance.getName(),
+        verified: EbetsArbiters.isVerifiedArbiter(arbiterContractInstance.address)
       },
       betContractInstance: betContractInstance
     });
@@ -314,39 +353,13 @@ class Bet extends Component {
           });
         }
       }
-      else if (response.event === 'stateChanged') {
-        var newOverAllState;
-        var newStepperState;
-        if (response.args.state === contractStates.OPEN) {
-          newOverAllState = betState.matchOpen;
-          newStepperState = stepperState.matchOpen
-        }
-        else if (response.args.state === contractStates.TEAM_ZERO_WON) {
-          newOverAllState = betState.team0Won;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (response.args.state === contractStates.TEAM_ONE_WON) {
-          newOverAllState = betState.team1Won;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (response.args.state === contractStates.DRAW) {
-          newOverAllState = betState.draw;
-          if (this.state.hasBetOnTeam !== null)
-            newStepperState = stepperState.payout;
-        }
-        else if (response.args.state === contractStates.UNDECIDED) {
-          newOverAllState = betState.arbiterUndecided;
-          newStepperState = stepperState.matchDecision;
-        }
-        else if (response.args.state === contractStates.CALLED_RESOLVER) {
-          newOverAllState = betState.calledArbiter;
-          newStepperState = stepperState.matchEnded;
-        }
+      else if (response.event === 'StateChanged') {
+        const responseState = response.args.state.toNumber();
+        var newStates = stateTransitionFunctions.fromBetStateToCurrentState(
+          responseState, this.state.hasBetOnTeam);
         this.setState({
-          currentBetState: newOverAllState,
-          stepperState: newStepperState
+          currentBetState: newStates.newOverAllState,
+          stepperState: newStates.newStepperState
         });
       }
     });
@@ -361,7 +374,7 @@ class Bet extends Component {
       if (this.state.hasBetOnTeam !== null)
         shouldPay = stepperState.payout;
       return {
-        currentBetState: betState.draw,
+        currentBetState: betState.team0Won,
         stepperState: shouldPay
     }})}, 20000);
     }

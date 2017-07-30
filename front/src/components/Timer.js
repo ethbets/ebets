@@ -4,7 +4,7 @@ import moment from 'moment';
 import Chip from 'material-ui/Chip';
 import * as MColors from 'material-ui/styles/colors';
 
-import { betTimeStates } from './betStates';
+import { betTimeStates, betState } from 'utils/betStates';
 
 class Clock extends React.Component {
   secondsToEnd = 0;
@@ -19,20 +19,28 @@ class Clock extends React.Component {
     this.setState({
       dateTimestamp: this.state.dateTimestamp - 1000
     });
-    // Match is happening
-    if (moment().unix() >= this.props.beginDate) {
-      if (this.props.parentState !== betTimeStates.matchRunning && 
-          this.props.parentState !== betTimeStates.matchEnded) {
-        console.log('Nottifying match Running');
-        this.props.updateState(betTimeStates.matchRunning);
-      }
-      // Match ended
-      if (moment().unix() >= this.props.endDate.toNumber()) {
-        if (this.props.parentState !== betTimeStates.matchEnded) {
-          console.log('Nottifying match end');
-          this.props.updateState(betTimeStates.matchEnded);
-        }
-      }
+    // Match open
+    if (moment().unix() < this.props.beginDate) {
+      this.props.updateState(betTimeStates.matchOpen);
+    }
+    // Match running
+    else if ((moment().unix() >= this.props.beginDate) &&
+        (moment().unix() < this.props.endDate)) {
+      this.props.updateState(betTimeStates.matchRunning);
+    }// Match end
+    else if ((moment().unix() >= this.props.endDate) &&
+        (moment().unix() < this.props.resolverDeadline)) {
+      this.props.updateState(betTimeStates.matchEnded);
+    }
+    // Match expired
+    else if ((moment().unix() >= this.props.resolverDeadline) &&
+        (moment().unix() < this.props.terminateDeadline)) {
+      this.props.updateState(betTimeStates.matchExpired);
+    }
+    // Match can selfdestruct
+    else if (moment().unix() > this.props.terminateDeadline) {
+      this.props.updateState(betTimeStates.matchDestruct);
+      clearInterval(this.interval);
     }
   }
 
@@ -47,21 +55,43 @@ class Clock extends React.Component {
   render() {
     var deltaSeconds;
     var msgString;
-    if (this.props.parentState < betTimeStates.matchBegin) {
-      deltaSeconds = this.props.beginDate - moment().unix();
-      msgString = 'Begins in: '
+    if (this.props.parentState === betState.matchOpen) {
+      deltaSeconds = this.props.beginDate.toNumber() - moment().unix();
+      msgString = 'Begins in: ';
     }
-    else if (this.props.parentState === betTimeStates.matchRunning) {
+    else if (this.props.parentState === betState.matchRunning) {
       deltaSeconds = this.props.endDate.toNumber() - moment().unix();
       msgString = 'Ends in: '
     }
-    else if (this.props.parentState === betTimeStates.matchEnded) {
+    else if (this.props.parentState === betState.shouldCallArbiter) {
       deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
-      msgString = 'Resolver must answer in: '
+      msgString = 'Should call arbiter in: '
     }
-
-    //secondsToBegin = (moment().unix() + 1033) - moment().unix();
-    //this.secondsToEnd = 10; 
+    else if (this.props.parentState === betState.calledArbiter) {
+      deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
+      msgString = 'Arbiter must answer in: '
+    }
+    else if (this.props.parentState === betState.betExpired) {
+      deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+      msgString = 'Bet expired, must decide to draw in: '
+    }
+    else {
+      // Bet expired!
+      if (moment().unix() > this.props.terminateDeadline.toNumber()) {
+        msgString = 'Bet terminated, can call self-destruct!'
+        return (
+          <div className='pushRight'>
+            <Chip backgroundColor={MColors.white}>
+              {msgString}
+            </Chip>
+          </div>
+        );
+      }
+      else {
+        deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+        msgString = 'Have decision, must collect reward in: '
+      }
+    }
 
     var days = deltaSeconds / (60 * 60 * 24);
     days = Math.floor(days);
@@ -90,7 +120,6 @@ class Clock extends React.Component {
           </Chip>
         </div>
       );
-
   }
 }
 export default Clock;

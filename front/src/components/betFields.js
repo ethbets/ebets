@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 let BETFIELDS = {
-  betState: '',
+  betState: 0,
   isFeatured: false,
   team0Name: '',
   team1Name: '',
@@ -14,7 +14,7 @@ let BETFIELDS = {
   timestampMatchEnd: new BigNumber(0),
   timestampArbiterDeadline: new BigNumber(0),
   timestampSelfDestructDeadline: new BigNumber(0),
-  TAX: 0
+  TAX: new BigNumber(0)
 };
 
 export default BETFIELDS;

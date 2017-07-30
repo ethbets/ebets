@@ -90,10 +90,9 @@ contract Bet is ProposalInterface{
   }
 
   function __resolve(uint outcome)
-    onlyArbiter() 
+    onlyArbiter()
     afterTimestamp(timestampMatchEnd)
-    beforeTimestamp(timestampArbiterDeadline)
-    matchIsOpenOrUndecided() {
+    beforeTimestamp(timestampArbiterDeadline) {
     require(betState == BET_STATES.CALLED_RESOLVER);
     if (outcome == 1)
       betState = BET_STATES.TEAM_ZERO_WON;
@@ -111,9 +110,9 @@ contract Bet is ProposalInterface{
     matchIsOpenOrUndecided()
     afterTimestamp(timestampMatchEnd) {
     require(betState != BET_STATES.CALLED_RESOLVER);
-    arbiter.addProposal(this, timestampArbiterDeadline);
     betState = BET_STATES.CALLED_RESOLVER;
     StateChanged(betState);
+    arbiter.addProposal(this, timestampArbiterDeadline);
   }
   
   function toggleFeatured() onlyOwner() {

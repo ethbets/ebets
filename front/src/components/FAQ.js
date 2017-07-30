@@ -40,19 +40,18 @@ class FAQ extends Component {
           </p>
           <p>
             By doing this, you can create your own private bets without loss of generality,
-            for instance, if Alice and Bob want to do a fart competition, and they choose Charly,
+            for instance, if Alice and Bob want to do a fart competition, and they choose Charlie,
             Danniel and Emily to arbitrate the outcome.
-            Charly, Danniel and Emily, are going to witness the fart competition, and later can decide
-            on the outcome together. The contract only decides on the outcome
-            when a simple majority is reached among the members of the arbiter contract, minimizing the
-            chance of collusion among the arbiters.
+            Charlie, Danniel and Emily, are going to witness the fart competition, and later can decide
+            on the outcome together. The contract can be, for example, one that can only decide on the outcome
+            when a simple majority is reached, minimizing the chance of collusion among the arbiters.
           </p>
 
           <li>Are you a prediction market?</li>
-          <p>No, this is a betting Dapp</p>
+          <p>Not necessarily</p>
           <li>Do you have a colored-paper?</li>
           <p>
-            We have a bunch of published papers if you want, they neither qualify nor disqualify
+            We have a bunch of published papers if you want! They neither qualify nor disqualify
             the Dapp, you can read the Dapp's code in github.
           </p>
           <li>Why are you doing this?</li>

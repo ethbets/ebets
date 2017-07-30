@@ -10,11 +10,11 @@ contract Ebets {
   }
 
   address owner;
-  /* 
+  /* TODO: ALSO FIRE CATEGORY EVENT
    * TODO: INDEX category! There is an issue with web3 that prevents us to do it
    * right now: https://github.com/ethereum/web3.js/issues/434
   */
-  event createdBet(address betAddr, string category);
+  event createdBet(address betAddr);
   
   function Ebets() {
     owner = msg.sender;
@@ -28,7 +28,7 @@ contract Ebets {
     // Featured by default for resolver
     if (msg.sender == owner)
       bet.toggleFeatured();
-    createdBet(bet, category);
+    createdBet(bet);
   }
   function modifyCategory(Bet bet, string newCategory) onlyOwner(){
     bet.modifyCategory(newCategory);
