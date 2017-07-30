@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import moment from 'moment';
 
 import React, { Component } from 'react';
@@ -7,16 +8,22 @@ import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import {GridList, GridTile} from 'material-ui/GridList';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 import getWeb3 from 'utils/getWeb3';
+import EbetsArbiters from 'utils/ebetsArbiters';
 import EbetsJson from 'build/contracts/ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
-import 'components/BetForm.css'
+import 'assets/stylesheets/BetForm.css'
 
-const HARD_DEADLINE_PERIOD = 7
-const TERMINATE_DEADLINE_PERIOD = 14
+const ARBITER_DEADLINE_PERIOD = 7
+const SELF_DESTRUCT_DEADLINE_PERIOD = 14
+const ARBITER_ADDRESSES = EbetsArbiters.addresses();
+// TODO Get all categories
+const CATEGORIES = ["E-Sports", "UFC"];
 
 class BetForm extends Component {
 
@@ -30,46 +37,68 @@ class BetForm extends Component {
         message: ''
       },
       ...betFields,
+      arbiterAddress: "",
       web3: null
     }
   }
 
   initializeTimestamps = () => {
-      const currentDate = moment().toDate();
-      this.setState({
-        timestamp_match_begin: currentDate,
-        timestamp_match_end: moment(currentDate).add(1, 'day').toDate(),
-        timestamp_hard_deadline: moment(currentDate).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
-        timestamp_terminate_deadline: moment(currentDate).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate()
-      });
+    const currentDate = moment().toDate();
+    this.setState({
+      timestampMatchBegin: currentDate,
+      timestampMatchEnd: moment(currentDate).add(1, 'day').toDate(),
+      timestampArbiterDeadline: moment(currentDate).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
+      timestampSelfDestructDeadline: moment(currentDate).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate()
+    });
+  }
+
+  menuItem(all, selected) {
+    return all.map((name) => (
+      <MenuItem
+        key={name}
+        insetChildren={true}
+        checked={_.isEmpty(selected) && selected.indexOf(name) >= 0}
+        value={name}
+        primaryText={name}
+      />
+    ));
+  }
+
+  handleArbiterAddressChange = (event, index, value) => {
+    // TODO: handle optional textfield input
+    this.setState({ arbiterAddress: value });
+  }
+
+  handleCategoryChange = (event, index, value) => {
+    this.setState({ category: value });
   }
 
   handleOnChange = (event) => {
     const target = event.target;
-    let value = target.type === 'checkbox' ? target.checked : target.value;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
 
     this.setState({ [name]: value });
   };
 
-  handleChangeTimestampBegin = (event, date) => {
-    this.setState({ timestamp_match_begin: date });
+  handleChangeTimestampMatchBegin = (event, date) => {
+    this.setState({ timestampMatchBegin: date });
   };
 
-  handleChangetimestamp_match_end = (event, date) => {
+  handleChangeTimestampMatchEnd= (event, date) => {
     this.setState({
-      timestamp_match_end: date,
-      timestamp_hard_deadline: moment(date).add(HARD_DEADLINE_PERIOD, 'days').toDate(),
-      timestamp_terminate_deadline: moment(date).add(TERMINATE_DEADLINE_PERIOD, 'days').toDate(),
+      timestampMatchEnd: date,
+      timestampArbiterDeadline: moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
+      timestampSelfDestructDeadline: moment(date).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate(),
     });
   };
 
-  handleChangetimestamp_hard_deadline = (event, date) => {
-    this.setState({ timestamp_hard_deadline: date });
+  handleChangeTimestampArbiterDeadline = (event, date) => {
+    this.setState({ timestampArbiterDeadline: date });
   };
 
-  handleChangeTimestampTeminateDeadline = (event, date) => {
-    this.setState({ timestamp_terminate_deadline: date });
+  handleChangeTimestampSelfDestructDeadline = (event, date) => {
+    this.setState({ timestampSelfDestructDeadline: date });
   };
 
   handleOnSubmit = event => {
@@ -110,20 +139,18 @@ class BetForm extends Component {
     ebetsContract.deployed().then(instance => {
 
       const timestamps = [
-        moment(this.state.timestamp_match_begin).unix(),
-        moment(this.state.timestamp_match_end).unix(),
-        moment(this.state.timestamp_hard_deadline).unix(),
-        moment(this.state.timestamp_terminate_deadline).unix()
+        moment(this.state.timestampMatchBegin).unix(),
+        moment(this.state.timestampMatchEnd).unix(),
+        moment(this.state.timestampArbiterDeadline).unix(),
+        moment(this.state.timestampSelfDestructDeadline).unix()
       ];
-
-      let createdBet = instance.create_bet(
+      console.log(this.state)
+      let createdBet = instance.createBet(
+        this.state.arbiterAddresses,
         this.state.team_0_title,
         this.state.team_1_title,
         this.state.category,
-        this.state.team_0_id,
-        this.state.team_1_id,
         timestamps,
-        this.state.url_oraclize,
         /* TODO: accounts[0] can be changed by the user,
          * There should be a way so when the user changes, this is updated too.
          */
@@ -165,28 +192,19 @@ class BetForm extends Component {
               <GridList
                 className='gridList'
                 cellHeight={'auto'}
-                cols={5}
+                cols={3}
               >
                 <GridTile>
                   <TextField
                     fullWidth={true}
                     name="team_0_title"
                     value={this.state.team_0_title}
-                    placeholder="Team 0"
-                    onChange={this.handleOnChange}
-                  />
-                </GridTile>
-                <GridTile>
-                  <TextField
-                    fullWidth={true}
-                    name="team_0_id"
-                    value={this.state.team_0_id}
-                    placeholder="Team 0 oracle id"
+                    floatingLabelText="Team 0"
                     onChange={this.handleOnChange}
                   />
                 </GridTile>
                 <GridTile
-                  style={{width: 50, height: 50, marginLeft: 'auto', marginRight: 'auto'}}
+                  style={{width: 54, height: 54, marginLeft: 'auto', marginRight: 'auto'}}
                 >
                   <img src={versusIcon} />
                 </GridTile>
@@ -195,43 +213,35 @@ class BetForm extends Component {
                     fullWidth={true}
                     name="team_1_title"
                     value={this.state.team_1_title}
-                    placeholder="Team 1"
-                    onChange={this.handleOnChange}
-                  />
-                </GridTile>
-                <GridTile>
-                  <TextField
-                    fullWidth={true}
-                    name="team_1_id"
-                    value={this.state.team_1_id}
-                    placeholder="Team 1 oracle id"
+                    floatingLabelText="Team 1"
                     onChange={this.handleOnChange}
                   />
                 </GridTile>
                 <GridTile
                   style={{marginTop: '10px'}}
-                  cols={2.5}
+                  cols={3}
                 >
-                  <TextField
-                    fullWidth={true}
-                    name="url_oraclize"
-                    value={this.state.url_oraclize}
-                    placeholder="Oraclize URL"
-                    onChange={this.handleOnChange}
-                  />
-                </GridTile>
-                <GridTile
-                  style={{marginTop: '10px'}}
-                  cols={2.5}
-                >
-                  {/*TODO: display a list of categories as select box*/}
-                  <TextField
-                    fullWidth={true}
-                    name="category"
+                  <SelectField
+                    autoWidth={true}
+                    floatingLabelText="Category"
                     value={this.state.category}
-                    placeholder="Category"
-                    onChange={this.handleOnChange}
-                  />
+                    onChange={this.handleCategoryChange}
+                  >
+                    {this.menuItem(CATEGORIES, this.state.category)}
+                  </SelectField>
+                </GridTile>
+                <GridTile
+                  style={{marginTop: '10px'}}
+                  cols={3}
+                >
+                  <SelectField
+                    autoWidth={true}
+                    floatingLabelText="Arbiter Address"
+                    value={this.state.arbiterAddress}
+                    onChange={this.handleArbiterAddressChange}
+                  >
+                    {this.menuItem(ARBITER_ADDRESSES, this.state.arbiterAddress)}
+                  </SelectField>
                 </GridTile>
               </GridList>
               <GridList
@@ -243,16 +253,16 @@ class BetForm extends Component {
                   <DatePicker
                     autoOk={true}
                     floatingLabelText="Starts in"
-                    defaultDate={this.state.timestamp_match_begin}
-                    onChange={this.handleChangeTimestampBegin}
+                    defaultDate={this.state.timestampMatchBegin}
+                    onChange={this.handleChangeTimestampMatchBegin}
                   />
                 </GridTile>
                 <GridTile>
                   <DatePicker
                     autoOk={true}
                     floatingLabelText="Ends in"
-                    defaultDate={this.state.timestamp_match_end}
-                    onChange={this.handleChangetimestamp_match_end}
+                    defaultDate={this.state.timestampMatchEnd}
+                    onChange={this.handleChangeTimestampMatchEnd}
                   />
                 </GridTile>
               </GridList>
@@ -266,22 +276,21 @@ class BetForm extends Component {
                     <GridList
                       style={{flexWrap: 'nowrap'}}
                       cellHeight={'auto'}
-                      cols={2}
                     >
                     <GridTile>
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Hard deadline"
-                        defaultDate={this.state.timestamp_hard_deadline}
-                        onChange={this.handleChangetimestamp_hard_deadline}
+                        defaultDate={this.state.timestampArbiterDeadline}
+                        onChange={this.handleChangeTimestampArbiterDeadline}
                       />
                     </GridTile>
                     <GridTile>
                       <DatePicker
                         autoOk={true}
                         floatingLabelText="Terminate deadline"
-                        defaultDate={this.state.timestamp_terminate_deadline}
-                        onChange={this.handleChangeTimestampTeminateDeadline}
+                        defaultDate={this.state.timestampSelfDestructDeadline}
+                        onChange={this.handleChangeTimestampSelfDestructDeadline}
                       />
                     </GridTile>
                   </GridList>
