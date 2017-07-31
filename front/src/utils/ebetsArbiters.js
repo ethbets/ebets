@@ -12,13 +12,9 @@ const EbetsArbiters = {
     }
   },
 
-  addresses: () => {
-    let addresses = [];
-    _.each(ArbitersJson, (networks, key) => {
-      addresses.push(_.map(networks, 'address'));
-    });
-    return _.flattenDeep(addresses);
-  }
+  addressOf: (arbiter, networkId = NETWORK_ID) => { return ArbitersJson[arbiter][networkId].address },
+
+  arbiters: () => { return _.keys(ArbitersJson) }
 }
 
 export default EbetsArbiters;
