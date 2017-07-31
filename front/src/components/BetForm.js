@@ -209,7 +209,7 @@ class BetForm extends Component {
                     fullWidth={true}
                     name="team0Name"
                     value={this.state.team0Name}
-                    floatingLabelText="Team 0"
+                    floatingLabelText="Team Name"
                     onChange={this.handleOnChange}
                   />
                 </GridTile>
@@ -223,7 +223,7 @@ class BetForm extends Component {
                     fullWidth={true}
                     name="team1Name"
                     value={this.state.team1Name}
-                    floatingLabelText="Team 1"
+                    floatingLabelText="Team Name"
                     onChange={this.handleOnChange}
                   />
                 </GridTile>

@@ -1,4 +1,4 @@
-import {stepperState, contractStates, betState} from './betStates';
+import {stepperState, contractStates, betState, betTimeStates} from './betStates';
 
 const stateTransitionFunctions = {
   fromBetStateToCurrentState: (currentState, hasBetOnTeam) => {
@@ -38,6 +38,58 @@ const stateTransitionFunctions = {
       newStepperState = stepperState.matchEnded;
     }
     return { newOverAllState: newOverAllState, newStepperState: newStepperState };
+  },
+
+  fromTimerStateToCurrentState : (currentState, timerState) => {
+    var newState = null;
+    if (timerState === betTimeStates.matchOpen) {
+      if (currentState !== betState.matchOpen)
+        newState = {
+          currentBetState: betState.matchOpen,
+          stepperState: stepperState.matchOpen
+        };
+    }
+    else if (timerState === betTimeStates.matchRunning) {
+      if (currentState <= betState.matchRunning)
+        newState = {
+          currentBetState: betState.matchRunning,
+          stepperState: stepperState.matchRunning
+        };
+    }
+    else if (timerState === betTimeStates.matchEnded) {
+      if ((currentState !== betState.calledArbiter) &&
+          (currentState !== betState.draw) &&
+          (currentState !== betState.team0Won) &&
+          (currentState !== betState.team1Won) &&
+          (currentState !== betState.arbiterUndecided) &&
+          (currentState !== betState.shouldCallArbiter))
+        newState = {
+          currentBetState: betState.shouldCallArbiter,
+          stepperState: stepperState.matchEnded
+        };
+    }
+    else if (timerState === betTimeStates.matchExpired) {
+      if ((currentState !== betState.draw) &&
+          (currentState !== betState.team0Won) &&
+          (currentState !== betState.team1Won) &&
+          (currentState !== betState.arbiterUndecided) &&
+          (currentState !== betState.betExpired))
+      newState = {
+        currentBetState: betState.betExpired,
+        stepperState: stepperState.matchEnded
+      };
+    }
+    else if (timerState === betTimeStates.matchDestruct) {
+      if ((currentState !== betState.draw) &&
+          (currentState !== betState.team0Won) &&
+          (currentState !== betState.team1Won) &&
+          (currentState !== betState.betTerminate))
+      newState = {
+        currentBetState: betState.betTerminate,
+        stepperState: stepperState.matchEnded
+      };
+    }
+    return newState;
   }
 };
 export default stateTransitionFunctions;

@@ -20,7 +20,7 @@ import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import getWeb3 from 'utils/getWeb3';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
-import {betTimeStates, betState, stepperState} from 'utils/betStates';
+import {betState, stepperState} from 'utils/betStates';
 import Timer from './Timer';
 import Arbiters from './Arbiters';
 
@@ -60,54 +60,11 @@ class Bet extends Component {
     return null;
   };
 
-  updateStateFromTimer(newState) {
-    if (newState === betTimeStates.matchOpen) {
-      if (this.state.currentBetState !== betState.matchOpen)
-        this.setState({
-          currentBetState: betState.matchOpen,
-          stepperState: stepperState.matchOpen
-        });
-    }
-    else if (newState === betTimeStates.matchRunning) {
-      if (this.state.currentBetState <= betState.matchRunning)
-        this.setState({
-          currentBetState: betState.matchRunning,
-          stepperState: stepperState.matchRunning
-        });
-    }
-    else if (newState === betTimeStates.matchEnded) {
-      if ((this.state.currentBetState !== betState.calledArbiter) &&
-          (this.state.currentBetState !== betState.draw) &&
-          (this.state.currentBetState !== betState.team0Won) &&
-          (this.state.currentBetState !== betState.team1Won) &&
-          (this.state.currentBetState !== betState.arbiterUndecided) &&
-          (this.state.currentBetState !== betState.shouldCallArbiter))
-        this.setState({
-          currentBetState: betState.shouldCallArbiter,
-          stepperState: stepperState.matchEnded
-        });
-    }
-    else if (newState === betTimeStates.matchExpired) {
-      if ((this.state.currentBetState !== betState.draw) &&
-          (this.state.currentBetState !== betState.team0Won) &&
-          (this.state.currentBetState !== betState.team1Won) &&
-          (this.state.currentBetState !== betState.arbiterUndecided) &&
-          (this.state.currentBetState !== betState.betExpired))
-      this.setState({
-        currentBetState: betState.betExpired,
-        stepperState: stepperState.matchEnded
-      });
-    }
-    else if (newState === betTimeStates.matchDestruct) {
-      if ((this.state.currentBetState !== betState.draw) &&
-          (this.state.currentBetState !== betState.team0Won) &&
-          (this.state.currentBetState !== betState.team1Won) &&
-          (this.state.currentBetState !== betState.betTerminate))
-      this.setState({
-        currentBetState: betState.betTerminate,
-        stepperState: stepperState.matchEnded
-      });
-    }
+  updateStateFromTimer(timerState) {
+    const newState = stateTransitionFunctions.fromTimerStateToCurrentState(
+      this.state.currentBetState, timerState);
+    if (newState !== null)
+      this.setState(newState);
   }
 
   handleCloseDialog = () => {
@@ -116,7 +73,7 @@ class Bet extends Component {
 
   BetStatusDialog = () => {
     const actions = [
-      <FlatButton
+      <FlatButton key='ok'
         label="Ok"
         primary={true}
         keyboardFocused={true}
@@ -354,12 +311,13 @@ class Bet extends Component {
       },
       betContractInstance: betContractInstance
     });
-    var allBetEvents = betContractInstance.allEvents({
+    // Only watch new events
+    var laterEvents = betContractInstance.allEvents({
       fromBlock: 'latest',
       toBlock: 'latest'
     });
     
-    allBetEvents.watch((error, response) => {
+    laterEvents.watch((error, response) => {
       if (response.event === 'NewBet') {
         if (response.args.forTeam === false)
           this.setState(previousState => (
