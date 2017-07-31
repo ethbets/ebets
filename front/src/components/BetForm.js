@@ -17,9 +17,11 @@ import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
-import 'assets/stylesheets/BetForm.css'
+import 'assets/stylesheets/BetForm.css';
 
-import Arbiters from './Arbiters'
+import Arbiters from './Arbiters';
+import ebetsCategories from 'utils/ebetsCategories';
+
 //TODO: put this in a configruation file
 const ARBITER_DEADLINE_PERIOD = 7
 const SELF_DESTRUCT_DEADLINE_PERIOD = 14
@@ -28,7 +30,6 @@ class BetForm extends Component {
 
   constructor(props) {
     super(props)
-
     this.state = {
       alert: {
         open: false,
@@ -37,19 +38,8 @@ class BetForm extends Component {
       },
       ...betFields,
       allCategories: [],
-      arbiters: [],
-      selectedArbiter: "",
       web3: null
     }
-  }
-
-  setArbiters = () => {
-    this.setState({ arbiters: Arbiters.arbiters() });
-  }
-
-  setCategories = () => {
-    // TODO: get all categories, don't make this hardcoded
-    this.setState({ allCategories: ["League Of Legends", "CS-GO", "UFC", "Soccer"] });
   }
 
   initializeTimestamps = () => {
@@ -62,16 +52,24 @@ class BetForm extends Component {
     });
   }
 
+  parsedCategories() {
+    return ebetsCategories.map(category => (
+        <div key={category.path}>
+          {category.name}
+        </div>
+      ))
+  }
+
   menuItem(all, selected) {
-    return all.map((name) => (
+    return all.map((name, idx) => { return(
       <MenuItem
-        key={name}
+        key={name.key}
         insetChildren={true}
-        checked={_.isEmpty(selected) && selected.indexOf(name) >= 0}
-        value={name}
+        //checked={_.isEmpty(selected) && selected >= 0}
+        value={name.key}
         primaryText={name}
       />
-    ));
+    )});
   }
 
   //TODO Add a toltip with arbiter description
@@ -137,10 +135,7 @@ class BetForm extends Component {
     .catch(() => {
       console.log('Error finding web3.');
     })
-
     this.initializeTimestamps();
-    this.setArbiters();
-    this.setCategories();
   }
 
   createContract() {
@@ -157,11 +152,11 @@ class BetForm extends Component {
         new BigNumber(moment(this.state.timestampArbiterDeadline).unix()),
         new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
       ];
-
-      const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
-
+      console.log('Arbiter address', this.state.selectedArbiter);
+      //const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
+      
       let createdBet = instance.createBet(
-        arbiterAddress,
+        this.state.selectedArbiter,
         this.state.team0Name,
         this.state.team1Name,
         this.state.category,
@@ -245,7 +240,7 @@ class BetForm extends Component {
                     value={this.state.category}
                     onChange={this.handleCategoryChange}
                   >
-                    {this.menuItem(this.state.allCategories, this.state.category)}
+                    {this.menuItem(this.parsedCategories(), this.state.category)}
                   </SelectField>
                 </GridTile>
                 <GridTile>
@@ -255,13 +250,13 @@ class BetForm extends Component {
                     value={this.state.selectedArbiter}
                     onChange={this.handleArbiterChange}
                   >
-                    {this.menuItem(this.state.arbiters, this.state.selectedArbiter)}
+                    {this.menuItem(Arbiters.arbiters(true), this.state.selectedArbiter)}
                    </SelectField>
                 </GridTile>
                 <GridTile>
                   <DatePicker
                     autoOk={true}
-                    floatingLabelText="Starts in"
+                    floatingLabelText="Starts at"
                     defaultDate={this.state.timestampMatchBegin}
                     onChange={this.handleChangeTimestampMatchBegin}
                   />
@@ -269,7 +264,7 @@ class BetForm extends Component {
                 <GridTile>
                   <DatePicker
                     autoOk={true}
-                    floatingLabelText="Ends in"
+                    floatingLabelText="Ends at"
                     defaultDate={this.state.timestampMatchEnd}
                     onChange={this.handleChangeTimestampMatchEnd}
                   />

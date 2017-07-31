@@ -237,7 +237,6 @@ class BetController extends Component {
         return <this.ArbiterExpandedMatch />
       }
       const ArbiterInfo =  Arbiters.getArbiterInfo(this.props.arbiterInfo);
-      console.log(this.props.arbiterInfo)
       return (
         <div>
           <div className='betRow'>

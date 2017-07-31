@@ -45,16 +45,25 @@ class Arbiters extends Component {
     return ArbitersJson[arbiter][networkId].address
   }
 
-  static arbiters(){
-    return _.keys(ArbitersJson).map(arbiter => (
-      <Badge 
-        style={{ padding: 0, height:40 }}
-        badgeStyle={{ bottom: 25, left: 70}}
+  static arbiters(withOther = false){
+    var arbiters =  _.keys(ArbitersJson).map(arbiter => { return(
+      <Badge key={ArbitersJson[arbiter][NETWORK_ID].address} 
+        style={{ padding: 0, height: 40 }}
+        badgeStyle={{ bottom: 25, left: 70 }}
         badgeContent={<IconButton tooltip='Verified!'><DoneIcon color={greenA200}/></IconButton>}
       >
       {arbiter}
       </Badge>
-    ));
+    )})
+    if (withOther)
+      arbiters.push(
+      <Badge key={'other'} 
+          style={{ padding: 0, height: 40 }}
+          badgeStyle={{ bottom: 25, left: 40 }}
+          badgeContent={<IconButton tooltip='Not verified!'><WarningIcon color={red500}/></IconButton>}
+        >Other
+        </Badge>);
+    return arbiters;
   }
 
   render() {
