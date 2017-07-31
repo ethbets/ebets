@@ -37,19 +37,19 @@ class BetForm extends Component {
       },
       ...betFields,
       allCategories: [],
-      arbiterAddresses: [],
-      selectedArbiterAddress: "",
+      arbiters: [],
+      selectedArbiter: "",
       web3: null
     }
   }
 
-  setArbiterAddresses = () => {
-    this.setState({ arbiterAddresses: EbetsArbiters.addresses() });
+  setArbiters = () => {
+    this.setState({ arbiters: EbetsArbiters.arbiters() });
   }
 
   setCategories = () => {
     // TODO: get all categories, don't make this hardcoded
-    this.setState({ allCategories: ["E-Sports", "UFC"] });
+    this.setState({ allCategories: ["League Of Legends", "CS-GO", "UFC", "Soccer"] });
   }
 
   initializeTimestamps = () => {
@@ -74,9 +74,10 @@ class BetForm extends Component {
     ));
   }
 
-  handleArbiterAddressChange = (event, index, value) => {
+  //TODO Add a toltip with arbiter description
+  handleArbiterChange = (event, index, value) => {
     // TODO: handle optional textfield input
-    this.setState({ selectedArbiterAddress: value });
+    this.setState({ selectedArbiter: value });
   }
 
   handleCategoryChange = (event, index, value) => {
@@ -138,7 +139,7 @@ class BetForm extends Component {
     })
 
     this.initializeTimestamps();
-    this.setArbiterAddresses();
+    this.setArbiters();
     this.setCategories();
   }
 
@@ -157,8 +158,10 @@ class BetForm extends Component {
         new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
       ];
 
+      const arbiterAddress = EbetsArbiters.addressOf(this.state.selectedArbiter)
+
       let createdBet = instance.createBet(
-        this.state.selectedArbiterAddress,
+        arbiterAddress,
         this.state.team0Name,
         this.state.team1Name,
         this.state.category,
@@ -229,10 +232,13 @@ class BetForm extends Component {
                     onChange={this.handleOnChange}
                   />
                 </GridTile>
-                <GridTile
-                  style={{marginTop: '10px'}}
-                  cols={3}
-                >
+              </GridList>
+              <GridList
+                className='gridList'
+                style={{flexWrap: 'nowrap', marginTop: '10px'}}
+                cellHeight={'auto'}
+              >
+                <GridTile>
                   <SelectField
                     autoWidth={true}
                     floatingLabelText="Category"
@@ -242,25 +248,16 @@ class BetForm extends Component {
                     {this.menuItem(this.state.allCategories, this.state.category)}
                   </SelectField>
                 </GridTile>
-                <GridTile
-                  style={{marginTop: '10px'}}
-                  cols={3}
-                >
+                <GridTile>
                   <SelectField
                     autoWidth={true}
-                    floatingLabelText="Arbiter Address"
-                    value={this.state.selectedArbiterAddress}
-                    onChange={this.handleArbiterAddressChange}
+                    floatingLabelText="Arbiter"
+                    value={this.state.selectedArbiter}
+                    onChange={this.handleArbiterChange}
                   >
-                    {this.menuItem(this.state.arbiterAddresses, this.state.selectedArbiterAddress)}
-                  </SelectField>
+                    {this.menuItem(this.state.arbiters, this.state.selectedArbiter)}
+                   </SelectField>
                 </GridTile>
-              </GridList>
-              <GridList
-                className='gridList'
-                style={{flexWrap: 'nowrap'}}
-                cellHeight={'auto'}
-              >
                 <GridTile>
                   <DatePicker
                     autoOk={true}
@@ -292,7 +289,7 @@ class BetForm extends Component {
                     <GridTile>
                       <DatePicker
                         autoOk={true}
-                        floatingLabelText="Hard deadline"
+                        floatingLabelText="Arbiter deadline"
                         defaultDate={this.state.timestampArbiterDeadline}
                         onChange={this.handleChangeTimestampArbiterDeadline}
                       />
@@ -300,7 +297,7 @@ class BetForm extends Component {
                     <GridTile>
                       <DatePicker
                         autoOk={true}
-                        floatingLabelText="Terminate deadline"
+                        floatingLabelText="Self Destruction deadline"
                         defaultDate={this.state.timestampSelfDestructDeadline}
                         onChange={this.handleChangeTimestampSelfDestructDeadline}
                       />
