@@ -54,6 +54,27 @@ class Bet extends Component {
     }
   }
 
+  hasBet = (betContractInstance) => {
+    return new Promise((resolve, reject) => {
+      var betEvents = betContractInstance.allEvents({
+        fromBlock: 0,
+        toBlock: 'latest'});
+      //this.setState({myBetsFilter: filter});
+      betEvents.get((error, result) => {
+        if (error) 
+          reject(error);
+        else {
+          for (var betEvent in result)
+            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
+              resolve(true);
+              return;
+            }
+          resolve(false);
+        }
+      });
+    });
+  }
+
   LinearProgressCustom = () => {
     if (this.state.transactionInProcess)
       return <LinearProgress mode="indeterminate" />;
@@ -191,13 +212,14 @@ class Bet extends Component {
         />
       </div>;
       // My bets
-      if ((this.props.category  === 'my_bets' && this.state.hasBetOnTeam.team !== null) ||
-        // This category
-        (this.props.category === this.state.category && this.state.isFeatured) ||
-        // All the bets
-        (this.props.category === 'all_bets' && this.state.isFeatured) ||
-        // Unfeatured and unfeatured category
-        (this.props.category === 'unfeatured' && !this.state.isFeatured))
+      if ((this.props.category === 'my_bets') && (this.state.hasEverBetOnATeam)||
+          // This category
+          (this.props.category === this.state.category && this.state.isFeatured) ||
+          // All the bets
+          (this.props.category === 'all_bets' && this.state.isFeatured) ||
+          // Unfeatured bets
+          (this.props.category === 'unfeatured' && !this.state.isFeatured)) {
+        
         return (
           <Card
             // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
@@ -232,6 +254,7 @@ class Bet extends Component {
           <this.LinearProgressCustom mode="indeterminate" />
           </Card>
         );
+      }
       return null;
     }
     
@@ -287,7 +310,7 @@ class Bet extends Component {
     
     const betToTeam = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
                       ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
-
+    
     const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
       stateObjects.betState.toNumber(), betToTeam);
 
@@ -299,7 +322,7 @@ class Bet extends Component {
                  (betToTeam === true) ? betsToTeam1 : new BigNumber(0)
       },
       currentBetState: newStates.newOverAllState,
-      stepperState: newStates.newStepperState
+      stepperState: newStates.newStepperState,
     });
 
     this.setState({
