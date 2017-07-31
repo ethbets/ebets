@@ -9,6 +9,8 @@ import Master from './components/Master';
 import FAQ from './components/FAQ';
 import Ebets from './components/Ebets';
 import CreateBet from './components/BetForm';
+import Arbiters from './components/Arbiters';
+
 
 const Routes = (
   <Route path='/' component={Master}> 
@@ -19,6 +21,7 @@ const Routes = (
     </Route>
     <Route path='new_bet' component={CreateBet} />
     <Route path='faq' component={FAQ} />
+    <Route path='arbiters' component={Arbiters} />
   </Route>
 );
 

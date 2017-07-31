@@ -22,7 +22,7 @@ import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
 import {betTimeStates, betState, stepperState} from 'utils/betStates';
 import Timer from './Timer';
-import EbetsArbiters from 'utils/ebetsArbiters';
+import Arbiters from './Arbiters';
 
 
 import BigNumber from 'bignumber.js';
@@ -39,7 +39,7 @@ class Bet extends Component {
       currentBetState: 0, // Overall current bet state (from time and contract state)
       betShoudlBeAtState: 0, // Related to time
       stepperState: 0,
-      hasBetOnTeam: null, // null: no team or {team: false/true, value: amount}
+      hasBetOnTeam: {team: null, value: new BigNumber(0)}, // {team: false/true/null, value: amount}
       open: false,
       betHappened: false,
       betStatusMessage: '',
@@ -233,8 +233,8 @@ class Bet extends Component {
                terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
       </div>;
-      // My bets        
-      if ((this.props.category  === 'my_bets' && this.state.hasBetOnTeam !== null) ||
+      // My bets
+      if ((this.props.category  === 'my_bets' && this.state.hasBetOnTeam.team !== null) ||
         // This category
         (this.props.category === this.state.category && this.state.isFeatured) ||
         // All the bets
@@ -350,7 +350,7 @@ class Bet extends Component {
       arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {
         name: await arbiterContractInstance.getName(),
-        verified: EbetsArbiters.isVerifiedArbiter(arbiterContractInstance.address)
+        verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address)
       },
       betContractInstance: betContractInstance
     });
@@ -370,8 +370,8 @@ class Bet extends Component {
 
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState(previousState => {
-            if (previousState.hasBetOnTeam === null)
-              previousState.hasBetOnTeam = {
+            if (previousState.hasBetOnTeam.team === null)
+              previousState.hasBetOnTeam.team = {
                 team: response.args.forTeam,
                 amount: response.args.amount
               };
@@ -401,7 +401,7 @@ class Bet extends Component {
       }})}, 15000);
       setTimeout(() => {this.setState(() => {
       var shouldPay = stepperState.matchDecision;
-      if (this.state.hasBetOnTeam !== null)
+      if (this.state.hasBetOnTeam.team !== null)
         shouldPay = stepperState.payout;
       return {
         currentBetState: betState.team0Won,

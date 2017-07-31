@@ -13,13 +13,13 @@ import MenuItem from 'material-ui/MenuItem';
 import BigNumber from 'bignumber.js';
 
 import getWeb3 from 'utils/getWeb3';
-import EbetsArbiters from 'utils/ebetsArbiters';
 import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
 import 'assets/stylesheets/BetForm.css'
 
+import Arbiters from './Arbiters'
 //TODO: put this in a configruation file
 const ARBITER_DEADLINE_PERIOD = 7
 const SELF_DESTRUCT_DEADLINE_PERIOD = 14
@@ -44,7 +44,7 @@ class BetForm extends Component {
   }
 
   setArbiters = () => {
-    this.setState({ arbiters: EbetsArbiters.arbiters() });
+    this.setState({ arbiters: Arbiters.arbiters() });
   }
 
   setCategories = () => {
@@ -158,7 +158,7 @@ class BetForm extends Component {
         new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
       ];
 
-      const arbiterAddress = EbetsArbiters.addressOf(this.state.selectedArbiter)
+      const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
 
       let createdBet = instance.createBet(
         arbiterAddress,

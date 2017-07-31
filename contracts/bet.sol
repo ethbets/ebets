@@ -83,7 +83,7 @@ contract Bet is ProposalInterface{
     team0Name = _team0Name;
     team1Name = _team1Name;
     category = _category;
-    // TODO: PUT BACK TIMESTAMP_MARGIN SUMS
+    // TODO: PUT BACK TIMESTAMP_MARGIN SUMS, PUT REQUIRES!
     timestampMatchBegin = _timestamps[0];// - TIMESTAMP_MARGIN;
     timestampMatchEnd = _timestamps[1];// + TIMESTAMP_MARGIN;
     timestampArbiterDeadline = _timestamps[2];// + TIMESTAMP_MARGIN;
