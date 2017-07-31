@@ -2,8 +2,7 @@
 var Monarchy = require('../build/contracts/Monarchy.json');
 var fs = require('fs');
 
-jsonFiles = {
-};
+jsonFiles = {};
 
 jsonFiles['Monarchy'] = {
   name: 'Monarchy', 
