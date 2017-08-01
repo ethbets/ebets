@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
-
+import contract from 'truffle-contract'
 import React, { Component } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
-import DatePicker from 'material-ui/DatePicker';
+import DateTimePicker from './DateTimePicker';
+
 import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import {GridList, GridTile} from 'material-ui/GridList';
@@ -90,11 +91,11 @@ class BetForm extends Component {
     this.setState({ [name]: value });
   };
 
-  handleChangeTimestampMatchBegin = (event, date) => {
+  handleChangeTimestampMatchBegin = (date) => {
     this.setState({ timestampMatchBegin: date });
   };
 
-  handleChangeTimestampMatchEnd= (event, date) => {
+  handleChangeTimestampMatchEnd= (date) => {
     this.setState({
       timestampMatchEnd: date,
       timestampArbiterDeadline: moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
@@ -102,11 +103,11 @@ class BetForm extends Component {
     });
   };
 
-  handleChangeTimestampArbiterDeadline = (event, date) => {
+  handleChangeTimestampArbiterDeadline = (date) => {
     this.setState({ timestampArbiterDeadline: date });
   };
 
-  handleChangeTimestampSelfDestructDeadline = (event, date) => {
+  handleChangeTimestampSelfDestructDeadline = (date) => {
     this.setState({ timestampSelfDestructDeadline: date });
   };
 
@@ -139,7 +140,6 @@ class BetForm extends Component {
   }
 
   createContract() {
-    const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(this.state.web3.currentProvider);
 
@@ -254,7 +254,7 @@ class BetForm extends Component {
                    </SelectField>
                 </GridTile>
                 <GridTile>
-                  <DatePicker
+                  <DateTimePicker
                     autoOk={true}
                     floatingLabelText="Starts at"
                     defaultDate={this.state.timestampMatchBegin}
@@ -262,7 +262,7 @@ class BetForm extends Component {
                   />
                 </GridTile>
                 <GridTile>
-                  <DatePicker
+                  <DateTimePicker
                     autoOk={true}
                     floatingLabelText="Ends at"
                     defaultDate={this.state.timestampMatchEnd}
@@ -282,7 +282,7 @@ class BetForm extends Component {
                       cellHeight={'auto'}
                     >
                     <GridTile>
-                      <DatePicker
+                      <DateTimePicker
                         autoOk={true}
                         floatingLabelText="Arbiter deadline"
                         defaultDate={this.state.timestampArbiterDeadline}
@@ -290,7 +290,7 @@ class BetForm extends Component {
                       />
                     </GridTile>
                     <GridTile>
-                      <DatePicker
+                      <DateTimePicker
                         autoOk={true}
                         floatingLabelText="Self Destruction deadline"
                         defaultDate={this.state.timestampSelfDestructDeadline}
