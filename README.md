@@ -16,6 +16,7 @@ npm start
 
 ## Basics:
 The contract roles are:
+
 1. Ebets
 2. User
 3. Arbiter
@@ -27,11 +28,13 @@ Think of Ebets as a bets deposit, it will keep track of every bet created in the
 and index them accordingly.
 
 The Ebets' power over a bet is very limited and it can only:
+
 * Feature and unfeature a bet
 * Change bet's category
 
 #### User
 User can:
+
 * Create bets
 * Bet
 * Collect rewards
