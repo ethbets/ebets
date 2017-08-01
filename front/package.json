@@ -33,10 +33,9 @@
     "watch-css": "NODE_PATH=src npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "test": "NODE_PATH=src react-scripts test --env=jsdom",
     "eject": "NODE_PATH=src react-scripts eject",
-    "start-js": "PORT=3001 NODE_PATH=src react-scripts start",
+    "start-js": "./generateArbitersFile.js && PORT=3001 NODE_PATH=src react-scripts start",
     "start": "NODE_PATH=src npm-run-all -p watch-css start-js",
-    "build": "NODE_PATH=src npm run build-css && react-scripts build",
-    "old-start": "NODE_PATH=src react-scripts start"
+    "build": "NODE_PATH=src npm run build-css && react-scripts build"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
