@@ -154,7 +154,6 @@ class BetForm extends Component {
       ];
 
       //const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
-      console.log(this.state.selectedArbiter, this.state.team0Name, this.state.team1Name, this.state.category, timestamps)
       let createdBet = instance.createBet(
         this.state.selectedArbiter,
         this.state.team0Name,
