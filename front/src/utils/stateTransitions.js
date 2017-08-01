@@ -50,7 +50,7 @@ const stateTransitionFunctions = {
         };
     }
     else if (timerState === betTimeStates.matchRunning) {
-      if (currentState <= betState.matchRunning)
+      if (currentState === betState.matchOpen)
         newState = {
           currentBetState: betState.matchRunning,
           stepperState: stepperState.matchRunning

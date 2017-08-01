@@ -54,27 +54,6 @@ class Bet extends Component {
     }
   }
 
-  hasBet = (betContractInstance) => {
-    return new Promise((resolve, reject) => {
-      var betEvents = betContractInstance.allEvents({
-        fromBlock: 0,
-        toBlock: 'latest'});
-      //this.setState({myBetsFilter: filter});
-      betEvents.get((error, result) => {
-        if (error) 
-          reject(error);
-        else {
-          for (var betEvent in result)
-            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
-              resolve(true);
-              return;
-            }
-          resolve(false);
-        }
-      });
-    });
-  }
-
   LinearProgressCustom = () => {
     if (this.state.transactionInProcess)
       return <LinearProgress mode="indeterminate" />;
@@ -84,8 +63,9 @@ class Bet extends Component {
   updateStateFromTimer(timerState) {
     const newState = stateTransitionFunctions.fromTimerStateToCurrentState(
       this.state.currentBetState, timerState);
-    if (newState !== null)
+    if (newState !== null) {
       this.setState(newState);
+    }
   }
 
   handleCloseDialog = () => {
@@ -142,6 +122,7 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
+    console.log(teamToBet, this.state.teamTo)
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
@@ -232,9 +213,9 @@ class Bet extends Component {
                resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
                terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
-      </div>;
-      // My bets
-      if ((this.props.category === 'my_bets') && (this.state.hasEverBetOnATeam)||
+  </div>;
+      if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null
+                                                 || this.state.hasEverBet)) ||
           // This category
           (this.props.category === this.state.category && this.state.isFeatured) ||
           // All the bets
@@ -295,6 +276,37 @@ class Bet extends Component {
       console.error('Error finding web3', err);
     });
   }
+  
+  hasBet = (betContractInstance) => {
+    return new Promise((resolve, reject) => {
+      var betEvents = betContractInstance.allEvents({
+        fromBlock: 0,
+        toBlock: 'latest'});
+      //this.setState({myBetsFilter: filter});
+      betEvents.get((error, result) => {
+        if (error) 
+          reject(error);
+        else {
+          for (var betEvent in result)
+            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
+              resolve(true);
+              return;
+            }
+          resolve(false);
+        }
+      });
+    });
+  }
+  // If path is my_bets, should see if bet in some team
+  componentWillReceiveProps() {
+    if (this.state.betContractInstance !== undefined) {
+      this.hasBet(this.state.betContractInstance)
+      .then(hasEverBet => {
+        if (hasEverBet)
+          this.setState({hasEverBet: true});
+      });
+    }
+  }
         
   async instantiateContract() {
     var objs = {loadCompleted: true};
@@ -340,19 +352,23 @@ class Bet extends Component {
     
     const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
       stateObjects.betState.toNumber(), betToTeam);
-
+    
+    // Should check if has bet
+    var hasEverBet = false;
+    if (this.props.category === 'my_bets') {
+      hasEverBet = await this.hasBet(betContractInstance);
+    }
     this.setState({
       ...stateObjects,
-      hasBetOnTeam : {
-        team : betToTeam,
-        amount : (betToTeam === false) ? betsToTeam0 : 
+      hasBetOnTeam: {
+        team: betToTeam,
+        amount: (betToTeam === false) ? betsToTeam0 : 
                  (betToTeam === true) ? betsToTeam1 : new BigNumber(0)
       },
+      hasEverBet: hasEverBet,
       currentBetState: newStates.newOverAllState,
       stepperState: newStates.newStepperState,
-    });
 
-    this.setState({
       isArbiter: isArbiter,
       arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {

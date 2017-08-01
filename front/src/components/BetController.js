@@ -114,7 +114,9 @@ class BetController extends Component {
         disabled={(this.props.currentBetState !== betState.matchOpen)}
         className="betBtn"
         primary={true}
-        onTouchTap={() => this.props.betOnTeamFunction(this.state.selectedTeam, this.state.amountToBet)}
+        onTouchTap={() => this.props.betOnTeamFunction(
+                          this.state.selectedTeam ||
+                          this.props.hasBetOnTeam.team, this.state.amountToBet)}
       ><span>Bet</span>
       </RaisedButton>
       )
