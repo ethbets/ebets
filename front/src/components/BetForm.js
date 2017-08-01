@@ -98,8 +98,8 @@ class BetForm extends Component {
   handleChangeTimestampMatchEnd= (date) => {
     this.setState({
       timestampMatchEnd: date,
-      timestampArbiterDeadline: moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
-      timestampSelfDestructDeadline: moment(date).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate(),
+      timestampArbiterDeadline: date.add(ARBITER_DEADLINE_PERIOD, 'days'),
+      timestampSelfDestructDeadline: date.add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days')
     });
   };
 
@@ -152,9 +152,9 @@ class BetForm extends Component {
         new BigNumber(moment(this.state.timestampArbiterDeadline).unix()),
         new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
       ];
-      console.log('Arbiter address', this.state.selectedArbiter);
+
       //const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
-      
+      console.log(this.state.selectedArbiter, this.state.team0Name, this.state.team1Name, this.state.category, timestamps)
       let createdBet = instance.createBet(
         this.state.selectedArbiter,
         this.state.team0Name,

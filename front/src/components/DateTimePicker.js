@@ -11,7 +11,7 @@ class DateTimePicker extends Component {
     super(props);
     this.state = {
       _selectedDate: null,
-      dateTime: null
+      dateTime: this.props.defaultDate
     }
   }
   
@@ -42,10 +42,11 @@ class DateTimePicker extends Component {
   dateTimeFormatter = (date) => {
     if (this.state.dateTime === null)
       return moment(date).format('LLLL');
-    return this.state.dateTime.format('LLLL');
+    return moment(this.state.dateTime).format('LLLL');
   }
 
   render() {
+    
     return (
       <div>
         <TimePickerDialog ref={(e) => this.dueDatePicker = e}
@@ -55,7 +56,8 @@ class DateTimePicker extends Component {
                   />
         <DatePicker floatingLabelText={this.props.floatingLabelText}
                     formatDate={this.dateTimeFormatter}
-                    //value={}
+                    //value={this.state.dateTime}
+                    defaultDate={this.props.defaultDate}
                     onChange={this.onSelectedDate}
         />
       </div>
