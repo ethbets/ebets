@@ -104,7 +104,7 @@ class Bet extends Component {
 
     return (
       <Dialog
-        title="Bet status"
+        title="Transaction Status"
         actions={actions}
         modal={false}
         open={this.state.betHappened}
@@ -115,19 +115,20 @@ class Bet extends Component {
     )
   }
 
-  transactionHappened = betPromisse => {
+  transactionHappened = betPromise => {
     var err = null;
     this.setState({ transactionInProcess: true });
-    return betPromisse.then(tx => {
+    return betPromise.then(tx => {
       return this.setState({
-        betStatusMessage: `Transaction OK
-        \n\nTransaction hash: ${tx.tx}
-        \n\nAppended in block: ${tx.receipt.blockNumber}\n`
+        betStatusMessage: <div>Transaction OK
+        <br/>Transaction hash: {tx.tx}
+        <br/>Appended in block: {tx.receipt.blockNumber}
+        </div>
       });
     })
     .catch(_err => {
       err = _err;
-      this.setState({betStatusMessage: `Transaction FAILED\n\nCause: ${err.toString()}`});
+      this.setState({betStatusMessage: <div>Transaction FAILED<br/>Error: {err.toString()}</div>});
     })
     .then(() => {
       this.setState({betHappened: true});
@@ -141,19 +142,40 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
-    if (this.state.betContractInstance === undefined ||
-        teamToBet === undefined ||
-        value === undefined ||
-        value <= 0) {
-      console.error('Error');
+    if (this.state.betContractInstance === undefined) {
+      this.transactionHappened(new Promise((resolve, reject) => {
+        reject('Error instantiating contract, please report that on github.');
+      }))
       return;
     }
-    const betPromisse = this.state.betContractInstance.bet(
+    if (teamToBet === null) {
+      this.transactionHappened(new Promise((resolve, reject) => {
+        reject('Must bet in a specific team!');
+      }))
+      return;
+    }
+    if (this.state.web3.eth.accounts.length === 0) {
+      this.transactionHappened(new Promise((resolve, reject) => {
+        reject('You must unlock your account before betting!');
+      }))
+      return;
+    }
+    if (value === undefined ||
+        value <= 0) {
+      this.transactionHappened(new Promise((resolve, reject) => {
+        reject('Must bet more than Ξ0');
+      }))
+      return;
+    }
+      
+    const betPromise = this.state.betContractInstance.bet(
       teamToBet,
       { from: this.state.web3.eth.accounts[0],
         value: value
       });
-    this.transactionHappened(betPromisse);
+    this.transactionHappened(betPromise)
+    .catch(() => {
+    })
   };
   callArbiter = () => {
     const callArbiterPromise = this.state.betContractInstance.updateResult(
@@ -265,12 +287,9 @@ class Bet extends Component {
 
   componentWillMount() {
     getWeb3
-    .then(results => {
-      this.setState({
-        web3: results.web3
-      });
-
-      this.instantiateContract();
+    .then(async results => {
+      this.state.web3 = results.web3;
+      await this.instantiateContract();
     })
     .catch(err => {
       console.error('Error finding web3', err);
@@ -300,13 +319,21 @@ class Bet extends Component {
     const governanceAddress = await betContractInstance.arbiter();
     
     const arbiterContractInstance = arbiterContract.at(governanceAddress);
-    const isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
+    var isArbiter;
+    var betsToTeam0;
+    var betsToTeam1;
+    if (this.state.web3.eth.accounts[0] !== undefined) {
+      isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
+      betsToTeam0 = await betContractInstance.betsToTeam0(this.state.web3.eth.accounts[0]);
+      betsToTeam1 = await betContractInstance.betsToTeam1(this.state.web3.eth.accounts[0]);
+    }
+    else {
+      betsToTeam0 = new BigNumber(0);
+      betsToTeam1 = new BigNumber(0);
+    }
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
     stateObjects['cat_url'] = require('assets/imgs/' + stateObjects.category + '.png');
-    
-    const betsToTeam0 = await betContractInstance.betsToTeam0(this.state.web3.eth.accounts[0]);
-    const betsToTeam1 = await betContractInstance.betsToTeam1(this.state.web3.eth.accounts[0]);
     
     const betToTeam = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
                       ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
