@@ -24,6 +24,7 @@ import {betState, stepperState} from 'utils/betStates';
 import Timer from './Timer';
 import Arbiters from './Arbiters';
 
+import CancellationTokenSource from 'utils/CancellationTokenSource'
 
 import BigNumber from 'bignumber.js';
 const MOCK = false;
@@ -268,36 +269,21 @@ class Bet extends Component {
   }
 
   componentWillMount() {
+    var cst = new CancellationTokenSource;
+    this.setState({cancellationToken: cst});
     getWeb3
     .then(async results => {
-      this.state.web3 = results.web3;
-      await this.instantiateContract();
+      await this.instantiateContract(results.web3, cst.token);
     })
     .catch(err => {
       console.error('Error finding web3', err);
     });
   }
-  
-  hasBet = (betContractInstance) => {
-    return new Promise((resolve, reject) => {
-      var betEvents = betContractInstance.allEvents({
-        fromBlock: 0,
-        toBlock: 'latest'});
-      //this.setState({myBetsFilter: filter});
-      betEvents.get((error, result) => {
-        if (error) 
-          reject(error);
-        else {
-          for (var betEvent in result)
-            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
-              resolve(true);
-              return;
-            }
-          resolve(false);
-        }
-      });
-    });
+  componentWillUnmount() {
+    this.state.cancellationToken.cancel();
+    console.log('unmount bet');
   }
+  
   // If path is my_bets, should see if bet in some team
   componentWillReceiveProps() {
     if (this.state.betContractInstance !== undefined) {
@@ -309,7 +295,7 @@ class Bet extends Component {
     }
   }
         
-  async instantiateContract() {
+  async instantiateContract(web3, cancellationToken) {
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {
@@ -325,8 +311,8 @@ class Bet extends Component {
 
     const betContract = contract(BetJson);
     const arbiterContract = contract(GovernanceInterfaceJson);
-    arbiterContract.setProvider(this.state.web3.currentProvider);
-    betContract.setProvider(this.state.web3.currentProvider);
+    arbiterContract.setProvider(web3.currentProvider);
+    betContract.setProvider(web3.currentProvider);
 
     var betContractInstance = betContract.at(this.props.address);
     const governanceAddress = await betContractInstance.arbiter();
@@ -335,10 +321,10 @@ class Bet extends Component {
     var isArbiter;
     var betsToTeam0;
     var betsToTeam1;
-    if (this.state.web3.eth.accounts[0] !== undefined) {
-      isArbiter = await arbiterContractInstance.isMember(this.state.web3.eth.accounts[0]);
-      betsToTeam0 = await betContractInstance.betsToTeam0(this.state.web3.eth.accounts[0]);
-      betsToTeam1 = await betContractInstance.betsToTeam1(this.state.web3.eth.accounts[0]);
+    if (web3.eth.accounts[0] !== undefined) {
+      isArbiter = await arbiterContractInstance.isMember(web3.eth.accounts[0]);
+      betsToTeam0 = await betContractInstance.betsToTeam0(web3.eth.accounts[0]);
+      betsToTeam1 = await betContractInstance.betsToTeam1(web3.eth.accounts[0]);
     }
     else {
       betsToTeam0 = new BigNumber(0);
@@ -359,8 +345,11 @@ class Bet extends Component {
     if (this.props.category === 'my_bets') {
       hasEverBet = await this.hasBet(betContractInstance);
     }
+    const arbiterName = await arbiterContractInstance.getName();
+    cancellationToken.throwIfCancelled();
     this.setState({
       ...stateObjects,
+      web3: web3,
       hasBetOnTeam: {
         team: betToTeam,
         amount: (betToTeam === false) ? betsToTeam0 : 
@@ -373,7 +362,7 @@ class Bet extends Component {
       isArbiter: isArbiter,
       arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {
-        name: await arbiterContractInstance.getName(),
+        name: arbiterName,
         verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address)
       },
       betContractInstance: betContractInstance
@@ -386,6 +375,7 @@ class Bet extends Component {
     
     laterEvents.watch((error, response) => {
       if (response.event === 'NewBet') {
+        cancellationToken.throwIfCancelled();
         if (response.args.forTeam === false)
           this.setState(previousState => (
             { team0BetSum : previousState.team0BetSum.plus(response.args.amount)}));
@@ -412,6 +402,7 @@ class Bet extends Component {
         const responseState = response.args.state.toNumber();
         var newStates = stateTransitionFunctions.fromBetStateToCurrentState(
           responseState, this.state.hasBetOnTeam);
+        cancellationToken.throwIfCancelled();
         this.setState({
           currentBetState: newStates.newOverAllState,
           stepperState: newStates.newStepperState
@@ -434,6 +425,28 @@ class Bet extends Component {
     }})}, 20000);
     }
   }
+
+  hasBet = (betContractInstance) => {
+    return new Promise((resolve, reject) => {
+      var betEvents = betContractInstance.allEvents({
+        fromBlock: 0,
+        toBlock: 'latest'});
+      //this.setState({myBetsFilter: filter});
+      betEvents.get((error, result) => {
+        if (error) 
+          reject(error);
+        else {
+          for (var betEvent in result)
+            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
+              resolve(true);
+              return;
+            }
+          resolve(false);
+        }
+      });
+    });
+  }
+
   render() {
   if (!this.state.loadCompleted)
     return (<div style={{display: 'flex',

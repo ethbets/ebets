@@ -11,48 +11,62 @@ class Ebets extends Component {
     super(props);
     this.state = {
       bets: [],
-      web3: null
     }
+  }
+
+  getBets = (ebetsContractInstance) => {
+    return new Promise((resolve, reject) => {
+      var betEvents = ebetsContractInstance.allEvents({
+        fromBlock: 0,
+        toBlock: 'latest'});
+      //this.setState({myBetsFilter: filter});
+      betEvents.get((error, result) => {
+        if (error) 
+          reject(error);
+        else {
+          resolve(result.map((bet) => bet.args.betAddr));
+        }
+      });
+    });
   }
 
   componentWillMount() {
     getWeb3
-    .then(results => {
-      this.setState({
-        web3: results.web3
-      })
-      // Instantiate contract once web3 provided.
-      this.instantiateContract()
+    .then(async results => {
+      await this.instantiateContract(results.web3)
     })
     .catch(() => {
-      console.log('Error finding web3.');
+      console.error('Error finding web3.');
     })
   }
+  componentWillUnmount () {
+    this.state.betsEvents.stopWatching();
+}
 
-  instantiateContract() {
+  async instantiateContract(web3) {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
-    ebetsContract.setProvider(this.state.web3.currentProvider);
+    ebetsContract.setProvider(web3.currentProvider);
     // Get accounts.
-    this.state.web3.eth.getAccounts((error) => {
-
-      ebetsContract.deployed()
-      .then(instance => {
-        //events
-        var betsEvents = instance.allEvents({fromBlock: 0, toBlock: 'latest'});
-        betsEvents.watch((error, response) => {
-          console.log('eita', response);
-          this.setState(previousState => {
-            console.log(previousState,response.args.betAddr )
-            return { 
-              bets: previousState.bets.concat(response.args.betAddr) 
-            }
-          });
+    web3.eth.getAccounts(async (error) => {
+      if (error) {
+        console.error('Error', error);
+        return;
+      }
+      var ebetsContractInstance = await ebetsContract.deployed();
+      //events
+      const allBetsList = await this.getBets(ebetsContractInstance);
+      const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
+      betsEvents.watch((error, response) => {
+        console.log('eita', response);
+        this.setState(previousState => {
+          console.log(previousState,response.args.betAddr )
+          return {
+            bets: previousState.bets.concat(response.args.betAddr) 
+          }
         });
-      })
-      .catch(err => {
-        console.error(err);
       });
+      this.setState({ bets: allBetsList, betsEvents: betsEvents} );
     }
   );
   }
