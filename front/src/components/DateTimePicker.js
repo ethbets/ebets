@@ -16,14 +16,13 @@ class DateTimePicker extends Component {
   }
   
   onSelectedDate = (err, dateObject) => {
-    this.setState({_selectedDate : dateObject});
+    this.setState({_selectedDate : moment(dateObject)});
     this.dueDatePicker.show();
   }
 
-  onSelectedTime = (dateObject) => {
-      console.log('dateObject: ', dateObject);
+  onSelectedTime = (timeObject) => {
       const momentDate = new moment(this.state._selectedDate);
-      const momentTime = new moment(dateObject);
+      const momentTime = new moment(timeObject);
       const dateTime = new moment({
           year: momentDate.year(),
           month: momentDate.month(),
@@ -31,7 +30,7 @@ class DateTimePicker extends Component {
           hour: momentTime.hours(),
           minute: momentTime.minutes()
       });
-      this.setState({dateTime: dateTime});
+      this.setState({dateTime: dateTime.toDate()});
       this.props.onChange(dateTime);
       this.dueDatePicker.dismiss();
   }
@@ -41,13 +40,16 @@ class DateTimePicker extends Component {
   };
 
   dateTimeFormatter = (date) => {
-    if (this.state.dateTime === null)
-      return moment(date).format('LLLL');
-    return moment(this.state.dateTime).format('LLLL');
+    var returnDate;
+    if (moment(this.props.defaultDate).isAfter(moment(date))) {
+      returnDate = this.props.defaultDate;
+    }
+    else
+      returnDate = date;
+    return moment(returnDate).format('LLL');
   }
 
   render() {
-    
     return (
       <div>
         <TimePickerDialog ref={(e) => this.dueDatePicker = e}
@@ -57,7 +59,7 @@ class DateTimePicker extends Component {
                   />
         <DatePicker floatingLabelText={this.props.floatingLabelText}
                     formatDate={this.dateTimeFormatter}
-                    //value={this.state.dateTime}
+                    value={this.state.dateTime}
                     defaultDate={this.props.defaultDate}
                     onChange={this.onSelectedDate}
         />

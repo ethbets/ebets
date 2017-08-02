@@ -110,14 +110,14 @@ class BetForm extends Component {
   };
 
   handleChangeTimestampMatchBegin = (date) => {
-    this.setState({ timestampMatchBegin: date });
+    this.setState({ timestampMatchBegin: new moment(date) });
   };
 
   handleChangeTimestampMatchEnd= (date) => {
     this.setState({
-      timestampMatchEnd: date,
-      timestampArbiterDeadline: date.add(ARBITER_DEADLINE_PERIOD, 'days'),
-      timestampSelfDestructDeadline: date.add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days')
+      timestampMatchEnd: new moment(date).toDate(),
+      timestampArbiterDeadline: new moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
+      timestampSelfDestructDeadline: new moment(date).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate()
     });
   };
 

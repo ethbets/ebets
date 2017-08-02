@@ -124,10 +124,10 @@ class BetController extends Component {
 
   ArbiterExpandedMatch = () => {
     return (
-      <div className='betRow'>
-        <div>
+      <div>
+        <span style={{marginRight: 15, marginLeft: 15}}>
           Who won the match?
-        </div>
+        </span>
         <SelectField style={{ width: 160 }} className='test'
           floatingLabelText='Team'
           value={this.state.selectedTeam}
