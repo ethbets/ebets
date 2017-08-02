@@ -107,4 +107,7 @@ right now!
 * Support ERC20 tokens
 * Make interface to create arbiters
 * Index bets by category in Ebets events
-
+* Fix my bets
+* Fix images for bets
+* Better format BigNumber
+* Fix "Win", sum with already bet by account, edit positioning
