@@ -337,8 +337,9 @@ class Bet extends Component {
     }
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
-    stateObjects['cat_url'] = require('assets/imgs/' + stateObjects.category + '.png');
-    
+    //stateObjects['cat_url'] = require('assets/imgs/' + stateObjects.category + '.png');
+    stateObjects['cat_url'] = require('assets/imgs/' + 'ufc' + '.png');
+
     const betToTeam = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
                       ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
     
