@@ -84,7 +84,16 @@ class BetForm extends Component {
   }
 
   handleArbiterChange = (inputText, dataSource, params) => {
-    this.setState({ selectedArbiter: inputText });
+    var newArbiterState = {
+      arbiterErrorMessage: null,
+      selectedArbiter: inputText
+    };
+    if(!isAddress(inputText)) {
+      newArbiterState = {
+        arbiterErrorMessage: 'Invalid address'
+      };
+    }
+    this.setState(newArbiterState);
   }
 
   handleArbiterSubmit = (selectedItem, index) => {
@@ -266,13 +275,17 @@ class BetForm extends Component {
                 </GridTile>
                 <GridTile>
                   <AutoComplete
+                    textFieldStyle={{width: 370}}
+                    style={{width: 370}}
                     floatingLabelText="Arbiter"
-                    filter={AutoComplete.noFilter}
+                    filter={(searchText, key, v) => 
+                      (v.key.props.primaryText.toLowerCase().indexOf(searchText) !== -1)}
                     openOnFocus={true}
                     dataSource={Arbiters.arbiters()}
                     dataSourceConfig={{ text: 'value', value: 'key' }}
                     onNewRequest={this.handleArbiterSubmit}
                     onUpdateInput={this.handleArbiterChange}
+                    errorText={this.state.arbiterErrorMessage}
                   />
                 </GridTile>
                 <GridTile>

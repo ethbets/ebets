@@ -66,6 +66,10 @@ class Arbiters extends Component {
     }, []);
   }
 
+  static getArbiterNameByAddress() {
+    
+  }
+
   //TODO: receive address as props and put addresses in state to dinamic
   // control new unverified addresses
   addUnverifiedArbiter = (address) => {
