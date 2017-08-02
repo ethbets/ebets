@@ -273,7 +273,12 @@ class Bet extends Component {
     this.setState({cancellationToken: cst});
     getWeb3
     .then(async results => {
-      await this.instantiateContract(results.web3, cst.token);
+      try {
+        await this.instantiateContract(results.web3, cst.token);
+      }
+      catch(err) {
+        console.error('InstantiateContractError', err);
+      }
     })
     .catch(err => {
       console.error('Error finding web3', err);
@@ -281,7 +286,6 @@ class Bet extends Component {
   }
   componentWillUnmount() {
     this.state.cancellationToken.cancel();
-    console.log('unmount bet');
   }
   
   // If path is my_bets, should see if bet in some team
@@ -346,6 +350,7 @@ class Bet extends Component {
       hasEverBet = await this.hasBet(betContractInstance);
     }
     const arbiterName = await arbiterContractInstance.getName();
+    
     cancellationToken.throwIfCancelled();
     this.setState({
       ...stateObjects,
