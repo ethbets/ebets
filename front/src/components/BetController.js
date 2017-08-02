@@ -5,6 +5,7 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
+import {formatEth} from 'utils/ethUtils';
 
 import * as MColors from 'material-ui/styles/colors';
 
@@ -23,7 +24,7 @@ class BetController extends Component {
     super(props);
     this.state = {
       selectedTeam: null,
-      amountToBet: 0,
+      amountToBet: new BigNumber(0),
       isArbiter: false
     }
   }
@@ -33,7 +34,8 @@ class BetController extends Component {
   };
 
   setBetValue = (event, newValue) => {
-    this.setState({amountToBet : parseInt(newValue)});
+    if (newValue !== '')
+      this.setState({amountToBet : new BigNumber(newValue)});
   };
 
   Steps = () => {
@@ -115,8 +117,9 @@ class BetController extends Component {
         className="betBtn"
         primary={true}
         onTouchTap={() => this.props.betOnTeamFunction(
-                          this.state.selectedTeam ||
-                          this.props.hasBetOnTeam.team, this.state.amountToBet)}
+          (this.props.hasBetOnTeam.team) ? this.props.hasBetOnTeam.team 
+          : this.state.selectedTeam , 
+          new BigNumber(this.state.amountToBet).times(new BigNumber('1000000000000000000')))}
       ><span>Bet</span>
       </RaisedButton>
       )
@@ -167,10 +170,10 @@ class BetController extends Component {
     if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
       return null;
 
-    if (this.state.amountToBet <= 0)
+    if (this.state.amountToBet.lessThan(new BigNumber(0)))
       return null;
 
-    amount = new BigNumber(this.state.amountToBet);
+    amount = this.state.amountToBet.times(new BigNumber('1000000000000000000'));
     if (this.state.selectedTeam === false) {
       loserPool = this.props.team1BetSum;
       winnerPool = this.props.team0BetSum;
@@ -188,7 +191,7 @@ class BetController extends Component {
       return (
       <Chip backgroundColor={MColors.yellow500}>
         <Avatar size={32} backgroundColor={MColors.yellow800}>Ξ</Avatar>
-        Win {parseFloat(expectedIncome.toString()).toFixed(2)}
+        Win {formatEth(expectedIncome)}
       </Chip>
       );
   }

@@ -21,6 +21,7 @@ import getWeb3 from 'utils/getWeb3';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
 import {betState, stepperState} from 'utils/betStates';
+import {formatEth} from 'utils/ethUtils';
 import Timer from './Timer';
 import Arbiters from './Arbiters';
 
@@ -123,7 +124,6 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
-    console.log(teamToBet, this.state.teamTo)
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
@@ -143,7 +143,7 @@ class Bet extends Component {
       return;
     }
     if (value === undefined ||
-        value <= 0) {
+        value.lessThan(new BigNumber(0))) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Must bet more than Ξ0');
       }))
@@ -197,14 +197,14 @@ class Bet extends Component {
         <div style={{display: 'flex'}}>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
-            {this.state.team0BetSum.toString()}
+            {formatEth(this.state.team0BetSum)}
           </Chip>
           <Chip backgroundColor={MColors.white}>
             {this.state.team0Name} vs {this.state.team1Name}
           </Chip>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
-            {this.state.team1BetSum.toString()}
+            {formatEth(this.state.team1BetSum)}
           </Chip>
         <Timer parentState={this.state.currentBetState}
                updateState={this.updateStateFromTimer.bind(this)}
@@ -288,7 +288,8 @@ class Bet extends Component {
     this.state.cancellationToken.cancel();
   }
   
-  // If path is my_bets, should see if bet in some team
+  // FIXME: This is wrong, we should check if route is my_bets
+  // and only then pay the price of watching all transactions
   componentWillReceiveProps() {
     if (this.state.betContractInstance !== undefined) {
       this.hasBet(this.state.betContractInstance)
@@ -391,7 +392,7 @@ class Bet extends Component {
         if (response.args.from === this.state.web3.eth.accounts[0]) {
           this.setState(previousState => {
             if (previousState.hasBetOnTeam.team === null)
-              previousState.hasBetOnTeam.team = {
+              previousState.hasBetOnTeam = {
                 team: response.args.forTeam,
                 amount: response.args.amount
               };
@@ -433,21 +434,23 @@ class Bet extends Component {
 
   hasBet = (betContractInstance) => {
     return new Promise((resolve, reject) => {
-      var betEvents = betContractInstance.allEvents({
+      getWeb3.then(web3Result => {
+        var betEvents = betContractInstance.allEvents({
         fromBlock: 0,
         toBlock: 'latest'});
-      //this.setState({myBetsFilter: filter});
-      betEvents.get((error, result) => {
-        if (error) 
-          reject(error);
-        else {
-          for (var betEvent in result)
-            if (result[betEvent].args.from === this.state.web3.eth.accounts[0]) {
-              resolve(true);
-              return;
-            }
-          resolve(false);
-        }
+        //this.setState({myBetsFilter: filter});
+        betEvents.get((error, result) => {
+          if (error) 
+            reject(error);
+          else {
+            for (var betEvent in result)
+              if (result[betEvent].args.from === web3Result.web3.eth.accounts[0]) {
+                resolve(true);
+                return;
+              }
+            resolve(false);
+          }
+        });
       });
     });
   }
