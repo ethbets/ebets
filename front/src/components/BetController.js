@@ -241,8 +241,12 @@ class BetController extends Component {
       const ArbiterInfo =  Arbiters.getArbiterInfo(this.props.arbiterInfo);
       return (
         <div>
-          <div className='betRow'>
-          <SelectField style={{ width: 160 }} className='test'
+          <div style={{justifyContent: 'flex-start',
+                       alignItems: 'flex-end'}}>
+          <SelectField style={{ width: 160, 
+                                verticalAlign: 'bottom',
+                                marginRight: 10,
+                                marginLeft: 70 }}
             floatingLabelText='Team'
             value={(this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
             onChange={this.setTeam}
@@ -259,8 +263,8 @@ class BetController extends Component {
             onChange={this.setBetValue}
             />
           <this.DynamicBetButton />
-          <this.ExpectedGain/>
-          <ArbiterInfo/>
+          <this.ExpectedGain />
+          <ArbiterInfo />
           </div>
           <this.Steps />
         </div>

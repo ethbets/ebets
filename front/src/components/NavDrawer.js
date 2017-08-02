@@ -7,7 +7,7 @@ import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 import { zIndex } from 'material-ui/styles';
 
-import '../assets/stylesheets/base.css';
+//import '../assets/stylesheets/base.css';
 
 const SelectableList = makeSelectable(List);
 

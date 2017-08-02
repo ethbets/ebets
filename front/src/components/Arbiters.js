@@ -24,13 +24,11 @@ class Arbiters extends Component {
     else
       badgeContent = <IconButton tooltip='Not verified'><WarningIcon color={red500}/></IconButton>
     return () => (
-      <div>
-        <Badge
-          badgeContent={badgeContent}
-        >
-        Using arbiter {arbiterInfo.name}
-        </Badge>
-    </div>
+      <Badge
+        badgeContent={badgeContent}
+      >
+      Using arbiter {arbiterInfo.name}
+      </Badge>
     )
   }
 

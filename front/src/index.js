@@ -12,10 +12,6 @@ window.React = React;
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
-/**
- * Render the main app component. You can read more about the react-router here:
- * https://github.com/reactjs/react-router/blob/master/docs/guides/README.md
- */
 render(
   <Router
     history={useRouterHistory(createHashHistory)({queryKey: false})}

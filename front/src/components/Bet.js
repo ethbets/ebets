@@ -192,8 +192,8 @@ class Bet extends Component {
 
   FilteredBet = () => {
     const betTitle = 
-      <div className='inRows'>
-        <div className='pushLeft'>
+      <div style={{flexFlow: 'row', justifyContent: 'space-between'}}>
+        <div style={{display: 'flex'}}>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {this.state.team0BetSum.toString()}
@@ -205,7 +205,6 @@ class Bet extends Component {
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {this.state.team1BetSum.toString()}
           </Chip>
-        </div> 
         <Timer parentState={this.state.currentBetState}
                updateState={this.updateStateFromTimer.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
@@ -213,7 +212,9 @@ class Bet extends Component {
                resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
                terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
-  </div>;
+        </div>
+      </div>;
+
       if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null
                                                  || this.state.hasEverBet)) ||
           // This category
@@ -435,7 +436,11 @@ class Bet extends Component {
   }
   render() {
   if (!this.state.loadCompleted)
-    return ( <div className="center"> <CircularProgress /> </div> ) ;
+    return (<div style={{display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'}}>
+              <CircularProgress /> 
+            </div> ) ;
 
     var total = this.state.team0BetSum + this.state.team1BetSum;
     var percentage0 = (this.state.team0BetSum / total)*100;

@@ -6,6 +6,7 @@ import getWeb3 from 'utils/getWeb3';
 import Bet from 'components/Bet';
 
 class Ebets extends Component {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -34,21 +35,26 @@ class Ebets extends Component {
     ebetsContract.setProvider(this.state.web3.currentProvider);
     // Get accounts.
     this.state.web3.eth.getAccounts((error) => {
-      if (error) throw 'Unable to get accounts';
+
       ebetsContract.deployed()
       .then(instance => {
         //events
         var betsEvents = instance.allEvents({fromBlock: 0, toBlock: 'latest'});
         betsEvents.watch((error, response) => {
+          console.log('eita', response);
           this.setState(previousState => {
-            return { bets: previousState.bets.concat(response.args.betAddr) }
+            console.log(previousState,response.args.betAddr )
+            return { 
+              bets: previousState.bets.concat(response.args.betAddr) 
+            }
           });
         });
       })
       .catch(err => {
         console.error(err);
       });
-    });
+    }
+  );
   }
 
   render() {
@@ -65,7 +71,7 @@ class Ebets extends Component {
     return (
       <div style={{marginLeft: 210}}>
         <h1 style={{marginLeft: 210}}>{this.props.location.pathname}</h1>
-        <ul className='card'>
+        <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
           {listItems}
         </ul>
       </div>

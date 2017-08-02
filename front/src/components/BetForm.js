@@ -20,7 +20,7 @@ import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
-import 'assets/stylesheets/BetForm.css';
+//import 'assets/stylesheets/BetForm.css';
 
 import Arbiters from './Arbiters';
 import ebetsCategories from 'utils/ebetsCategories';
@@ -30,7 +30,16 @@ const ARBITER_DEADLINE_PERIOD = 7
 const SELF_DESTRUCT_DEADLINE_PERIOD = 14
 
 class BetForm extends Component {
-
+  static gridListStyle = {
+    marginTop:10
+  };
+  static gridRootStyle = {
+    display: 'flex',
+    marginLeft: 260,
+    marginTop: 50,
+    flexWrap: 'wrap',
+    justifyContent: 'space-around'
+  };
   constructor(props) {
     super(props)
     this.state = {
@@ -193,6 +202,7 @@ class BetForm extends Component {
   render() {
     if (this.state.alert.type && this.state.alert.message) {
       // TODO apply layouts
+      // TODO: fix this
       var classString = 'bg-' + this.state.alert.type;
       var status = <div id="status" className={classString}>
                     <Dialog
@@ -205,14 +215,14 @@ class BetForm extends Component {
                   </div>
     }
     return (
-      <div className="gridRoot">
+      <div style={BetForm.gridRootStyle}>
         {status}
         <div>
           <form onSubmit={this.handleOnSubmit} >
             <h1>Add Bet</h1>
             <div>
               <GridList
-                className='gridList'
+                style={BetForm.gridListStyle}
                 cellHeight={'auto'}
                 cols={3}
               >
@@ -241,8 +251,7 @@ class BetForm extends Component {
                 </GridTile>
               </GridList>
               <GridList
-                className='gridList'
-                style={{flexWrap: 'nowrap', marginTop: '10px'}}
+                style={{flexWrap: 'nowrap', marginTop: '10px', ...BetForm.gridListStyle}}
                 cellHeight={'auto'}
               >
                 <GridTile>

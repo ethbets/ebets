@@ -5,11 +5,11 @@ import {
   IndexRedirect
 } from 'react-router';
 
-import Master from './components/Master';
-import FAQ from './components/FAQ';
-import Ebets from './components/Ebets';
-import CreateBet from './components/BetForm';
-import Arbiters from './components/Arbiters';
+import Master from 'components/Master';
+import FAQ from 'components/FAQ';
+import Ebets from 'components/Ebets';
+import CreateBet from 'components/BetForm';
+import Arbiters from 'components/Arbiters';
 
 
 const Routes = (

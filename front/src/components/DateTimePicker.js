@@ -21,6 +21,7 @@ class DateTimePicker extends Component {
   }
 
   onSelectedTime = (dateObject) => {
+      console.log('dateObject: ', dateObject);
       const momentDate = new moment(this.state._selectedDate);
       const momentTime = new moment(dateObject);
       const dateTime = new moment({

@@ -7,7 +7,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {darkWhite, lightWhite, grey900} from 'material-ui/styles/colors';
 import withWidth, {MEDIUM, LARGE} from 'material-ui/utils/withWidth';
 
-import NavDrawer from 'components/NavDrawer';
+import NavDrawer from './NavDrawer';
 
 class Master extends Component {
   static propTypes = {
