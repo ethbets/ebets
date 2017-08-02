@@ -5,7 +5,7 @@ module.exports = {
   output: {
     path: __dirname + '/dist',
     filename: 'bundle.js',
-    publicPath: './static/'
+    publicPath: '/dist/'
   },
 
   resolve: {
@@ -20,7 +20,7 @@ module.exports = {
       loader: 'babel-loader',
       include: __dirname,
       query: {
-        presets: [ 'es2015', 'react', 'react-hmre'],
+        presets: [ 'es2015', 'react'],
         plugins: ['transform-class-properties', 'transform-object-rest-spread']
       }
     },
