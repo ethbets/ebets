@@ -3,6 +3,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import IconButton from 'material-ui/IconButton';
 import Badge from 'material-ui/Badge';
+import MenuItem from 'material-ui/MenuItem';
 import DoneIcon from 'material-ui/svg-icons/action/done';
 import WarningIcon from 'material-ui/svg-icons/alert/warning';
 import {red500, greenA200} from 'material-ui/styles/colors';
@@ -45,25 +46,42 @@ class Arbiters extends Component {
     return ArbitersJson[arbiter][networkId].address
   }
 
-  static arbiters(withOther = false){
-    var arbiters =  _.keys(ArbitersJson).map(arbiter => { return(
-      <Badge key={ArbitersJson[arbiter][NETWORK_ID].address} 
-        style={{ padding: 0, height: 40 }}
-        badgeStyle={{ bottom: 25, left: 70 }}
-        badgeContent={<IconButton tooltip='Verified!'><DoneIcon color={greenA200}/></IconButton>}
-      >
-      {arbiter}
-      </Badge>
-    )})
-    if (withOther)
-      arbiters.push(
-      <Badge key={'other'} 
-          style={{ padding: 0, height: 40 }}
-          badgeStyle={{ bottom: 25, left: 40 }}
-          badgeContent={<IconButton tooltip='Not verified!'><WarningIcon color={red500}/></IconButton>}
-        >Other
-        </Badge>);
-    return arbiters;
+  static setVerifiedIcon(address) {
+    if (this.isVerifiedArbiter(address)) {
+      return <IconButton tooltip='Verified!'><DoneIcon color={greenA200}/></IconButton>
+    }
+    return <IconButton tooltip='Not verified!'><WarningIcon color={red500}/></IconButton>
+  }
+
+  static arbiters() {
+    return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
+      ourArbiters.push({
+          key: (
+            <MenuItem
+              primaryText={name}
+              secondaryText={this.setVerifiedIcon(networks[NETWORK_ID].address)}
+            />
+          ),
+          value: networks[NETWORK_ID].address
+      })
+      return ourArbiters;
+    }, []);
+  }
+
+  //TODO: receive address as props and put addresses in state to dinamic
+  // control new unverified addresses
+  addUnverifiedArbiter = (address) => {
+    this.setState((prevState, props) => ({
+      arbiters: prevState.arbiters.push({
+        key: (
+          <MenuItem
+            primaryText={'other'}
+            secondaryText={this.setVerifiedIcon(address)}
+          />
+        ),
+        value: address
+      })
+    }));
   }
 
   render() {

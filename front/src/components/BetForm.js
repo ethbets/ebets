@@ -11,9 +11,11 @@ import {Card, CardHeader, CardText} from 'material-ui/Card';
 import {GridList, GridTile} from 'material-ui/GridList';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import AutoComplete from 'material-ui/AutoComplete';
 import BigNumber from 'bignumber.js';
 
 import getWeb3 from 'utils/getWeb3';
+import isAddress from 'utils/validateAddress';
 import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
@@ -38,7 +40,6 @@ class BetForm extends Component {
         message: ''
       },
       ...betFields,
-      allCategories: [],
       web3: null
     }
   }
@@ -62,21 +63,29 @@ class BetForm extends Component {
   }
 
   menuItem(all, selected) {
-    return all.map((name, idx) => { return(
-      <MenuItem
-        key={name.key}
-        insetChildren={true}
-        //checked={_.isEmpty(selected) && selected >= 0}
-        value={name.key}
-        primaryText={name}
-      />
+    return all.map((name, idx) => {
+      return (
+        <MenuItem
+          key={name.key}
+          insetChildren={true}
+          value={name.key}
+          primaryText={name}
+        />
     )});
   }
 
-  //TODO Add a toltip with arbiter description
-  handleArbiterChange = (event, index, value) => {
-    // TODO: handle optional textfield input
-    this.setState({ selectedArbiter: value });
+  handleArbiterChange = (inputText, dataSource, params) => {
+    this.setState({ selectedArbiter: inputText });
+  }
+
+  handleArbiterSubmit = (selectedItem, index) => {
+    if (index !== -1) {
+      this.setState({ selectedArbiter: selectedItem.value });
+    }
+    // TODO: this will not be static method
+    // else {
+    //   Arbiters.addUnverifiedArbiter(selectedItem)
+    // }
   }
 
   handleCategoryChange = (event, index, value) => {
@@ -113,6 +122,10 @@ class BetForm extends Component {
 
   handleOnSubmit = event => {
     event.preventDefault();
+    // TODO: Improve this
+    if(!isAddress(this.state.selectedArbiter)) {
+      this.setState({ alert: { type: 'danger', message: `Error: Invalid Arbiter Address ${this.state.selectedArbiter}`, open: true } });
+    }
     // TODO: handle form validations
     this.createContract()
   }
@@ -243,14 +256,15 @@ class BetForm extends Component {
                   </SelectField>
                 </GridTile>
                 <GridTile>
-                  <SelectField
-                    autoWidth={true}
+                  <AutoComplete
                     floatingLabelText="Arbiter"
-                    value={this.state.selectedArbiter}
-                    onChange={this.handleArbiterChange}
-                  >
-                    {this.menuItem(Arbiters.arbiters(true), this.state.selectedArbiter)}
-                   </SelectField>
+                    filter={AutoComplete.noFilter}
+                    openOnFocus={true}
+                    dataSource={Arbiters.arbiters()}
+                    dataSourceConfig={{ text: 'value', value: 'key' }}
+                    onNewRequest={this.handleArbiterSubmit}
+                    onUpdateInput={this.handleArbiterChange}
+                  />
                 </GridTile>
                 <GridTile>
                   <DateTimePicker
