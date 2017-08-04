@@ -112,3 +112,5 @@ right now!
 * Fix images for bets
 * Better format BigNumber
 * Fix "Win", sum with already bet by account, edit positioning
+* Paginate front page
+
