@@ -1,4 +1,4 @@
-import _ from 'lodash';
+/*global web3:true */
 import moment from 'moment';
 import contract from 'truffle-contract'
 import React, { Component } from 'react';
@@ -14,7 +14,6 @@ import MenuItem from 'material-ui/MenuItem';
 import AutoComplete from 'material-ui/AutoComplete';
 import BigNumber from 'bignumber.js';
 
-import getWeb3 from 'utils/getWeb3';
 import isAddress from 'utils/validateAddress';
 import EbetsJson from 'build/contracts/Ebets.json';
 
@@ -48,8 +47,7 @@ class BetForm extends Component {
         type: 'info',
         message: ''
       },
-      ...betFields,
-      web3: null
+      ...betFields
     }
   }
 
@@ -71,8 +69,8 @@ class BetForm extends Component {
       ))
   }
 
-  menuItem(all, selected) {
-    return all.map((name, idx) => {
+  menuItem(all) {
+    return all.map((name) => {
       return (
         <MenuItem
           key={name.key}
@@ -83,7 +81,7 @@ class BetForm extends Component {
     )});
   }
 
-  handleArbiterChange = (inputText, dataSource, params) => {
+  handleArbiterChange = (inputText) => {
     var newArbiterState = {
       arbiterErrorMessage: null,
       selectedArbiter: inputText
@@ -149,7 +147,7 @@ class BetForm extends Component {
   }
 
   handleAlert = () => {
-    this.setState((prevState, props) => ({
+    this.setState((prevState) => ({
       alert: {
         open: !prevState.alert.open
       }
@@ -157,22 +155,12 @@ class BetForm extends Component {
   };
 
   componentWillMount() {
-    // Get network provider and web3 instance.
-    getWeb3
-    .then(results => {
-      this.setState({
-        web3: results.web3
-      })
-    })
-    .catch(() => {
-      console.log('Error finding web3.');
-    })
     this.initializeTimestamps();
   }
 
   createContract() {
     const ebetsContract = contract(EbetsJson);
-    ebetsContract.setProvider(this.state.web3.currentProvider);
+    ebetsContract.setProvider(web3.currentProvider);
 
     //create contract
     ebetsContract.deployed().then(instance => {
@@ -194,7 +182,7 @@ class BetForm extends Component {
         /* TODO: accounts[0] can be changed by the user,
          * There should be a way so when the user changes, this is updated too.
          */
-        {from: this.state.web3.eth.accounts[0]}
+        {from: web3.eth.accounts[0]}
         );
       return createdBet;
     })

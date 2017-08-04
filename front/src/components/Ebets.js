@@ -1,8 +1,7 @@
+/*global web3:true */
 import React, { Component } from 'react';
 
 import EbetsJson from 'build/contracts/Ebets.json';
-import getWeb3 from 'utils/getWeb3';
-
 import Bet from 'components/Bet';
 
 class Ebets extends Component {
@@ -31,19 +30,13 @@ class Ebets extends Component {
   }
 
   componentWillMount() {
-    getWeb3
-    .then(async results => {
-      await this.instantiateContract(results.web3)
-    })
-    .catch(() => {
-      console.error('Error finding web3.');
-    })
+    this.instantiateContract();
   }
   componentWillUnmount () {
     this.state.betsEvents.stopWatching();
 }
 
-  async instantiateContract(web3) {
+  async instantiateContract() {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
     ebetsContract.setProvider(web3.currentProvider);
