@@ -51,9 +51,9 @@ class Ebets extends Component {
       const allBetsList = await this.getBets(ebetsContractInstance);
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
       betsEvents.watch((error, response) => {
-        console.log('eita', response);
+        //console.log('eita', response);
         this.setState(previousState => {
-          console.log(previousState,response.args.betAddr )
+          //console.log(previousState,response.args.betAddr)
           return {
             bets: previousState.bets.concat(response.args.betAddr) 
           }

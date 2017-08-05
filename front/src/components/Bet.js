@@ -39,7 +39,6 @@ class Bet extends Component {
     super(props);
     this.state = {
       currentBetState: 0, // Overall current bet state (from time and contract state)
-      betShoudlBeAtState: 0, // Related to time
       stepperState: 0,
       hasBetOnTeam: {team: null, value: new BigNumber(0)}, // {team: false/true/null, value: amount}
       open: false,
