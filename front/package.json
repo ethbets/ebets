@@ -29,7 +29,7 @@
     "react-scripts": "1.0.10",
     "react-tap-event-plugin": "^2.0.1",
     "react-transition-group": "^2.1.0",
-    "react-web3": "^0.4.0",
+    "react-web3": "git+https://github.com/ethbets/react-web3.git",
     "reactstrap": "^4.8.0",
     "truffle-contract": "^2.0.1",
     "web3": "^0.19.1",

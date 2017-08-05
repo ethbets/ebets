@@ -3,7 +3,7 @@ Ebets aims to be a decentralized platform, built using Ethereum, where you
 can create and bet on anything that has two outcomes.
 
 Ebets was tailored to create sports games, you can access it in a convenient way
-at: ebets.ch or at ipfs: 
+at: (ebets.ch)[https://ebets.ch] or at ipfs: 
 
 ## Running
 So you're right! To be fully decentralized you should be able to run it by yourself,

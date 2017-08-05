@@ -48,7 +48,7 @@ class Bet extends Component {
       transactionInProcess: false,
       isExpanded: false,
       loadCompleted: false,
-      cat_url: null,
+      iconUrl: null,
       isArbiter: false,
       stepIndex: 0,
       ...betFields,
@@ -231,7 +231,8 @@ class Bet extends Component {
             expanded={this.state.isExpanded}
           >
           <CardHeader
-            avatar={(this.state.cat_url != null) ? this.state.cat_url : <Avatar icon={<ImagePhotoCamera />} /> }
+            avatar={(this.state.iconUrl != null) ? 
+                     this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
             title={betTitle}
             actAsExpander={true}
             showExpandableButton={true}
@@ -324,8 +325,12 @@ class Bet extends Component {
     }
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
-    //stateObjects['cat_url'] = require('assets/imgs/' + stateObjects.category + '.png');
-    stateObjects['cat_url'] = require('assets/imgs/' + 'ufc' + '.png');
+    try{
+      stateObjects['iconUrl'] = require('assets/imgs/' + stateObjects.category + '.png');
+    }
+    catch(err) {
+      stateObjects['iconUrl'] = null;
+    }
 
     const betToTeam = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
                       ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
