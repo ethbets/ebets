@@ -19,7 +19,6 @@ import EbetsJson from 'build/contracts/Ebets.json';
 
 import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
-//import 'assets/stylesheets/BetForm.css';
 
 import Arbiters from './Arbiters';
 import ebetsCategories from 'utils/ebetsCategories';
@@ -49,6 +48,14 @@ class BetForm extends Component {
       },
       ...betFields
     }
+  }
+
+  validateDateRange = (selectedField, selectedDate, limitField, limitDate) => {
+    if (selectedDate < limitDate) {
+      this.setState({ alert: { type: 'danger', message: `Error: ${selectedField} can't be greater than ${limitField}`, open: true } });
+      return false;
+    }
+    return true;
   }
 
   initializeTimestamps = () => {
@@ -121,19 +128,25 @@ class BetForm extends Component {
   };
 
   handleChangeTimestampMatchEnd= (date) => {
-    this.setState({
-      timestampMatchEnd: new moment(date).toDate(),
-      timestampArbiterDeadline: new moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
-      timestampSelfDestructDeadline: new moment(date).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate()
-    });
+    if (this.validateDateRange("End date", date, "Start date", this.state.timestampMatchBegin)) {
+      this.setState({
+        timestampMatchEnd: new moment(date).toDate(),
+        timestampArbiterDeadline: new moment(date).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
+        timestampSelfDestructDeadline: new moment(date).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate()
+      });
+    }
   };
 
   handleChangeTimestampArbiterDeadline = (date) => {
-    this.setState({ timestampArbiterDeadline: date });
+    if (this.validateDateRange("Arbiter deadline date", date, "End date", this.state.timestampMatchEnd)) {
+      this.setState({ timestampArbiterDeadline: date });
+    }
   };
 
   handleChangeTimestampSelfDestructDeadline = (date) => {
-    this.setState({ timestampSelfDestructDeadline: date });
+    if (this.validateDateRange("Self destruction deadline date", date, "Arbiter deadline date", this.state.timestampArbiterDeadline)) {
+      this.setState({ timestampSelfDestructDeadline: date });
+    }
   };
 
   handleOnSubmit = event => {
