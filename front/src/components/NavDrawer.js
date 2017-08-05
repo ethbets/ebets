@@ -90,7 +90,7 @@ class NavDrawer extends Component {
             href='#/category/ufc'
           />
           <ListItem
-            primaryText="Soccer"
+            primaryText="Football"
             value="/category/football"
             href="#/category/football"
           />

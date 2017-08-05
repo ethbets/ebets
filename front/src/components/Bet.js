@@ -237,6 +237,7 @@ class Bet extends Component {
             showExpandableButton={true}
           />
           <BetController
+            detailed={(this.props)}
             currentBetState={this.state.currentBetState}
             team0Name={this.state.team0Name}
             team1Name={this.state.team1Name}
@@ -278,16 +279,7 @@ class Bet extends Component {
   
   // FIXME: This is wrong, we should check if route is my_bets
   // and only then pay the price of watching all transactions
-  componentWillReceiveProps() {
-    if (this.state.betContractInstance !== undefined) {
-      this.hasBet(this.state.betContractInstance)
-      .then(hasEverBet => {
-        if (hasEverBet)
-          this.setState({hasEverBet: true});
-      });
-    }
-  }
-        
+ 
   async instantiateContract(cancellationToken) {
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {
