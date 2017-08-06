@@ -1,3 +1,6 @@
+/*global web3:true */
+import moment from 'moment';
+import EthereumBlockies from 'ethereum-blockies';
 import BigNumber from 'bignumber.js';
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
@@ -5,10 +8,18 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
-import RaisedButton from 'material-ui/RaisedButton'
-
+import RaisedButton from 'material-ui/RaisedButton';
 import * as MColors from 'material-ui/styles/colors';
 import LinkIcon from 'material-ui/svg-icons/content/link';
+
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 
 import {formatEth} from 'utils/ethUtils';
 import {
@@ -26,29 +37,39 @@ class BetController extends Component {
     this.state = {
       selectedTeam: null,
       amountToBet: new BigNumber(0),
-      isArbiter: false
+      isArbiter: false,
+      betList: [],
+      allBetEvents: null
     }
   }
 
   componentWillMount() {
-    // if (this.props.isDetailed) {
-    //   var betEvents = betContractInstance.allEvents({
-    //   fromBlock: 0,
-    //   toBlock: 'latest'});
-    //   //this.setState({myBetsFilter: filter});
-    //   betEvents.get((error, result) => {
-    //     if (error) 
-    //       reject(error);
-    //     else {
-    //       for (var betEvent in result)
-    //         if (result[betEvent].args.from === web3.eth.accounts[0]) {
-    //           resolve(true);
-    //           return;
-    //         }
-    //       resolve(false);
-    //     }
-    //   });
-    // }
+    if (this.props.isDetailed) {
+      var allBetEvents = this.props.betContractInstance.allEvents({
+      fromBlock: 0,
+      toBlock: 'latest'});
+      this.setState({allBetEvents: allBetEvents});
+      //this.setState({myBetsFilter: filter});
+      allBetEvents.watch((error, result) => {
+        if (result.event === 'NewBet') {
+          web3.eth.getBlock(result.blockNumber, (err, block) => {
+            this.setState(previousState => {
+              const newBet = {
+                from: result.args.from,
+                amount: result.args.amount,
+                forTeam: result.args.forTeam,
+                timestamp: block.timestamp
+              };
+              previousState.betList.unshift(newBet);
+            });
+          });
+        }
+      });
+    }
+  }
+  componentWillUnmount() {
+    if (this.state.allBetEvents !== null)
+      this.state.allBetEvents.stopWatching();
   }
 
   setTeam = (event, index, value) => {
@@ -256,15 +277,38 @@ class BetController extends Component {
   DynamicList = () => {
     if (!this.props.isDetailed)
       return null;
-    // var betEvents = this.props.betContractInstance.allEvents({
-    // fromBlock: 0,
-    // toBlock: 'latest'});
-    //this.setState({myBetsFilter: filter});
-    // betEvents.watch((error, result) => {
-    //   console.log('bet', result);
-    // });
     return (
-      <div>adas</div>
+      <div>
+        <h3 style={{textAlign: 'center'}}>Bets history</h3>
+        <Table selectable={false} height='300px'>
+          <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
+            <TableRow>
+              <TableHeaderColumn colSpan='2'>Address</TableHeaderColumn>
+              <TableHeaderColumn>Amount</TableHeaderColumn>
+              <TableHeaderColumn>For Team</TableHeaderColumn>
+              <TableHeaderColumn>At</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody displayRowCheckbox={false}>
+            {this.state.betList.map((bet, index) => {
+              const imgURL = EthereumBlockies.create({
+                seed: bet.from.toLowerCase(),
+                size: 8,
+                scale: 4,
+              }).toDataURL();
+              return (
+                <TableRow key={index}>
+                  
+                  <TableRowColumn colSpan='2' ><img src={"data:image/jpeg;" + imgURL} />{bet.from}</TableRowColumn>
+                  <TableRowColumn>{formatEth(bet.amount)}</TableRowColumn>
+                  <TableRowColumn>{(bet.forTeam) ? this.props.team1Name : this.props.team0Name}</TableRowColumn>
+                  <TableRowColumn>{moment(bet.timestamp*1e3).format('LLL')}</TableRowColumn>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     );
   }
 
