@@ -8,6 +8,16 @@ import DoneIcon from 'material-ui/svg-icons/action/done';
 import WarningIcon from 'material-ui/svg-icons/alert/warning';
 import {red500, greenA200} from 'material-ui/styles/colors';
 
+import EthereumBlockies from 'ethereum-blockies';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
+
 import ArbitersJson from 'utils/ebetsArbiters.json';
 // CHANGE THIS WHEN THE NETWORK IS MAINNET
 const NETWORK_ID = '42';
@@ -87,7 +97,37 @@ class Arbiters extends Component {
   }
 
   render() {
-    return null;
+    return (
+      <div style={{marginLeft: 270}}>
+        <h1 style={{marginLeft: 210}}>{this.props.location.pathname}</h1>
+        <h3>Arbiters:</h3>
+        <Table selectable={false} height='300px'>
+            <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
+              <TableRow>
+                <TableHeaderColumn>Name</TableHeaderColumn>
+                <TableHeaderColumn colSpan='2'>Address</TableHeaderColumn>
+                <TableHeaderColumn>Network Id</TableHeaderColumn>
+                <TableHeaderColumn>Description</TableHeaderColumn>
+              </TableRow>
+            </TableHeader>
+            <TableBody displayRowCheckbox={false}>
+              {_.keys(ArbitersJson).map((arbiter, index) => {
+                console.log('arbiter', arbiter)
+                return (
+                  <TableRow key={index}>
+                    <TableRowColumn>{ArbitersJson[arbiter].name}</TableRowColumn>
+                    <TableRowColumn colSpan='2'>{ArbitersJson[arbiter]['42'].address}</TableRowColumn>
+                    <TableRowColumn>42</TableRowColumn>
+                    <TableRowColumn style={{whiteSpace: 'normal', wordWrap: 'break-word'}}>
+                    {ArbitersJson[arbiter].description}
+                    </TableRowColumn>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+    );
   }
 }
 
