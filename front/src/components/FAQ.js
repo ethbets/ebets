@@ -89,7 +89,7 @@ class FAQ extends Component {
           <li>Where are the contracts?</li>
           <p>In <a href='https://github.com/ethbets/ebets/blob/master/contracts/'>github</a></p>
         </ul>
-        <img style={{flex: 1, resizeMode: 'contain'}} src={HowDoesItWork} />
+        {/* <img style={{flex: 1, resizeMode: 'contain'}} src={HowDoesItWork} /> */}
       </div>
     );
   }
