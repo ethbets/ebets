@@ -78,6 +78,7 @@ class Ebets extends Component {
         />
       );
     }
+    // Detailed bet
     if (address !== undefined) {
       listItems = <Bet category='detailed'
                        address={address} />

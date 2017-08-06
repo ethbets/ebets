@@ -4,7 +4,7 @@ import {Router, useRouterHistory} from 'react-router';
 import Routes from './Routes';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import {createHashHistory} from 'history';
-import {Web3Provider} from 'react-web3';
+import {Web3Provider} from './react-web3';
 
 
 // Helpers for debugging

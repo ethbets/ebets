@@ -202,6 +202,7 @@ class BetForm extends Component {
     .then(response => {
       console.log(response);
       this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
+      this.props.router.push('/bet/' + response.logs[0].args.betAddr);
     })
     .catch((error) => {
       console.log(error);

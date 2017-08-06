@@ -293,12 +293,13 @@ class BetController extends Component {
             {this.state.betList.map((bet, index) => {
               const imgURL = EthereumBlockies.create({
                 seed: bet.from.toLowerCase(),
+                spotcolor: -1,
                 size: 8,
                 scale: 4,
               }).toDataURL();
+              
               return (
                 <TableRow key={index}>
-                  
                   <TableRowColumn colSpan='2' ><img src={"data:image/jpeg;" + imgURL} />{bet.from}</TableRowColumn>
                   <TableRowColumn>{formatEth(bet.amount)}</TableRowColumn>
                   <TableRowColumn>{(bet.forTeam) ? this.props.team1Name : this.props.team0Name}</TableRowColumn>
