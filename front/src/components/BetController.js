@@ -5,11 +5,12 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
-import {formatEth} from 'utils/ethUtils';
+import RaisedButton from 'material-ui/RaisedButton'
 
 import * as MColors from 'material-ui/styles/colors';
+import LinkIcon from 'material-ui/svg-icons/content/link';
 
-import RaisedButton from 'material-ui/RaisedButton'
+import {formatEth} from 'utils/ethUtils';
 import {
   Step,
   Stepper,
@@ -27,6 +28,27 @@ class BetController extends Component {
       amountToBet: new BigNumber(0),
       isArbiter: false
     }
+  }
+
+  componentWillMount() {
+    // if (this.props.isDetailed) {
+    //   var betEvents = betContractInstance.allEvents({
+    //   fromBlock: 0,
+    //   toBlock: 'latest'});
+    //   //this.setState({myBetsFilter: filter});
+    //   betEvents.get((error, result) => {
+    //     if (error) 
+    //       reject(error);
+    //     else {
+    //       for (var betEvent in result)
+    //         if (result[betEvent].args.from === web3.eth.accounts[0]) {
+    //           resolve(true);
+    //           return;
+    //         }
+    //       resolve(false);
+    //     }
+    //   });
+    // }
   }
 
   setTeam = (event, index, value) => {
@@ -84,7 +106,6 @@ class BetController extends Component {
   }
   
   DynamicBetButton = () => {
-    
     if (this.props.currentBetState === betState.shouldCallArbiter ||
         this.props.currentBetState === betState.calledArbiter) {
       return (
@@ -98,7 +119,7 @@ class BetController extends Component {
       )
     }
     else if ((this.props.currentBetState >= betState.team0Won &&
-                this.props.currentBetState <= betState.draw) ||
+              this.props.currentBetState <= betState.draw) ||
               this.props.stepperState === stepperState.payout) {
       var gain = this.FinalGain();
       return (
@@ -114,14 +135,13 @@ class BetController extends Component {
     return (
       <RaisedButton 
         disabled={(this.props.currentBetState !== betState.matchOpen)}
-        className="betBtn"
         primary={true}
+        label='Bet'
         onTouchTap={() => this.props.betOnTeamFunction(
-          (this.props.hasBetOnTeam.team) ? this.props.hasBetOnTeam.team 
+          (this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team 
           : this.state.selectedTeam , 
           new BigNumber(this.state.amountToBet).times(new BigNumber('1000000000000000000')))}
-      ><span>Bet</span>
-      </RaisedButton>
+      />
       )
   }
 
@@ -233,6 +253,21 @@ class BetController extends Component {
     return this.ComputeGain(amount, winnerPool, loserPool, tax);
   }
 
+  DynamicList = () => {
+    if (!this.props.isDetailed)
+      return null;
+    // var betEvents = this.props.betContractInstance.allEvents({
+    // fromBlock: 0,
+    // toBlock: 'latest'});
+    //this.setState({myBetsFilter: filter});
+    // betEvents.watch((error, result) => {
+    //   console.log('bet', result);
+    // });
+    return (
+      <div>adas</div>
+    );
+  }
+
   render() {
     if (this.props.isExpanded) {
       /*
@@ -266,10 +301,18 @@ class BetController extends Component {
             onChange={this.setBetValue}
             />
           <this.DynamicBetButton />
-          <this.ExpectedGain />
           <ArbiterInfo />
+          <RaisedButton
+            style={{marginLeft: 14}}
+            href={`#bet/${this.props.address}`}
+            label='Permalink'
+            primary={true}
+            icon={<LinkIcon />}
+          />
+          <this.ExpectedGain />
           </div>
           <this.Steps />
+          <this.DynamicList />
         </div>
       )
     }

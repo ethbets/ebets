@@ -61,13 +61,13 @@ class FAQ extends Component {
           </p>
           <li>What are the fees?</li>
           <p>
-            2% of the loosing side, this will be always transparent to the user.
+            1% of the loosing side, this will be always transparent to the user.
           </p>
           <li>How do you guarantee not to steal my money?</li>
           <p>
             The only attack we can do is bet a lot of ether in a team
-            and lie in the resolver part, saying that that team won.
-            We plan to outsource and build a comunity of resolvers for
+            and lie in the arbiter part, saying that that team won.
+            We plan to outsource and build a comunity of arbiters for
             the each bet category to overcome this issue.
           </p>
           <li>How do I play?</li>

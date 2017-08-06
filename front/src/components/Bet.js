@@ -122,6 +122,7 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
+    console.log(teamToBet);
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
@@ -214,35 +215,37 @@ class Bet extends Component {
         </div>
       </div>;
 
-      if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null
-                                                 || this.state.hasEverBet)) ||
+      if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null || 
+           this.state.hasEverBet)) || (this.props.category === 'detailed') ||
           // This category
           (this.props.category === this.state.category && this.state.isFeatured) ||
           // All the bets
           (this.props.category === 'all_bets' && this.state.isFeatured) ||
           // Unfeatured bets
-          (this.props.category === 'unfeatured' && !this.state.isFeatured)) {
-        
+          (this.props.category === 'unfeatured' && !this.state.isFeatured)){
+        // TODO: Pack arguments to BetController! 
         return (
           <Card
             // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
             onExpandChange={lodash.debounce(this.onExpand, 150)}
-            expanded={this.state.isExpanded}
+            expanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
           >
           <CardHeader
             avatar={(this.state.iconUrl != null) ? 
                      this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
             title={betTitle}
-            actAsExpander={true}
-            showExpandableButton={true}
+            actAsExpander={(this.props.category === 'detailed') ? false : true}
+            showExpandableButton={(this.props.category === 'detailed') ? false : true}
           />
           <BetController
-            detailed={(this.props)}
+            isDetailed={(this.props.category === 'detailed') ? true : false}
+            betContractInstance={this.state.betContractInstance}
+            address={this.props.address}
             currentBetState={this.state.currentBetState}
             team0Name={this.state.team0Name}
             team1Name={this.state.team1Name}
             stepperState={this.state.stepperState}
-            isExpanded={this.state.isExpanded}
+            isExpanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
             hasBetOnTeam={this.state.hasBetOnTeam}
             team0BetSum={this.state.team0BetSum}
             team1BetSum={this.state.team1BetSum}
@@ -277,9 +280,18 @@ class Bet extends Component {
     this.state.cancellationToken.cancel();
   }
   
-  // FIXME: This is wrong, we should check if route is my_bets
-  // and only then pay the price of watching all transactions
- 
+  // // FIXME: This is wrong, we should check if route is my_bets
+  // // and only then pay the price of watching all transactions
+  // componentWillReceiveProps() {
+  //   if (this.state.betContractInstance !== undefined) {
+  //     this.hasBet(this.state.betContractInstance)
+  //     .then(hasEverBet => {
+  //       if (hasEverBet)
+  //         this.setState({hasEverBet: true});
+  //     });
+  //   }
+  // }
+        
   async instantiateContract(cancellationToken) {
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {
@@ -297,8 +309,15 @@ class Bet extends Component {
     const arbiterContract = contract(GovernanceInterfaceJson);
     arbiterContract.setProvider(web3.currentProvider);
     betContract.setProvider(web3.currentProvider);
-
-    var betContractInstance = betContract.at(this.props.address);
+    var betAddress;
+    var showDetails = false;
+    if (this.props.params !== undefined) {
+      betAddress = this.props.params.address;
+      showDetails = true;
+    }
+    else
+      betAddress = this.props.address;
+    var betContractInstance = betContract.at(betAddress);
     const governanceAddress = await betContractInstance.arbiter();
     
     const arbiterContractInstance = arbiterContract.at(governanceAddress);
@@ -354,7 +373,8 @@ class Bet extends Component {
         name: arbiterName,
         verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address)
       },
-      betContractInstance: betContractInstance
+      betContractInstance: betContractInstance,
+      showDetails: showDetails
     });
     // Only watch new events
     var laterEvents = betContractInstance.allEvents({
@@ -437,31 +457,30 @@ class Bet extends Component {
   }
 
   render() {
-  if (!this.state.loadCompleted)
-    return (<div style={{display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'}}>
-              <CircularProgress /> 
-            </div> ) ;
+    if (!this.state.loadCompleted)
+      return (
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <CircularProgress /> 
+        </div>
+      );
 
-    var total = this.state.team0BetSum + this.state.team1BetSum;
-    var percentage0 = (this.state.team0BetSum / total)*100;
-    var percentage1 = (this.state.team1BetSum / total)*100;
-    isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
-    isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
+      var total = this.state.team0BetSum + this.state.team1BetSum;
+      var percentage0 = (this.state.team0BetSum / total)*100;
+      var percentage1 = (this.state.team1BetSum / total)*100;
+      isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
+      isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
 
-   var ProgressBar = () => {
-      if (percentage0 !== 0 && percentage1 !== 0)
-        return <Progress multi className='progressBar'>
-          <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
-          <Progress bar color="success" value={percentage1}>{percentage1}%</Progress>
-          </Progress>;
-      else
-        return null;
+    var ProgressBar = () => {
+        if (percentage0 !== 0 && percentage1 !== 0)
+          return <Progress multi className='progressBar'>
+            <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
+            <Progress bar color="success" value={percentage1}>{percentage1}%</Progress>
+            </Progress>;
+        else
+          return null;
+      }
+      return <this.FilteredBet />
     }
-
-    return <this.FilteredBet />
-  }
 }
 
 export default Bet;
