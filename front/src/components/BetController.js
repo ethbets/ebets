@@ -346,13 +346,13 @@ class BetController extends Component {
             />
           <this.DynamicBetButton />
           <ArbiterInfo />
-          <RaisedButton
+          {(!this.props.isDetailed) ? <RaisedButton
             style={{marginLeft: 14}}
             href={`#bet/${this.props.address}`}
             label='Permalink'
             primary={true}
             icon={<LinkIcon />}
-          />
+          /> : null}
           <this.ExpectedGain />
           </div>
           <this.Steps />
