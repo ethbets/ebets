@@ -10,6 +10,7 @@ class FAQ extends Component {
     console.log('adasdasdasdas');
     return (
       <div style={{marginLeft: 280, marginTop: 90}}>
+        <h4>You can find more information on <a href='https://github.com/ethbets/ebets'>github</a></h4>
         <ul>
           <li>How does it work?</li>
           <p>
@@ -32,8 +33,9 @@ class FAQ extends Component {
           </p>
           <p>
             We plan to create a set of governance smart contracts,
-            so any one can become an arbiter by implementing our interface 
-            (INSERT LINK TO CODE).
+            so any one can become an arbiter by implementing our interface: <a 
+              href='https://github.com/ethbets/ebets/blob/master/contracts/governanceInterface.sol'>
+            governanceInterface.sol</a>.
             We aim for every comunity implementing a smart contract for their own sports,
             when there is a conflict, there is going to be a higher instance that can arbitrate,
             much likely how the actual judiciary systems work nowadays.
@@ -85,7 +87,7 @@ class FAQ extends Component {
           <li>Why your website is ugly?</li>
           <p>It works, doesn't it?</p>
           <li>Where are the contracts?</li>
-          <p>In github INSERT LINK WHEN WE GET IT</p>
+          <p>In <a href='https://github.com/ethbets/ebets/blob/master/contracts/'>github</a></p>
         </ul>
         <img style={{flex: 1, resizeMode: 'contain'}} src={HowDoesItWork} />
       </div>

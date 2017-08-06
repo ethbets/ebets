@@ -13,6 +13,7 @@ cd front/
 npm install
 npm start
 ```
+Open `http://127.0.0.1:8080/` and you're ready to use the system.
 
 ## Basics:
 The contract roles are:
