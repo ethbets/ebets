@@ -122,7 +122,6 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
-    console.log(teamToBet);
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
