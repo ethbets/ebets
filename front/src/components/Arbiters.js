@@ -64,11 +64,11 @@ class Arbiters extends Component {
   static arbiters() {
     return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
       const imgURL = EthereumBlockies.create({
-                  seed:networks[NETWORK_ID].address.toLowerCase(),
-                  spotcolor: -1,
-                  size: 8,
-                  scale: 4,
-                }).toDataURL();
+        seed:networks[NETWORK_ID].address.toLowerCase(),
+        spotcolor: -1,
+        size: 8,
+        scale: 4,
+      }).toDataURL();
       ourArbiters.push({
           key: (
             <MenuItem
