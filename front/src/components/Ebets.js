@@ -33,7 +33,7 @@ class Ebets extends Component {
     this.instantiateContract();
   }
   componentWillUnmount () {
-    if (this.state.betsEvents !== null)
+    if (this.state.betsEvents)
       this.state.betsEvents.stopWatching();
 }
 

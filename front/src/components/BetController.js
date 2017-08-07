@@ -68,7 +68,7 @@ class BetController extends Component {
     }
   }
   componentWillUnmount() {
-    if (this.state.allBetEvents !== null)
+    if (this.state.allBetEvents)
       this.state.allBetEvents.stopWatching();
   }
 

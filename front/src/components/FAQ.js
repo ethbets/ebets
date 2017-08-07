@@ -7,7 +7,6 @@ class FAQ extends Component {
   }
 
   render() {
-    console.log('adasdasdasdas');
     return (
       <div style={{marginLeft: 280, marginTop: 90}}>
         <h4>You can find more information on <a href='https://github.com/ethbets/ebets'>github</a></h4>
