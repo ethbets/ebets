@@ -63,10 +63,17 @@ class Arbiters extends Component {
 
   static arbiters() {
     return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
+      const imgURL = EthereumBlockies.create({
+                  seed:networks[NETWORK_ID].address.toLowerCase(),
+                  spotcolor: -1,
+                  size: 8,
+                  scale: 4,
+                }).toDataURL();
       ourArbiters.push({
           key: (
             <MenuItem
               primaryText={name}
+              leftIcon={<img src={"data:image/jpeg;" + imgURL} />}
               secondaryText={this.setVerifiedIcon(networks[NETWORK_ID].address)}
             />
           ),
@@ -112,11 +119,20 @@ class Arbiters extends Component {
             </TableHeader>
             <TableBody displayRowCheckbox={false}>
               {_.keys(ArbitersJson).map((arbiter, index) => {
+                const imgURL = EthereumBlockies.create({
+                  seed: ArbitersJson[arbiter]['42'].address.toLowerCase(),
+                  spotcolor: -1,
+                  size: 8,
+                  scale: 4,
+                }).toDataURL();
                 console.log('arbiter', arbiter)
                 return (
                   <TableRow key={index}>
                     <TableRowColumn>{ArbitersJson[arbiter].name}</TableRowColumn>
-                    <TableRowColumn colSpan='2'>{ArbitersJson[arbiter]['42'].address}</TableRowColumn>
+                    <TableRowColumn colSpan='2'>
+                      <img src={"data:image/jpeg;" + imgURL} />
+                      {ArbitersJson[arbiter]['42'].address}
+                    </TableRowColumn>
                     <TableRowColumn>42</TableRowColumn>
                     <TableRowColumn style={{whiteSpace: 'normal', wordWrap: 'break-word'}}>
                     {ArbitersJson[arbiter].description}
