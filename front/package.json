@@ -5,6 +5,7 @@
   "dependencies": {
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "bootstrap": "^4.0.0-alpha.6",
@@ -37,7 +38,7 @@
   },
   "scripts": {
     "start": "./generateArbitersFile.js && webpack-dev-server --progress --inline",
-    "build": "./generateArbitersFile.js && webpack -p"
+    "build": "./generateArbitersFile.js && webpack --progress -p"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

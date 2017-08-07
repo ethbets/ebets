@@ -1,8 +1,1 @@
-{"Monarchy":{
-  "42":{
-    "address":"0x78b251c5cfb2b7acf1ea09273d2ed543ecaa4f08"
-  },
-  "name":"Monarchy",
-  "description":"The Monarchy contract have a single Arbiter that can decide on the bet outcomes"
-  }
-}
+{"Monarchy":{"42":{"address":"0x78b251c5cfb2b7acf1ea09273d2ed543ecaa4f08"},"name":"Monarchy","description":"The Monarchy contract have a single Arbiter that can decide on the bet outcomes"}}

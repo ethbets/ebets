@@ -23,7 +23,7 @@ import betFields from './betFields';
 import {betState, stepperState} from 'utils/betStates';
 import {formatEth} from 'utils/ethUtils';
 import Timer from './Timer';
-import Arbiters from './Arbiters';
+import Arbiters from 'components/Arbiters';
 
 import CancellationTokenSource from 'utils/CancellationTokenSource'
 

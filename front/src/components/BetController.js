@@ -29,7 +29,7 @@ import {
 } from 'material-ui/Stepper';
 
 import {betState, stepperState} from 'utils/betStates';
-import Arbiters from './Arbiters';
+import Arbiters from 'components/Arbiters';
 
 class BetController extends Component {
   constructor(props) {
