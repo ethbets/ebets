@@ -14,8 +14,10 @@ window.React = React;
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 render(
-  <Web3Provider>
-    <Router
+  <Web3Provider onChangeAccount={() => {location.reload();}}
+    passive={true}
+    >
+     <Router
       history={useRouterHistory(createHashHistory)({queryKey: false})}
       onUpdate={() => window.scrollTo(0, 0)}
     >

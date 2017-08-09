@@ -8,7 +8,7 @@ class FAQ extends Component {
 
   render() {
     return (
-      <div style={{marginLeft: 280, marginTop: 90}}>
+      <div style={{marginLeft: 50}}>
         <h4>You can find more information on <a href='https://github.com/ethbets/ebets'>github</a></h4>
         <ul>
           <li>How does it work?</li>

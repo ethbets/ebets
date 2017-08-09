@@ -105,9 +105,7 @@ class Arbiters extends Component {
 
   render() {
     return (
-      <div style={{marginLeft: 270}}>
-        <h1 style={{marginLeft: 210}}>{this.props.location.pathname}</h1>
-        <h3>Arbiters:</h3>
+      <div style={{marginLeft: 50}}>
         <Table selectable={false} height='300px'>
             <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
               <TableRow>
@@ -125,7 +123,6 @@ class Arbiters extends Component {
                   size: 8,
                   scale: 4,
                 }).toDataURL();
-                console.log('arbiter', arbiter)
                 return (
                   <TableRow key={index}>
                     <TableRowColumn>{ArbitersJson[arbiter].name}</TableRowColumn>

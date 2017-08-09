@@ -33,8 +33,7 @@ class BetForm extends Component {
   };
   static gridRootStyle = {
     display: 'flex',
-    marginLeft: 260,
-    marginTop: 50,
+    marginLeft: 50,
     flexWrap: 'wrap',
     justifyContent: 'space-around'
   };
@@ -59,7 +58,7 @@ class BetForm extends Component {
   }
 
   initializeTimestamps = () => {
-    const currentDate = moment().toDate();
+    const currentDate = moment().add(2, 'hour').toDate();
     this.setState({
       timestampMatchBegin: currentDate,
       timestampMatchEnd: moment(currentDate).add(1, 'day').toDate(),
@@ -229,7 +228,6 @@ class BetForm extends Component {
         {status}
         <div>
           <form onSubmit={this.handleOnSubmit} >
-            <h1>Add Bet</h1>
             <div>
               <GridList
                 style={BetForm.gridListStyle}

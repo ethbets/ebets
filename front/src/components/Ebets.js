@@ -10,6 +10,7 @@ class Ebets extends Component {
     super(props);
     this.state = {
       bets: [],
+      ebetsContractInstance: null
     }
   }
 
@@ -47,7 +48,14 @@ class Ebets extends Component {
         console.error('Error', error);
         return;
       }
-      var ebetsContractInstance = await ebetsContract.deployed();
+      var ebetsContractInstance;
+      try {
+        ebetsContractInstance = await ebetsContract.deployed();
+      }
+      catch(error) {
+        console.error('Contract not deployed!');
+        return;
+      }
       //events
       const allBetsList = await this.getBets(ebetsContractInstance);
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
@@ -60,7 +68,10 @@ class Ebets extends Component {
           }
         });
       });
-      this.setState({ bets: allBetsList, betsEvents: betsEvents} );
+      this.setState({bets: allBetsList,
+        betsEvents: betsEvents,
+        ebetsContractInstance: ebetsContractInstance
+      });
     }
   );
   }
@@ -84,12 +95,9 @@ class Ebets extends Component {
                        address={address} />
     }
     return (
-      <div style={{marginLeft: 210}}>
-        <h1 style={{marginLeft: 210}}>{this.props.location.pathname}</h1>
-        <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
-          {listItems}
-        </ul>
-      </div>
+      <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
+        {listItems}
+      </ul>
     );
   }
 }
