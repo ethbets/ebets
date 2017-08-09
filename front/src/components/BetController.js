@@ -60,7 +60,8 @@ class BetController extends Component {
                 forTeam: result.args.forTeam,
                 timestamp: block.timestamp
               };
-              previousState.betList.unshift(newBet);
+              previousState.betList.push(newBet);
+              previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
             });
           });
         }
