@@ -34,7 +34,8 @@
     "reactstrap": "^4.8.0",
     "truffle-contract": "^2.0.1",
     "web3": "^0.19.1",
-    "webpack": "^3.2.0"
+    "webpack": "^3.2.0",
+    "webpack-dev-server": "^2.7.1"
   },
   "scripts": {
     "start": "./generateArbitersFile.js && webpack-dev-server --progress --inline",

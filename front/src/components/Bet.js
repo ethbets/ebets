@@ -13,6 +13,7 @@ import Chip from 'material-ui/Chip';
 import * as MColors from 'material-ui/styles/colors';
 import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
+import AutoComplete from 'material-ui/AutoComplete';
 
 import BetController from './BetController';
 
@@ -24,6 +25,7 @@ import {betState, stepperState} from 'utils/betStates';
 import {formatEth} from 'utils/ethUtils';
 import Timer from './Timer';
 import Arbiters from 'components/Arbiters';
+import ERC20Tokens from 'components/ERC20Tokens';
 
 import CancellationTokenSource from 'utils/CancellationTokenSource'
 
@@ -50,6 +52,7 @@ class Bet extends Component {
       iconUrl: null,
       isArbiter: false,
       stepIndex: 0,
+      erc20token: '',
       ...betFields,
     }
   }
@@ -189,10 +192,33 @@ class Bet extends Component {
   }
   // End of contract interaction functions
 
+  handleCurrencyUpdate = (searchText) => {
+    this.setState({
+      erc20token: searchText,
+    });
+  };
+
+  Currency = () => {
+    return (
+      <AutoComplete
+        textFieldStyle={{width: 160}}
+        style={{width: 160, margin: 10}}
+        floatingLabelText="ERC20 Token"
+        searchText={this.state.erc20token}
+        onUpdateInput={this.handleCurrencyUpdate}
+        openOnFocus={true}
+        dataSource={ERC20Tokens.erc20tokens()}
+        dataSourceConfig={{ text: 'textKey', value: 'valueKey' }}
+        filter={AutoComplete.noFilter}
+      />
+    );
+  }
+
+
   FilteredBet = () => {
     const betTitle = 
-      <div style={{flexFlow: 'row', justifyContent: 'space-between'}}>
-        <div style={{display: 'flex'}}>
+      <div style={{flexFlow: 'row', justifyContent: 'space-between', alignItems: 'baseline'}}>
+        <div style={{display: 'flex', alignItems: 'baseline' }}>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {formatEth(this.state.team0BetSum)}
@@ -204,6 +230,9 @@ class Bet extends Component {
             <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
             {formatEth(this.state.team1BetSum)}
           </Chip>
+          <div>
+          <this.Currency />
+          </div>
         <Timer parentState={this.state.currentBetState}
                updateState={this.updateStateFromTimer.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
