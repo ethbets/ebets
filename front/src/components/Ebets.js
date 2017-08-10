@@ -58,6 +58,7 @@ class Ebets extends Component {
       }
       //events
       const allBetsList = await this.getBets(ebetsContractInstance);
+      console.log(allBetsList);
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
       betsEvents.watch((error, response) => {
         //console.log('eita', response);

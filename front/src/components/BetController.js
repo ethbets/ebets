@@ -1,5 +1,7 @@
 /*global web3:true */
 import moment from 'moment';
+
+import PropTypes from 'prop-types';
 import EthereumBlockies from 'ethereum-blockies';
 import BigNumber from 'bignumber.js';
 import React, { Component } from 'react';
@@ -365,5 +367,9 @@ class BetController extends Component {
     return null;
   }
 }
+
+BetController.contextTypes = {
+  web3: PropTypes.object
+};
 
 export default BetController;

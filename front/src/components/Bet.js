@@ -3,6 +3,7 @@ import contract from 'truffle-contract';
 import lodash from 'lodash';
 import moment from 'moment';
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { Dialog, FlatButton } from 'material-ui'
@@ -370,7 +371,7 @@ class Bet extends Component {
       arbiterContractInstance: arbiterContractInstance,
       arbiterInfo: {
         name: arbiterName,
-        verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address)
+        verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address, this.context.web3.networkId)
       },
       betContractInstance: betContractInstance,
       showDetails: showDetails
@@ -481,5 +482,9 @@ class Bet extends Component {
       return <this.FilteredBet />
     }
 }
+
+Bet.contextTypes = {
+  web3: PropTypes.object
+};
 
 export default Bet;

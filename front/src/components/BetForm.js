@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import DateTimePicker from './DateTimePicker';
+import PropTypes from 'prop-types';
 
 import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
@@ -280,7 +281,7 @@ class BetForm extends Component {
                     filter={(searchText, key, v) => 
                       (v.key.props.primaryText.toLowerCase().indexOf(searchText) !== -1)}
                     openOnFocus={true}
-                    dataSource={Arbiters.arbiters()}
+                    dataSource={Arbiters.arbiters(this.context.web3.networkId)}
                     dataSourceConfig={{ text: 'value', value: 'key' }}
                     onNewRequest={this.handleArbiterSubmit}
                     onUpdateInput={this.handleArbiterChange}
@@ -342,5 +343,8 @@ class BetForm extends Component {
     )
   }
 }
+BetForm.contextTypes = {
+  web3: PropTypes.object
+};
 
 export default BetForm;
