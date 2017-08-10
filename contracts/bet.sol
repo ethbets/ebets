@@ -160,7 +160,7 @@ contract Bet is ProposalInterface {
     NewBet(forTeam, msg.sender, msg.value);
   }
 
-  function checkAddERC20(address erc20) {
+  function checkAddERC20(address erc20) internal {
     if (ERC20Team0BetSum[erc20] == 0 && ERC20Team1BetSum[erc20] == 0) {
       validERC20.push(erc20);
     }
