@@ -19,9 +19,10 @@ function deployContract(contractABI, contractBin, address) {
     monarchyContract.deploy({
       data: contractBin
     }).send({
-      from: address 
+      from: address,
+      gas: 3940000 
     })
-    .on('error', () => {})
+    .on('error', (err) => {console.log('error', err)})
     .on('confirmation', (block, tx) => {
       resolve(tx.contractAddress)
     })
@@ -42,6 +43,8 @@ async function deployAll() {
       updated_at: now
     }
     MonarchyJSON.networks[networkId] = monarchyObj;
+    MonarchyJSON['unlinked_binary'] = MonarchyBin;
+    MonarchyJSON['abi'] = MonarchyABI;
     fs.writeFileSync('./build/contracts/Monarchy.json', JSON.stringify(MonarchyJSON, undefined, 2));
     console.log('Deployed');
 
@@ -51,6 +54,8 @@ async function deployAll() {
       address: ebetsAddress,
       updated_at: now
     }
+    EbetsJSON['unlinked_binary'] = EbetsBin;
+    EbetsJSON['abi'] = EbetsABI;
     EbetsJSON.networks[networkId] = ebetsObj;
     fs.writeFileSync('./build/contracts/Ebets.json', JSON.stringify(EbetsJSON, undefined, 2));
     console.log('Deployed');
