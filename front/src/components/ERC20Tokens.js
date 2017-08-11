@@ -6,7 +6,7 @@ class ERC20Tokens extends Component {
   }
 
   static erc20tokens() {
-    return [ { textKey: 'SimpleToken', valueKey: '0x86261273' }, ];
+    return [ {textKey: 'Ether', valueKey: ''}, { textKey: 'SimpleToken', valueKey: '0x86261273' }, ];
   }
 
 }

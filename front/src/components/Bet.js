@@ -52,7 +52,7 @@ class Bet extends Component {
       iconUrl: null,
       isArbiter: false,
       stepIndex: 0,
-      erc20token: '',
+      erc20token: {name: 'Ether', address: ''},
       ...betFields,
     }
   }
@@ -125,6 +125,7 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
+    console.log('Currency is ' + this.state.erc20token.name + ' ' + this.state.erc20token.address);
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
@@ -193,19 +194,24 @@ class Bet extends Component {
   // End of contract interaction functions
 
   handleCurrencyUpdate = (searchText) => {
-    this.setState({
-      erc20token: searchText,
-    });
   };
+
+  handleCurrencySubmit = (selectedItem, index) => {
+    if (index !== -1) {
+      console.log(selectedItem);
+      this.setState({ erc20token: {name: selectedItem.textKey, address: selectedItem.valueKey}});
+    }
+  }
+
 
   Currency = () => {
     return (
       <AutoComplete
         textFieldStyle={{width: 160}}
         style={{width: 160, margin: 10}}
-        floatingLabelText="ERC20 Token"
-        searchText={this.state.erc20token}
+        floatingLabelText="Currency"
         onUpdateInput={this.handleCurrencyUpdate}
+        onNewRequest={this.handleCurrencySubmit}
         openOnFocus={true}
         dataSource={ERC20Tokens.erc20tokens()}
         dataSourceConfig={{ text: 'textKey', value: 'valueKey' }}
@@ -262,7 +268,6 @@ class Bet extends Component {
             avatar={(this.state.iconUrl != null) ? 
                      this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
             title={betTitle}
-            actAsExpander={(this.props.category === 'detailed') ? false : true}
             showExpandableButton={(this.props.category === 'detailed') ? false : true}
           />
           <BetController
