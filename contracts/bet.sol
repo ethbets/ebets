@@ -50,7 +50,6 @@ contract Bet is ProposalInterface{
   bool public isFeatured;
   string public team0Name;
   string public team1Name;
-  string public category;
   uint public team0BetSum;
   uint public team1BetSum;
   mapping (address => uint) public betsToTeam0;
@@ -69,8 +68,7 @@ contract Bet is ProposalInterface{
   event StateChanged(BET_STATES state);
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 
-               string _team1Name, string _category, 
-               uint[] _timestamps
+               string _team1Name, uint[] _timestamps
                ) {
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
@@ -82,7 +80,6 @@ contract Bet is ProposalInterface{
     arbiter = _arbiter;
     team0Name = _team0Name;
     team1Name = _team1Name;
-    category = _category;
     // TODO: PUT BACK TIMESTAMP_MARGIN SUMS, PUT REQUIRES!
     timestampMatchBegin = _timestamps[0];// - TIMESTAMP_MARGIN;
     timestampMatchEnd = _timestamps[1];// + TIMESTAMP_MARGIN;
@@ -120,10 +117,6 @@ contract Bet is ProposalInterface{
     isFeatured = !isFeatured;
   }
 
-  function modifyCategory(string newCategory) onlyOwner() {
-    category = newCategory;
-  }
-  
   function bet(bool forTeam) payable 
     beforeTimestamp(timestampMatchBegin) {
     require(!arbiter.isMember(msg.sender));

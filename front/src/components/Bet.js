@@ -218,11 +218,11 @@ class Bet extends Component {
       if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null || 
            this.state.hasEverBet)) || (this.props.category === 'detailed') ||
           // This category
-          (this.props.category === this.state.category && this.state.isFeatured) ||
+          (this.props.category === this.state.category) ||
           // All the bets
-          (this.props.category === 'all_bets' && this.state.isFeatured) ||
-          // Unfeatured bets
-          (this.props.category === 'unfeatured' && !this.state.isFeatured)){
+          (this.props.category === 'all_bets')) {
+        if (this.state.isFeatured === false && this.props.showUnfeatured === false)
+          return null;
         // TODO: Pack arguments to BetController! 
         return (
           <Card

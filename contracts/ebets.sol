@@ -16,7 +16,7 @@ contract Ebets {
    * TODO: INDEX category! There is an issue with web3 that prevents us to do it
    * right now: https://github.com/ethereum/web3.js/issues/434
   */
-  event createdBet(address indexed betAddr);
+  event createdBet(address betAddr);
   
   function Ebets() {
     owner = msg.sender;
@@ -26,7 +26,7 @@ contract Ebets {
                       string team1Name, string category, 
                       uint[] timestamps) {
 
-    Bet bet = new Bet(arbiter, team0Name, team1Name, category, timestamps);
+    Bet bet = new Bet(arbiter, team0Name, team1Name, timestamps);
     // Featured by default for resolver
     if (msg.sender == owner)
       bet.toggleFeatured();

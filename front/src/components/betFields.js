@@ -5,7 +5,6 @@ let BETFIELDS = {
   isFeatured: false,
   team0Name: '',
   team1Name: '',
-  category: '',
   team0BetSum: new BigNumber(0),
   team1BetSum: new BigNumber(0),
   betsToTeam0: {},
