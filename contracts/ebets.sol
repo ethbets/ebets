@@ -16,7 +16,7 @@ contract Ebets {
    * TODO: INDEX category! There is an issue with web3 that prevents us to do it
    * right now: https://github.com/ethereum/web3.js/issues/434
   */
-  event createdBet(address betAddr);
+  event createdBet(address betAddr, string category);
   
   function Ebets() {
     owner = msg.sender;
@@ -31,7 +31,7 @@ contract Ebets {
     if (msg.sender == owner)
       bet.toggleFeatured();
     bets[category].push(bet);
-    createdBet(bet);
+    createdBet(bet, category);
   }
 
   function modifyCategory(uint betIdx, string oldCategory, string newCategory) 

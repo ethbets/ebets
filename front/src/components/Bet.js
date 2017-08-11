@@ -214,56 +214,47 @@ class Bet extends Component {
         />
         </div>
       </div>;
-
-      if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null || 
-           this.state.hasEverBet)) || (this.props.category === 'detailed') ||
-          // This category
-          (this.props.category === this.state.category) ||
-          // All the bets
-          (this.props.category === 'all_bets')) {
-        if (this.state.isFeatured === false && this.props.showUnfeatured === false)
-          return null;
-        // TODO: Pack arguments to BetController! 
-        return (
-          <Card
-            // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
-            onExpandChange={lodash.debounce(this.onExpand, 150)}
-            expanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
-          >
-          <CardHeader
-            avatar={(this.state.iconUrl != null) ? 
-                     this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
-            title={betTitle}
-            actAsExpander={(this.props.category === 'detailed') ? false : true}
-            showExpandableButton={(this.props.category === 'detailed') ? false : true}
-          />
-          <BetController
-            isDetailed={(this.props.category === 'detailed') ? true : false}
-            betContractInstance={this.state.betContractInstance}
-            address={this.props.address}
-            currentBetState={this.state.currentBetState}
-            team0Name={this.state.team0Name}
-            team1Name={this.state.team1Name}
-            stepperState={this.state.stepperState}
-            isExpanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
-            hasBetOnTeam={this.state.hasBetOnTeam}
-            team0BetSum={this.state.team0BetSum}
-            team1BetSum={this.state.team1BetSum}
-            tax={this.state.TAX}
-            betOnTeamFunction={this.betOnTeam.bind(this)}
-            callArbiterFunction={this.callArbiter.bind(this)}
-            callVoteFunction={this.callVote.bind(this)}
-            withdrawFunction={this.withdraw.bind(this)}
-            betHappened={this.state.betHappened}
-            isArbiter={this.state.isArbiter}
-            arbiterInfo={this.state.arbiterInfo}
-          />
-          <this.BetStatusDialog />
-          <this.LinearProgressCustom mode="indeterminate" />
-          </Card>
-        );
-      }
-      return null;
+      if (this.state.isFeatured === false && this.props.showUnfeatured === false)
+        return null;
+      // TODO: Pack arguments to BetController! 
+      return (
+        <Card
+          // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
+          onExpandChange={lodash.debounce(this.onExpand, 150)}
+          expanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
+        >
+        <CardHeader
+          avatar={(this.state.iconUrl != null) ? 
+                    this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
+          title={betTitle}
+          actAsExpander={(this.props.category === 'detailed') ? false : true}
+          showExpandableButton={(this.props.category === 'detailed') ? false : true}
+        />
+        <BetController
+          isDetailed={(this.props.category === 'detailed') ? true : false}
+          betContractInstance={this.state.betContractInstance}
+          address={this.props.address}
+          currentBetState={this.state.currentBetState}
+          team0Name={this.state.team0Name}
+          team1Name={this.state.team1Name}
+          stepperState={this.state.stepperState}
+          isExpanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
+          hasBetOnTeam={this.state.hasBetOnTeam}
+          team0BetSum={this.state.team0BetSum}
+          team1BetSum={this.state.team1BetSum}
+          tax={this.state.TAX}
+          betOnTeamFunction={this.betOnTeam.bind(this)}
+          callArbiterFunction={this.callArbiter.bind(this)}
+          callVoteFunction={this.callVote.bind(this)}
+          withdrawFunction={this.withdraw.bind(this)}
+          betHappened={this.state.betHappened}
+          isArbiter={this.state.isArbiter}
+          arbiterInfo={this.state.arbiterInfo}
+        />
+        <this.BetStatusDialog />
+        <this.LinearProgressCustom mode="indeterminate" />
+        </Card>
+      );
     }
     
   onExpand = () => {

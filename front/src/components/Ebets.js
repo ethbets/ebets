@@ -35,11 +35,14 @@ class Ebets extends Component {
   getBetsByCategory = (category, ebetsContractInstance) => {
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
-      if (category === 'all_bets')
-        for (let cIdx in ebetsCategories)
+      if (category === 'all_bets') {
+        for (let cIdx in ebetsCategories) {
           betPromises.push(ebetsContractInstance.getBetsByCategory(ebetsCategories[cIdx].path));
-      else
+        }
+      }
+      else {
         betPromises = [ebetsContractInstance.getBetsByCategory(category)];
+      }
       const bets = (await Promise.all(betPromises)).reduce((a, b) => {
         return a.concat(b);
       }, []);
@@ -87,7 +90,8 @@ class Ebets extends Component {
       //events
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
       betsEvents.watch((error, response) => {
-        
+        if (response.args.category === this.props.routeParams.category)
+          this.setState(previousState => ({bets: previousState.bets.concat(response.args.betAddr)}));
       })
       //   //console.log('eita', response);
       //   this.setState(previousState => {
