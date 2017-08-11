@@ -52,7 +52,7 @@ class Bet extends Component {
       iconUrl: null,
       isArbiter: false,
       stepIndex: 0,
-      erc20token: {name: 'Ether', address: ''},
+      currency: {name: 'Ether (default)', address: ''},
       ...betFields,
     }
   }
@@ -125,7 +125,6 @@ class Bet extends Component {
    * Functions to interact with contract
    */
   betOnTeam = (teamToBet, value) => {
-    console.log('Currency is ' + this.state.erc20token.name + ' ' + this.state.erc20token.address);
     if (this.state.betContractInstance === undefined) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Error instantiating contract, please report that on github.');
@@ -193,16 +192,11 @@ class Bet extends Component {
   }
   // End of contract interaction functions
 
-  handleCurrencyUpdate = (searchText) => {
-  };
-
   handleCurrencySubmit = (selectedItem, index) => {
     if (index !== -1) {
-      console.log(selectedItem);
-      this.setState({ erc20token: {name: selectedItem.textKey, address: selectedItem.valueKey}});
+      this.setState({ currency: {name: selectedItem.textKey, address: selectedItem.valueKey}});
     }
   }
-
 
   Currency = () => {
     return (
@@ -210,7 +204,7 @@ class Bet extends Component {
         textFieldStyle={{width: 160}}
         style={{width: 160, margin: 10}}
         floatingLabelText="Currency"
-        onUpdateInput={this.handleCurrencyUpdate}
+        searchText={this.state.currency.name}
         onNewRequest={this.handleCurrencySubmit}
         openOnFocus={true}
         dataSource={ERC20Tokens.erc20tokens()}
@@ -220,20 +214,25 @@ class Bet extends Component {
     );
   }
 
+  CurrencyId = () => {
+    if (this.state.currency.address === '')
+      return 'Ξ';
+    return this.state.currency.name[0];
+  }
 
   FilteredBet = () => {
     const betTitle = 
       <div style={{flexFlow: 'row', justifyContent: 'space-between', alignItems: 'baseline'}}>
         <div style={{display: 'flex', alignItems: 'baseline' }}>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
-            <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
+            <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
             {formatEth(this.state.team0BetSum)}
           </Chip>
           <Chip backgroundColor={MColors.white}>
             {this.state.team0Name} vs {this.state.team1Name}
           </Chip>
           <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
-            <Avatar size={32} backgroundColor={MColors.cyan800}>Ξ</Avatar>
+            <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
             {formatEth(this.state.team1BetSum)}
           </Chip>
           <div>
