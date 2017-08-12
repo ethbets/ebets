@@ -325,39 +325,36 @@ class BetController extends Component {
       const ArbiterInfo =  Arbiters.getArbiterInfo(this.props.arbiterInfo);
       return (
         <div>
-          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center',
-                       alignItems: 'baseline'}}>
-          <ArbiterInfo />
-          <div style={{margin: 20}}>
-          <SelectField style={{ width: 160, 
-                                verticalAlign: 'bottom',
-                                marginRight: 10,
-                                marginLeft: 0 }}
-            floatingLabelText='Team'
-            value={(this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
-            onChange={this.setTeam}
-            disabled={this.props.hasBetOnTeam.team !== null || this.props.currentBetState >= betState.matchRunning}
-          >
-            <MenuItem value={false} primaryText={this.props.team0Name} />
-            <MenuItem value={true} primaryText={this.props.team1Name} />
-          </SelectField> 
-          <TextField 
-            disabled={(this.props.currentBetState >= betState.matchRunning)} 
-            style={{ width: 80 }}
-            id='betAmount' 
-            type='number'
-            onChange={this.setBetValue}
-            />
-          <this.DynamicBetButton />
-          </div>
-          {(!this.props.isDetailed) ? <RaisedButton
-            style={{marginLeft: 14}}
-            href={`#bet/${this.props.address}`}
-            label='Permalink'
-            primary={true}
-            icon={<LinkIcon />}
-          /> : null}
-          <this.ExpectedGain />
+          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end'}}>
+            <ArbiterInfo />
+            <SelectField style={{ width: 160,
+                                  marginRight: 10,
+                                  marginLeft: 10 }}
+              floatingLabelText='Team'
+              value={(this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
+              onChange={this.setTeam}
+              disabled={this.props.hasBetOnTeam.team !== null || this.props.currentBetState >= betState.matchRunning}
+            >
+              <MenuItem value={false} primaryText={this.props.team0Name} />
+              <MenuItem value={true} primaryText={this.props.team1Name} />
+            </SelectField>
+            <TextField
+              disabled={(this.props.currentBetState >= betState.matchRunning)}
+              style={{ width: 80, marginRight: 10 }}
+              hintText='Value'
+              id='betAmount'
+              type='number'
+              onChange={this.setBetValue}
+              />
+            <this.DynamicBetButton />
+            {(!this.props.isDetailed) ? <RaisedButton
+              style={{marginLeft: 14}}
+              href={`#bet/${this.props.address}`}
+              label='Permalink'
+              primary={true}
+              icon={<LinkIcon />}
+            /> : null}
+            <this.ExpectedGain />
           </div>
           <this.Steps />
           <this.DynamicList />
