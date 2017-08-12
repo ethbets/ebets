@@ -286,7 +286,6 @@ class Bet extends Component {
         <this.LinearProgressCustom mode="indeterminate" />
         </Card>
       );
->>>>>>> ebets_reestructure
     }
     
   onExpand = () => {
