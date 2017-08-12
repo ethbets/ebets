@@ -202,7 +202,7 @@ class Bet extends Component {
     return (
       <AutoComplete
         textFieldStyle={{width: 160}}
-        style={{width: 160, margin: 10}}
+        style={{width: 160, marginLeft: 20}}
         floatingLabelText="Currency"
         searchText={this.state.currency.name}
         onNewRequest={this.handleCurrencySubmit}
@@ -222,22 +222,19 @@ class Bet extends Component {
 
   FilteredBet = () => {
     const betTitle = 
-      <div style={{flexFlow: 'row', justifyContent: 'space-between', alignItems: 'baseline'}}>
-        <div style={{display: 'flex', alignItems: 'baseline' }}>
-          <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
-            <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
-            {formatEth(this.state.team0BetSum)}
-          </Chip>
-          <Chip backgroundColor={MColors.white}>
-            {this.state.team0Name} vs {this.state.team1Name}
-          </Chip>
-          <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
-            <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
-            {formatEth(this.state.team1BetSum)}
-          </Chip>
-          <div>
-          <this.Currency />
-          </div>
+      <div style={{display: 'flex', flexFlow: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+          <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
+          {formatEth(this.state.team0BetSum)}
+        </Chip>
+        <Chip backgroundColor={MColors.white}>
+          {this.state.team0Name} vs {this.state.team1Name}
+        </Chip>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+          <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
+          {formatEth(this.state.team1BetSum)}
+        </Chip>
+        <this.Currency />
         <Timer parentState={this.state.currentBetState}
                updateState={this.updateStateFromTimer.bind(this)}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
@@ -245,7 +242,6 @@ class Bet extends Component {
                resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
                terminateDeadline={(MOCK) ? mockTerminateDeadline : this.state.timestampSelfDestructDeadline}
         />
-        </div>
       </div>;
 
       if ((this.props.category === 'my_bets' && (this.state.hasBetOnTeam.team !== null || 
@@ -267,6 +263,7 @@ class Bet extends Component {
             avatar={(this.state.iconUrl != null) ? 
                      this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
             title={betTitle}
+            style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}
             showExpandableButton={(this.props.category === 'detailed') ? false : true}
           />
           <BetController
@@ -502,7 +499,7 @@ class Bet extends Component {
       isNaN(percentage0) ? percentage0 = 0 : percentage0 = parseFloat(percentage0).toFixed(2);
       isNaN(percentage1) ? percentage1 = 0 : percentage1 = parseFloat(percentage1).toFixed(2);
 
-    var ProgressBar = () => {
+      var ProgressBar = () => {
         if (percentage0 !== 0 && percentage1 !== 0)
           return <Progress multi className='progressBar'>
             <Progress bar color="danger" value={percentage0}>{percentage0}%</Progress>
