@@ -23,15 +23,18 @@ class Master extends Component {
 
   static childContextTypes = {
     muiTheme: PropTypes.object,
+    showUnfeatured: PropTypes.bool
   };
 
   state = {
     navDrawerOpen: false,
+    showUnfeatured: false
   };
 
   getChildContext() {
     return {
       muiTheme: this.state.muiTheme,
+      showUnfeatured: this.state.showUnfeatured      
     };
   }
 
@@ -127,6 +130,9 @@ class Master extends Component {
   };
 
   handleChangeList = (event, value) => {
+    if (typeof value === 'object') {
+      return;
+    }
     if (value) {
       this.props.router.push(value);
     }
@@ -137,6 +143,10 @@ class Master extends Component {
       muiTheme: muiTheme,
     });
   };
+
+  toggleUnfeatured = (featured) => {
+    this.setState({showUnfeatured: featured});
+  }
 
   render() {
     const {
@@ -154,7 +164,7 @@ class Master extends Component {
 
     const web3Context = this.context.web3;
     var errorMessage = null;
-    if (web3Context.networkId !== '42' && web3Context.networkId !== null) {
+    if (web3Context.networkId !== null && web3Context.networkId !== '42' && web3Context.networkId !== '3') {
       errorMessage = <div> <WarningIcon color={red500}/> Ebets runs only in the Kovan network, please switch to use the Dapp</div>;
       //this.props.router.push('');
     }
@@ -163,7 +173,6 @@ class Master extends Component {
         Make sure you unlock or have at least one account in your wallet
       </div>;
     }
-    
     return (
       <div>
         <div style={{marginLeft: 210}}>
@@ -184,6 +193,7 @@ class Master extends Component {
           docked={true}
           open={true}
           onChangeList={this.handleChangeList}
+          onToggleUnfeatured={this.toggleUnfeatured.bind(this)}
         />
       </div>
     );

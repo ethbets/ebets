@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 
 import EbetsJson from 'build/contracts/Ebets.json';
 import Bet from 'components/Bet';
+import PropTypes from 'prop-types';
+import ebetsCategories from 'utils/ebetsCategories';
 
 class Ebets extends Component {
   
@@ -15,7 +17,7 @@ class Ebets extends Component {
   }
 
   getBets = (ebetsContractInstance) => {
-    return new Promise((resolve, reject) => {
+    /*return new Promise((resolve, reject) => {
       var betEvents = ebetsContractInstance.allEvents({
         fromBlock: 0,
         toBlock: 'latest'});
@@ -27,16 +29,44 @@ class Ebets extends Component {
           resolve(result.map((bet) => bet.args.betAddr));
         }
       });
-    });
+    });*/
   }
 
+  getBetsByCategory = (category, ebetsContractInstance) => {
+    return new Promise( async (resolve, reject) => {
+      let betPromises = [];
+      if (category === 'all_bets') {
+        for (let cIdx in ebetsCategories) {
+          betPromises.push(ebetsContractInstance.getBetsByCategory(ebetsCategories[cIdx].path));
+        }
+      }
+      else {
+        betPromises = [ebetsContractInstance.getBetsByCategory(category)];
+      }
+      const bets = (await Promise.all(betPromises)).reduce((a, b) => {
+        return a.concat(b);
+      }, []);
+      resolve(bets);
+    });
+  }
+  
   componentWillMount() {
     this.instantiateContract();
   }
   componentWillUnmount () {
     if (this.state.betsEvents)
       this.state.betsEvents.stopWatching();
-}
+  }
+  componentWillReceiveProps(nextProps) {
+    const category = nextProps.routeParams.category;
+    if (this.state.ebetsContractInstance !== null && 
+        category !== undefined) {
+      this.getBetsByCategory(category, this.state.ebetsContractInstance)
+      .then(bets => {
+        this.setState({bets: bets})
+      });
+    }
+  }
 
   async instantiateContract() {
     const contract = require('truffle-contract');
@@ -56,20 +86,25 @@ class Ebets extends Component {
         console.error('Contract not deployed!');
         return;
       }
+      var bets = await this.getBetsByCategory(this.props.routeParams.category, ebetsContractInstance);
       //events
-      const allBetsList = await this.getBets(ebetsContractInstance);
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
       betsEvents.watch((error, response) => {
-        //console.log('eita', response);
-        this.setState(previousState => {
-          //console.log(previousState,response.args.betAddr)
-          return {
-            bets: previousState.bets.concat(response.args.betAddr) 
-          }
-        });
-      });
-      this.setState({bets: allBetsList,
-        betsEvents: betsEvents,
+        if (response.args.category === this.props.routeParams.category)
+          this.setState(previousState => ({bets: previousState.bets.concat(response.args.betAddr)}));
+      })
+      //   //console.log('eita', response);
+      //   this.setState(previousState => {
+      //     //console.log(previousState,response.args.betAddr)
+      //     return {
+      //       ebetsContractInstance: ebetsContractInstance,
+      //       //bets: previousState.bets.concat(response.args.betAddr) 
+      //     }
+      //   });
+      // });
+      this.setState({
+        bets: bets,
+        //betsEvents: betsEvents,
         ebetsContractInstance: ebetsContractInstance
       });
     }
@@ -77,15 +112,16 @@ class Ebets extends Component {
   }
 
   render() {
-    var {category, address} = this.props.routeParams;
-    var listItems;
+    var { category, address } = this.props.routeParams;
+    var listItems = [];
     if (category !== undefined) {
       if (this.props.routeParams.subcategory !== undefined)
         category = category + '/' + this.props.routeParams.subcategory;
       listItems = this.state.bets.map(bet => 
-        <Bet key={bet.toString()}
+        <Bet key={bet}
             category={category}
             address={bet}
+            showUnfeatured={this.context.showUnfeatured}
         />
       );
     }
@@ -101,5 +137,9 @@ class Ebets extends Component {
     );
   }
 }
+
+Ebets.contextTypes = {
+  showUnfeatured: PropTypes.bool
+};
 
 export default Ebets;

@@ -21,6 +21,7 @@ import {
 import ArbitersJson from 'utils/ebetsArbiters.json';
 // CHANGE THIS WHEN THE NETWORK IS MAINNET
 const NETWORK_ID = '42';
+const NETWORK_IDS = ['42', '3'];
 
 class Arbiters extends Component {
   constructor(props) {
@@ -42,9 +43,9 @@ class Arbiters extends Component {
     )
   }
 
-  static isVerifiedArbiter(address){
+  static isVerifiedArbiter(address, networkId){
     for (var arbiter in ArbitersJson) {
-      if (ArbitersJson[arbiter][NETWORK_ID].address === address)
+      if (ArbitersJson[arbiter][networkId].address.toLowerCase() === address.toLowerCase())
         return true;
       return false;
     }
@@ -54,17 +55,19 @@ class Arbiters extends Component {
     return ArbitersJson[arbiter][networkId].address
   }
 
-  static setVerifiedIcon(address) {
-    if (this.isVerifiedArbiter(address)) {
+  static setVerifiedIcon(address, networkId) {
+    if (this.isVerifiedArbiter(address, networkId)) {
       return <IconButton tooltip='Verified!'><DoneIcon color={greenA200}/></IconButton>
     }
     return <IconButton tooltip='Not verified!'><WarningIcon color={red500}/></IconButton>
   }
+  // TODO: This is bad practice, this should return something agnostic to react models
+  static arbiters(networkId) {
+    if (networkId === null) return [ <MenuItem primaryText=''/> ]
 
-  static arbiters() {
     return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
       const imgURL = EthereumBlockies.create({
-        seed:networks[NETWORK_ID].address.toLowerCase(),
+        seed:networks[networkId].address.toLowerCase(),
         spotcolor: -1,
         size: 8,
         scale: 4,
@@ -74,10 +77,10 @@ class Arbiters extends Component {
             <MenuItem
               primaryText={name}
               leftIcon={<img src={"data:image/jpeg;" + imgURL} />}
-              secondaryText={this.setVerifiedIcon(networks[NETWORK_ID].address)}
+              secondaryText={this.setVerifiedIcon(networks[networkId].address, networkId)}
             />
           ),
-          value: networks[NETWORK_ID].address
+          value: networks[networkId].address
       })
       return ourArbiters;
     }, []);
@@ -116,26 +119,28 @@ class Arbiters extends Component {
               </TableRow>
             </TableHeader>
             <TableBody displayRowCheckbox={false}>
-              {_.keys(ArbitersJson).map((arbiter, index) => {
-                const imgURL = EthereumBlockies.create({
-                  seed: ArbitersJson[arbiter]['42'].address.toLowerCase(),
+              {_.keys(ArbitersJson).map((arbiter, index1) => {
+                return NETWORK_IDS.map((networkId, index2) => {
+                  const imgURL = EthereumBlockies.create({
+                  seed: ArbitersJson[arbiter][networkId].address.toLowerCase(),
                   spotcolor: -1,
                   size: 8,
                   scale: 4,
                 }).toDataURL();
                 return (
-                  <TableRow key={index}>
+                  <TableRow key={`${index1}-${index2}`}>
                     <TableRowColumn>{ArbitersJson[arbiter].name}</TableRowColumn>
                     <TableRowColumn colSpan='2'>
                       <img src={"data:image/jpeg;" + imgURL} />
-                      {ArbitersJson[arbiter]['42'].address}
+                      {ArbitersJson[arbiter][networkId].address}
                     </TableRowColumn>
-                    <TableRowColumn>42</TableRowColumn>
+                    <TableRowColumn>{networkId}</TableRowColumn>
                     <TableRowColumn style={{whiteSpace: 'normal', wordWrap: 'break-word'}}>
                     {ArbitersJson[arbiter].description}
                     </TableRowColumn>
                   </TableRow>
                 )
+                });
               })}
             </TableBody>
           </Table>
