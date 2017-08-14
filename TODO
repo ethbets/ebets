@@ -1,0 +1,8 @@
+Branch erc20 TODO list:
+
+Front
+- Bet: instantiate ERC20 contract and call "approve" from the user to the bet
+- When the Bet contract is instantiated, read the "validERC20" list from the contract,
+  and build a dict with the amount the user has bet for each currency used so far
+- Withdraw: compute withdraw value according to the selected currency
+  Maybe: not show any value at all
