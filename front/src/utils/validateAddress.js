@@ -1,3 +1,10 @@
+/* Copyright (C) 2017 ethbets
+ * All rights reserved.
+ * 
+ * This software may be modified and distributed under the terms
+ * of the BSD license. See the LICENSE file for details.
+*/
+
 // Extract from: https://github.com/ethereum/go-ethereum/blob/aa9fff3e68b1def0a9a22009c233150bf9ba481f/jsre/ethereum_js.go#L2288
 import sha3 from 'crypto-js/sha3';
 
