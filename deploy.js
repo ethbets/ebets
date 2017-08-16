@@ -75,27 +75,14 @@ async function deployAll() {
 
     console.log('Deploying ERC20 SimpleToken1...');
     const simpleToken1Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
-    const simpleToken1Obj = {
-      address: simpleToken1Address,
-      updated_at: now
-    }
-    SimpleToken1JSON['unlinked_binary'] = SimpleTokenBin;
-    SimpleToken1JSON['abi'] = SimpleTokenABI;
-    SimpleToken1JSON.networks[networkId] = simpleToken1Obj;
-    fs.writeFileSync('./build/contracts/SimpleToken1.json', JSON.stringify(SimpleToken1JSON, undefined, 2));
+    writeBinABI('./build/contracts/SimpleToken1.json', SimpleToken1JSON, 
+                networkId, undefined, SimpleTokenABI, SimpleTokenBin, now);
     console.log('Deployed');
     
-
     console.log('Deploying ERC20 SimpleToken2...');
     const simpleToken2Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
-    const simpleToken2Obj = {
-      address: simpleToken2Address,
-      updated_at: now
-    }
-    SimpleToken2JSON['unlinked_binary'] = SimpleTokenBin;
-    SimpleToken2JSON['abi'] = SimpleTokenABI;
-    SimpleToken2JSON.networks[networkId] = simpleToken2Obj;
-    fs.writeFileSync('./build/contracts/SimpleToken2.json', JSON.stringify(SimpleToken2JSON, undefined, 2));
+    writeBinABI('./build/contracts/SimpleToken2.json', SimpleToken2JSON, 
+                networkId, undefined, SimpleTokenABI, SimpleTokenBin, now);
     console.log('Deployed');
 
     process.exit();
