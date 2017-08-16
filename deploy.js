@@ -3,12 +3,17 @@ const fs = require('fs');
 
 const MonarchyABI = JSON.parse(fs.readFileSync('./compiledContracts/Monarchy.abi'));
 const MonarchyBin = `0x${fs.readFileSync('./compiledContracts/Monarchy.bin').toString()}`
+
+const BetABI = JSON.parse(fs.readFileSync('./compiledContracts/Bet.abi'));
+const BetBin = `0x${fs.readFileSync('./compiledContracts/Bet.bin').toString()}`
+
 const EbetsABI = JSON.parse(fs.readFileSync('./compiledContracts/Ebets.abi'));
 const EbetsBin = `0x${fs.readFileSync('./compiledContracts/Ebets.bin').toString()}`
 const SimpleTokenABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken.abi'));
 const SimpleTokenBin = `0x${fs.readFileSync('./compiledContracts/SimpleToken.bin').toString()}`
 
 var MonarchyJSON = require('./build/contracts/Monarchy.json');
+var BetJSON = require('./build/contracts/Bet.json');
 var EbetsJSON = require('./build/contracts/Ebets.json');
 var SimpleToken1JSON = require('./build/contracts/SimpleToken1.json');
 var SimpleToken2JSON = require('./build/contracts/SimpleToken2.json');
@@ -16,6 +21,17 @@ var SimpleToken2JSON = require('./build/contracts/SimpleToken2.json');
 const deployAddress = '0x82De95A2c2805731a404C4F652514929cdB463bb';
 
 var web3 = new Web3('http://localhost:8545');
+
+function writeBinABI(buildPath, jsonFile, networkId, address, abi, bin, timestamp) {
+  const obj = {
+    address: address,
+    updated_at: timestamp
+  }
+  jsonFile.networks[networkId] = obj;
+  jsonFile['unlinked_binary'] = bin;
+  jsonFile['abi'] = abi;
+  fs.writeFileSync(buildPath, JSON.stringify(jsonFile, undefined, 2));
+}
 
 function deployContract(contractABI, contractBin, address) {
   return new Promise((resolve, reject) => {
@@ -42,26 +58,19 @@ async function deployAll() {
 
     console.log('Deploying Monarchy...');
     const monarchyAddress = await deployContract(MonarchyABI, MonarchyBin, deployAddress);
-    const monarchyObj = {
-      address: monarchyAddress,
-      updated_at: now
-    }
-    MonarchyJSON.networks[networkId] = monarchyObj;
-    MonarchyJSON['unlinked_binary'] = MonarchyBin;
-    MonarchyJSON['abi'] = MonarchyABI;
-    fs.writeFileSync('./build/contracts/Monarchy.json', JSON.stringify(MonarchyJSON, undefined, 2));
+    writeBinABI('./build/contracts/Monarchy.json', MonarchyJSON, 
+                networkId, monarchyAddress, MonarchyABI, MonarchyBin, now);
     console.log('Deployed');
 
     console.log('Deploying Ebets...');
     const ebetsAddress = await deployContract(EbetsABI, EbetsBin, deployAddress);
-    const ebetsObj = {
-      address: ebetsAddress,
-      updated_at: now
-    }
-    EbetsJSON['unlinked_binary'] = EbetsBin;
-    EbetsJSON['abi'] = EbetsABI;
-    EbetsJSON.networks[networkId] = ebetsObj;
-    fs.writeFileSync('./build/contracts/Ebets.json', JSON.stringify(EbetsJSON, undefined, 2));
+    writeBinABI('./build/contracts/Ebets.json', EbetsJSON, 
+                networkId, ebetsAddress, EbetsABI, EbetsBin, now);
+    console.log('Deployed');
+
+    console.log('Writing on Bet file...');
+    writeBinABI('./build/contracts/Bet.json', BetJSON, 
+                networkId, undefined, BetABI, BetBin, now);
     console.log('Deployed');
 
     console.log('Deploying ERC20 SimpleToken1...');
