@@ -275,8 +275,8 @@ class BetForm extends Component {
                 </GridTile>
                 <GridTile>
                   <AutoComplete
-                    textFieldStyle={{width: 370}}
-                    style={{width: 370}}
+                    textFieldStyle={{width: 380}}
+                    style={{width: 380}}
                     floatingLabelText="Arbiter"
                     filter={(searchText, key, v) => 
                       (v.key.props.primaryText.toLowerCase().indexOf(searchText) !== -1)}
