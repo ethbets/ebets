@@ -5,9 +5,13 @@ const MonarchyABI = JSON.parse(fs.readFileSync('./compiledContracts/Monarchy.abi
 const MonarchyBin = `0x${fs.readFileSync('./compiledContracts/Monarchy.bin').toString()}`
 const EbetsABI = JSON.parse(fs.readFileSync('./compiledContracts/Ebets.abi'));
 const EbetsBin = `0x${fs.readFileSync('./compiledContracts/Ebets.bin').toString()}`
+const SimpleTokenABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken.abi'));
+const SimpleTokenBin = `0x${fs.readFileSync('./compiledContracts/SimpleToken.bin').toString()}`
 
 var MonarchyJSON = require('./build/contracts/Monarchy.json');
 var EbetsJSON = require('./build/contracts/Ebets.json');
+var SimpleToken1JSON = require('./build/contracts/SimpleToken1.json');
+var SimpleToken2JSON = require('./build/contracts/SimpleToken2.json');
 
 const deployAddress = '0x82De95A2c2805731a404C4F652514929cdB463bb';
 
@@ -58,6 +62,31 @@ async function deployAll() {
     EbetsJSON['abi'] = EbetsABI;
     EbetsJSON.networks[networkId] = ebetsObj;
     fs.writeFileSync('./build/contracts/Ebets.json', JSON.stringify(EbetsJSON, undefined, 2));
+    console.log('Deployed');
+
+    console.log('Deploying ERC20 SimpleToken1...');
+    const simpleToken1Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
+    const simpleToken1Obj = {
+      address: simpleToken1Address,
+      updated_at: now
+    }
+    SimpleToken1JSON['unlinked_binary'] = SimpleTokenBin;
+    SimpleToken1JSON['abi'] = SimpleTokenABI;
+    SimpleToken1JSON.networks[networkId] = simpleToken1Obj;
+    fs.writeFileSync('./build/contracts/SimpleToken1.json', JSON.stringify(SimpleToken1JSON, undefined, 2));
+    console.log('Deployed');
+    
+
+    console.log('Deploying ERC20 SimpleToken2...');
+    const simpleToken2Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
+    const simpleToken2Obj = {
+      address: simpleToken2Address,
+      updated_at: now
+    }
+    SimpleToken2JSON['unlinked_binary'] = SimpleTokenBin;
+    SimpleToken2JSON['abi'] = SimpleTokenABI;
+    SimpleToken2JSON.networks[networkId] = simpleToken2Obj;
+    fs.writeFileSync('./build/contracts/SimpleToken2.json', JSON.stringify(SimpleToken2JSON, undefined, 2));
     console.log('Deployed');
 
     process.exit();

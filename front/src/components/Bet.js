@@ -341,6 +341,7 @@ class Bet extends Component {
         if (attr in betFields
             && attr !== 'betsToTeam0' // Cannot get mapping keys, no prob: get from events
             && attr !== 'betsToTeam1'
+            && attr !== 'validERC20'
             && attr !== 'ERC20BetsToTeam0'
             && attr !== 'ERC20BetsToTeam1'
             && attr !== 'ERC20Team0BetSum'

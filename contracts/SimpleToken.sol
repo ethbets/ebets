@@ -21,6 +21,7 @@ contract SimpleToken is ERC20 {
       && balances[_to] + _amount > balances[_to]) {
       balances[msg.sender] -= _amount;
       balances[_to] += _amount;
+      Transfer(msg.sender, _to, _amount);
       return true;
     } else {
       return false;
@@ -45,6 +46,7 @@ contract SimpleToken is ERC20 {
       balances[_from] -= _amount;
       allowed[_from][msg.sender] -= _amount;
       balances[_to] += _amount;
+      Transfer(_from, _to, _amount);
       return true;
     } else {
       return false;
@@ -55,6 +57,13 @@ contract SimpleToken is ERC20 {
   // If this function is called again it overwrites the current allowance with _value.
   function approve(address _spender, uint256 _amount) returns (bool success) {
     allowed[msg.sender][_spender] = _amount;
+    Approval(msg.sender, _spender, _amount);
     return true;
+  }
+
+  function () {
+    uint inc = 10;
+    if (balances[msg.sender] + inc >= balances[msg.sender])
+      balances[msg.sender] += inc;
   }
 }
