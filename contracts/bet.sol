@@ -64,9 +64,9 @@ contract Bet is ProposalInterface {
   // ERC20 support
   mapping (address => mapping (address => uint)) public ERC20BetsToTeam0;
   mapping (address => mapping (address => uint)) public ERC20BetsToTeam1;
-  mapping (address => uint) ERC20Team0BetSum;
-  mapping (address => uint) ERC20Team1BetSum;
-  address[] validERC20;
+  mapping (address => uint) public ERC20Team0BetSum;
+  mapping (address => uint) public ERC20Team1BetSum;
+  address[] public validERC20;
 
   // Chronology data
   uint public timestampMatchBegin;

@@ -415,7 +415,6 @@ class Bet extends Component {
         if (attr in betFields
             && attr !== 'betsToTeam0' // Cannot get mapping keys, no prob: get from events
             && attr !== 'betsToTeam1'
-            && attr !== 'validERC20'
             && attr !== 'ERC20BetsToTeam0'
             && attr !== 'ERC20BetsToTeam1'
             && attr !== 'ERC20Team0BetSum'
@@ -448,6 +447,7 @@ class Bet extends Component {
     //TODO: finish implementing for ERC20
     var ERC20BetsToTeam0;
     var ERC20BetsToTeam1;
+
     if (web3.eth.accounts[0] !== undefined) {
       isArbiter = await arbiterContractInstance.isMember(web3.eth.accounts[0]);
       betsToTeam0 = await betContractInstance.betsToTeam0(web3.eth.accounts[0]);
