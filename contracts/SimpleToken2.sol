@@ -9,7 +9,11 @@ pragma solidity ^0.4.11;
 
 import './ERC20.sol';
 
-contract SimpleToken is ERC20 {
+contract SimpleToken2 is ERC20 {
+  string public constant name = "Simple Token 2";
+  string public constant symbol = "ST2";
+  uint8 public constant decimals = 18;
+
   // Balances for each account
   mapping(address => uint256) balances;
 

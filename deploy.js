@@ -20,8 +20,11 @@ const EbetsBin = `0x${fs.readFileSync('./compiledContracts/Ebets.bin').toString(
 const ERC20ABI = JSON.parse(fs.readFileSync('./compiledContracts/ERC20.abi'));
 const ERC20Bin = `0x${fs.readFileSync('./compiledContracts/ERC20.bin').toString()}`
 
-const SimpleTokenABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken.abi'));
-const SimpleTokenBin = `0x${fs.readFileSync('./compiledContracts/SimpleToken.bin').toString()}`
+const SimpleToken1ABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken1.abi'));
+const SimpleToken1Bin = `0x${fs.readFileSync('./compiledContracts/SimpleToken1.bin').toString()}`
+
+const SimpleToken2ABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken2.abi'));
+const SimpleToken2Bin = `0x${fs.readFileSync('./compiledContracts/SimpleToken2.bin').toString()}`
 
 var MonarchyJSON = require('./build/contracts/Monarchy.json');
 var BetJSON = require('./build/contracts/Bet.json');
@@ -91,15 +94,15 @@ async function deployAll() {
     console.log('Written');
 
     console.log('Deploying ERC20 SimpleToken1...');
-    const simpleToken1Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
+    const simpleToken1Address = await deployContract(SimpleToken1ABI, SimpleToken1Bin, deployAddress);
     writeBinABI('./build/contracts/SimpleToken1.json', SimpleToken1JSON, 
-                networkId, undefined, SimpleTokenABI, SimpleTokenBin, now);
+                networkId, simpleToken1Address, SimpleToken1ABI, SimpleToken1Bin, now);
     console.log('Deployed');
-    
+
     console.log('Deploying ERC20 SimpleToken2...');
-    const simpleToken2Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
+    const simpleToken2Address = await deployContract(SimpleToken2ABI, SimpleToken2Bin, deployAddress);
     writeBinABI('./build/contracts/SimpleToken2.json', SimpleToken2JSON, 
-                networkId, undefined, SimpleTokenABI, SimpleTokenBin, now);
+                networkId, simpleToken2Address, SimpleToken2ABI, SimpleToken2Bin, now);
     console.log('Deployed');
 
     process.exit();
