@@ -8,6 +8,7 @@
 /*global web3:true */
 import contract from 'truffle-contract';
 import lodash from 'lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 import PropTypes from 'prop-types';
@@ -26,6 +27,7 @@ import AutoComplete from 'material-ui/AutoComplete';
 import BetController from './BetController';
 
 import BetJson from 'build/contracts/Bet.json';
+import ERC20Json from 'build/contracts/ERC20.json';
 import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
@@ -62,6 +64,7 @@ class Bet extends Component {
       isArbiter: false,
       stepIndex: 0,
       currency: {name: 'Ether (default)', address: ''},
+      erc20Contracts: {},
       ...betFields,
     }
   }
@@ -161,6 +164,8 @@ class Bet extends Component {
     }
 
     if (this.state.currency.address === '') { 
+      console.log('Betting using Ether');
+      value = value.times(new BigNumber('1000000000000000000'));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
         { from: web3.eth.accounts[0],
@@ -171,16 +176,53 @@ class Bet extends Component {
       });
     }
     else {
-      //TODO instantiate ERC20 and call approve
+      var erc20instance;
+      var erc20decimals;
+      var token = this.state.currency.name;
+      var addr = this.state.currency.address;
 
-      const betPromise = this.state.betContractInstance.betERC20(
-        this.state.currency.address,
-        teamToBet,
-        value,
-        { from: web3.eth.accounts[0] }
-      );
-      this.transactionHappened(betPromise)
-      .catch(() => {
+      console.log('Instantiating ERC20 contract ' + name + ' at address ' + addr);
+      this.instantiateERC20Contract(addr).then(() => {
+        erc20instance = this.state.erc20Contracts[addr].instance;
+        erc20decimals = this.state.erc20Contracts[addr].decimals;
+        if (erc20decimals !== undefined && erc20decimals.greaterThanOrEqualTo(1) && erc20decimals.lessThanOrEqualTo(18)) {
+          var power = (new BigNumber(10)).toPower(erc20decimals);
+          value = value.times(power);
+        }
+
+        //TODO: this is for testing purposes only. This calls the fallback function of our ERC20 test contracts,
+        //which gives tokens to the sender
+        return new Promise((resolve, reject) => {
+          web3.eth.sendTransaction({to: addr, from: web3.eth.accounts[0], data: ''}, function(err, transactionHash) {
+            if (!err) {
+              resolve();
+            }
+            else {
+              reject(err);
+            }
+          });
+        });
+      })
+      .then(() => {
+        console.log('Sending Approval');
+        return erc20instance.approve(
+          this.state.betContractInstance.address,
+          value,
+          { from: web3.eth.accounts[0] }
+        );
+      })
+      .then(tx => {
+        console.log('Betting');
+        const betPromise = this.state.betContractInstance.betERC20(
+          this.state.currency.address,
+          teamToBet,
+          value,
+          { from: web3.eth.accounts[0] }
+        );
+        this.transactionHappened(betPromise)
+      })
+      .catch((err) => {
+        console.log('Betting error: ' + err);
       });
     }
   };
@@ -340,7 +382,32 @@ class Bet extends Component {
   //     });
   //   }
   // }
-        
+
+  instantiateERC20Contract(address) {
+    return new Promise((resolve, reject) => {
+      if (address in this.state.erc20Contracts)
+        resolve();
+
+      const erc20Contract = contract(ERC20Json);
+      erc20Contract.setProvider(web3.currentProvider);
+      var erc20Instance = erc20Contract.at(address);
+
+      erc20Instance.then(() => {
+        return erc20Instance.decimals();
+      })
+      .then((dec) => {
+        var _erc20Contracts = _.clone(this.state.erc20Contracts);
+        _erc20Contracts[address] = {instance: erc20Instance, decimals: dec};
+        this.setState({ erc20Contracts : _erc20Contracts});
+        resolve();
+      })
+      .catch(err => {
+        console.log('Could not instantiate ERC20 contract: ' + err);
+        reject(err);
+      });
+    });
+  }
+
   async instantiateContract(cancellationToken) {
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {

@@ -171,7 +171,7 @@ class BetController extends Component {
         onTouchTap={() => this.props.betOnTeamFunction(
           (this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team 
           : this.state.selectedTeam , 
-          new BigNumber(this.state.amountToBet).times(new BigNumber('1000000000000000000')))}
+          new BigNumber(this.state.amountToBet))}
       />
       )
   }

@@ -1,7 +1,6 @@
 Branch erc20 TODO list:
 
 Front
-- Bet: instantiate ERC20 contract and call "approve" from the user to the bet
 - When the Bet contract is instantiated, read the "validERC20" list from the contract,
   and build a dict with the amount the user has bet for each currency used so far
 - Withdraw: compute withdraw value according to the selected currency
@@ -12,3 +11,4 @@ Front
 Bugs
 - When creating a bet: Uncaught (in promise) Error: Invalid number of arguments to Solidity function
 - Category icon not showing
+- When Approval doesn't work, the promise resolves anyway and the current JS code thinks it's time to send the real Bet transaction. This should be fixed.
