@@ -16,12 +16,17 @@ const BetBin = `0x${fs.readFileSync('./compiledContracts/Bet.bin').toString()}`
 
 const EbetsABI = JSON.parse(fs.readFileSync('./compiledContracts/Ebets.abi'));
 const EbetsBin = `0x${fs.readFileSync('./compiledContracts/Ebets.bin').toString()}`
+
+const ERC20ABI = JSON.parse(fs.readFileSync('./compiledContracts/ERC20.abi'));
+const ERC20Bin = `0x${fs.readFileSync('./compiledContracts/ERC20.bin').toString()}`
+
 const SimpleTokenABI = JSON.parse(fs.readFileSync('./compiledContracts/SimpleToken.abi'));
 const SimpleTokenBin = `0x${fs.readFileSync('./compiledContracts/SimpleToken.bin').toString()}`
 
 var MonarchyJSON = require('./build/contracts/Monarchy.json');
 var BetJSON = require('./build/contracts/Bet.json');
 var EbetsJSON = require('./build/contracts/Ebets.json');
+var ERC20JSON = require('./build/contracts/ERC20.json');
 var SimpleToken1JSON = require('./build/contracts/SimpleToken1.json');
 var SimpleToken2JSON = require('./build/contracts/SimpleToken2.json');
 
@@ -75,10 +80,15 @@ async function deployAll() {
                 networkId, ebetsAddress, EbetsABI, EbetsBin, now);
     console.log('Deployed');
 
-    console.log('Writing on Bet file...');
+    console.log('Writing Bet file...');
     writeBinABI('./build/contracts/Bet.json', BetJSON, 
                 networkId, undefined, BetABI, BetBin, now);
-    console.log('Deployed');
+    console.log('Written');
+
+    console.log('Writing ERC20 file...');
+    writeBinABI('./build/contracts/ERC20.json', ERC20JSON,
+                networkId, undefined, ERC20ABI, ERC20Bin, now);
+    console.log('Written');
 
     console.log('Deploying ERC20 SimpleToken1...');
     const simpleToken1Address = await deployContract(SimpleTokenABI, SimpleTokenBin, deployAddress);
