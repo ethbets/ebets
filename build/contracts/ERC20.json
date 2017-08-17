@@ -51,6 +51,19 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "_owner",
@@ -134,10 +147,10 @@
       "type": "event"
     }
   ],
-  "unlinked_binary": "0x0000\n",
+  "unlinked_binary": "0x",
   "networks": {
     "42": {
-      "updated_at": 1502964279885
+      "updated_at": 1502977079937
     }
   },
   "schema_version": "0.0.5",

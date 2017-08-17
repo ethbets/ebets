@@ -15,8 +15,8 @@ class ERC20Tokens extends Component {
   static erc20tokens() {
     return [
       {textKey: 'Ether (default)', valueKey: ''},
-      {textKey: 'SimpleToken1', valueKey: '0x57e5Ce2735E9DcB218F4e5E170801e5a151b507C'},
-      {textKey: 'SimpleToken2', valueKey: '0x123eEEdF6aC9d3bC37aCdD5b5F282b22a204cD32'}
+      {textKey: 'SimpleToken1', valueKey: '0xF8f30C544433B88D28cBB5c179649B7e435B65a2'},
+      {textKey: 'SimpleToken2', valueKey: '0xF0aA51f81DB72F38a04290e1986701E743B529dF'}
     ];
   }
 

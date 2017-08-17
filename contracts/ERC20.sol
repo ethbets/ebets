@@ -9,6 +9,7 @@ pragma solidity ^0.4.11;
 
 // https://github.com/ethereum/EIPs/issues/20
 contract ERC20 {
+  uint8 public decimals;
   function balanceOf(address _owner) constant returns (uint balance);
   function transfer(address _to, uint _value) returns (bool success);
   function transferFrom(address _from, address _to, uint _value) returns (bool success);

@@ -12,7 +12,7 @@ import './ERC20.sol';
 contract SimpleToken2 is ERC20 {
   string public constant name = "Simple Token 2";
   string public constant symbol = "ST2";
-  uint8 public constant decimals = 18;
+  uint8 public constant decimals = 12;
 
   // Balances for each account
   mapping(address => uint256) balances;
@@ -73,7 +73,7 @@ contract SimpleToken2 is ERC20 {
   }
 
   function () {
-    uint inc = 10;
+    uint inc = 10000000000000;
     if (balances[msg.sender] + inc >= balances[msg.sender])
       balances[msg.sender] += inc;
   }
