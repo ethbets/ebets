@@ -542,8 +542,8 @@ class Bet extends Component {
           var _valid = _.clone(this.state.validERC20);
           _valid.push(erc20);
           this.setState({ validERC20 : _valid });
-          erc20Team0BetSum[erc20] = BigNumber(0);
-          erc20Team1BetSum[erc20] = BigNumber(0);
+          erc20Team0BetSum[erc20] = new BigNumber(0);
+          erc20Team1BetSum[erc20] = new BigNumber(0);
         }
 
         if (response.args.forTeam === false) {
@@ -561,7 +561,7 @@ class Bet extends Component {
             erc20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: erc20HasBetOnTeam[erc20].amount.add(amount) };
           }
           else {
-            erc20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: BigNumber(amount) };
+            erc20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: (new BigNumber(amount)) };
           }
           this.setState({ ERC20HasBetOnTeam : erc20HasBetOnTeam });
         }
