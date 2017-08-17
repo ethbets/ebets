@@ -11,10 +11,9 @@ import React, { Component } from 'react';
 import EbetsJson from 'build/contracts/Ebets.json';
 import Bet from 'components/Bet';
 import PropTypes from 'prop-types';
-import ebetsCategories from 'utils/ebetsCategories';
+import {getParsedCategories} from 'utils/ebetsCategories';
 
 class Ebets extends Component {
-  
   constructor(props) {
     super(props);
     this.state = {
@@ -23,30 +22,14 @@ class Ebets extends Component {
     }
   }
 
-  getBets = (ebetsContractInstance) => {
-    /*return new Promise((resolve, reject) => {
-      var betEvents = ebetsContractInstance.allEvents({
-        fromBlock: 0,
-        toBlock: 'latest'});
-      //this.setState({myBetsFilter: filter});
-      betEvents.get((error, result) => {
-        if (error) 
-          reject(error);
-        else {
-          resolve(result.map((bet) => bet.args.betAddr));
-        }
-      });
-    });*/
-  }
-
   getBetsByCategory = (category, ebetsContractInstance) => {
     console.log(ebetsContractInstance)
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
       if (category === 'all_bets') {
-        for (let cIdx in ebetsCategories) {
-          betPromises.push(ebetsContractInstance.getBetsByCategory(ebetsCategories[cIdx].path));
-        }
+        getParsedCategories().map(category => {
+          betPromises.push(ebetsContractInstance.getBetsByCategory(category.key));
+        });
       }
       else {
         betPromises = [ebetsContractInstance.getBetsByCategory(category)];
@@ -101,15 +84,6 @@ class Ebets extends Component {
         if (response.args.category === this.props.routeParams.category)
           this.setState(previousState => ({bets: previousState.bets.concat(response.args.betAddr)}));
       })
-      //   //console.log('eita', response);
-      //   this.setState(previousState => {
-      //     //console.log(previousState,response.args.betAddr)
-      //     return {
-      //       ebetsContractInstance: ebetsContractInstance,
-      //       //bets: previousState.bets.concat(response.args.betAddr) 
-      //     }
-      //   });
-      // });
       this.setState({
         bets: bets,
         //betsEvents: betsEvents,

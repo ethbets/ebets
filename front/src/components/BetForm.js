@@ -29,8 +29,7 @@ import betFields from 'components/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
 
 import Arbiters from './Arbiters';
-import ebetsCategories from 'utils/ebetsCategories';
-
+import {getParsedCategories} from 'utils/ebetsCategories';
 //TODO: put this in a configruation file
 const ARBITER_DEADLINE_PERIOD = 7
 const SELF_DESTRUCT_DEADLINE_PERIOD = 14
@@ -73,14 +72,6 @@ class BetForm extends Component {
       timestampArbiterDeadline: moment(currentDate).add(ARBITER_DEADLINE_PERIOD, 'days').toDate(),
       timestampSelfDestructDeadline: moment(currentDate).add(SELF_DESTRUCT_DEADLINE_PERIOD, 'days').toDate()
     });
-  }
-
-  parsedCategories() {
-    return ebetsCategories.map(category => (
-        <div key={category.path}>
-          {category.name}
-        </div>
-      ))
   }
 
   menuItem(all) {
@@ -277,7 +268,7 @@ class BetForm extends Component {
                     value={this.state.category}
                     onChange={this.handleCategoryChange}
                   >
-                    {this.menuItem(this.parsedCategories(), this.state.category)}
+                    {this.menuItem(getParsedCategories(), this.state.category)}
                   </SelectField>
                 </GridTile>
                 <GridTile>

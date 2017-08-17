@@ -15,6 +15,8 @@ import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
 import Divider from 'material-ui/Divider';
 import { zIndex } from 'material-ui/styles';
 
+import _ from 'lodash';
+import { ebetsCategories } from 'utils/ebetsCategories';
 //import '../assets/stylesheets/base.css';
 
 const SelectableList = makeSelectable(List);
@@ -28,6 +30,31 @@ class NavDrawer extends Component {
   }
 
   Navigations = () => {
+    const getCategoriesRecursive = (category) => {
+      if (!category.subcategory) {
+        return <ListItem key={category.path}
+          primaryText={`${category.name}`}
+          value={`/category/${category.path}`}
+          href={`#/category/${category.path}`}
+        />
+      }
+      let categoryList = category.subcategory.map(cat => {
+        return getCategoriesRecursive(cat);
+      })
+
+      return <ListItem key={`${category.name}`}
+          primaryText={`${category.name}`}
+          primaryTogglesNestedList={true}
+          nestedItems={categoryList}
+        />
+    }
+
+    const getCategoriesNav = () => {
+      return ebetsCategories.map(category => {
+       return getCategoriesRecursive(category);
+      });
+    }
+
     const {
       location,
       onRequestChangeNavDrawer,
@@ -89,32 +116,7 @@ class NavDrawer extends Component {
           value='/category/all_bets'
           href='#/category/all_bets'
         />
-        <ListItem
-          primaryText='E-Sports'
-          primaryTogglesNestedList={true}
-          nestedItems={[
-              <ListItem key='1'
-                primaryText='League of Legends'
-                value='/category/esports/lol'
-                href='#/category/esports/lol'
-              />,
-              <ListItem key='2'
-                primaryText='CS-GO'
-                value='/category/esports/csgo'
-                href='#/category/esports/csgo'
-              />,
-            ]}
-        />
-        <ListItem
-          primaryText='UFC'
-          value='/category/ufc'
-          href='#/category/ufc'
-        />
-        <ListItem
-          primaryText='Football'
-          value='/category/football'
-          href='#/category/football'
-        />
+        {getCategoriesNav()}
       </SelectableList>
     </Drawer>
   }
