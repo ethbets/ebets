@@ -1,12 +1,14 @@
 Branch erc20 TODO list:
 
+Logic:
+- Figure what exactly to do with Token decimals
+
 Front
-- When the Bet contract is instantiated, read the "validERC20" list from the contract,
-  and build a dict with the amount the user has bet for each currency used so far
 - Withdraw: compute withdraw value according to the selected currency
   Maybe: not show any value at all
 - Withdraw: Send list of tokens to withdraw, like this the user can pay the price
   of doing only the necessary bet withdraws.
+- Use "loading bar" already when Approval request is sent
 
 Bugs
 - When creating a bet: Uncaught (in promise) Error: Invalid number of arguments to Solidity function
