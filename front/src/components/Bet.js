@@ -165,7 +165,7 @@ class Bet extends Component {
 
     if (this.state.currency.address === '') { 
       console.log('Betting using Ether');
-      value = value.times(new BigNumber('1000000000000000000'));
+      value = value.times(new BigNumber(1e18));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
         { from: web3.eth.accounts[0],
@@ -447,7 +447,7 @@ class Bet extends Component {
     //TODO: finish implementing for ERC20
     var ERC20BetsToTeam0;
     var ERC20BetsToTeam1;
-
+    
     if (web3.eth.accounts[0] !== undefined) {
       isArbiter = await arbiterContractInstance.isMember(web3.eth.accounts[0]);
       betsToTeam0 = await betContractInstance.betsToTeam0(web3.eth.accounts[0]);
