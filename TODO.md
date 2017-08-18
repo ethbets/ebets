@@ -10,5 +10,5 @@ Front
 
 Bugs
 - [ ] When creating a bet: Uncaught (in promise) Error: Invalid number of arguments to Solidity function
-- [ ] Category icon not showing
+- [X] Category icon not showing
 - [ ] When Approval doesn't work, the promise resolves anyway and the current JS code thinks it's time to send the real Bet transaction. This should be fixed.
