@@ -23,7 +23,6 @@ class Ebets extends Component {
   }
 
   getBetsByCategory = (category, ebetsContractInstance) => {
-    console.log(ebetsContractInstance)
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
       if (category === 'all_bets') {

@@ -258,17 +258,17 @@ contract Bet is ProposalInterface {
   }
 
   function collectProfit() internal {
-    uint bet = 0;
+    uint betAmount = 0;
     uint sum = 0;
     uint profit = 0;
 
     if (betState == BET_STATES.TEAM_ZERO_WON && betsToTeam0[msg.sender] > 0) {
-      bet = betsToTeam0[msg.sender];
+      betAmount = betsToTeam0[msg.sender];
       sum = team0BetSum;
       profit = team1BetSum;
     }
     else if (betState == BET_STATES.TEAM_ONE_WON && betsToTeam1[msg.sender] > 0) {
-      bet = betsToTeam1[msg.sender];
+      betAmount = betsToTeam1[msg.sender];
       sum = team1BetSum;
       profit = team0BetSum;
     }
@@ -276,24 +276,24 @@ contract Bet is ProposalInterface {
       return;
     }
 
-    assert(bet <= sum);
+    assert(betAmount <= sum);
 
-    profit = computeProfit(bet, sum, profit);
+    profit = computeProfit(betAmount, sum, profit);
     msg.sender.transfer(profit + collectOriginalBet());
   }
 
   function collectProfitERC20(address erc20) internal {
-    uint bet = 0;
+    uint betAmount = 0;
     uint sum = 0;
     uint profit = 0;
 
     if (betState == BET_STATES.TEAM_ZERO_WON && ERC20BetsToTeam0[erc20][msg.sender] > 0) {
-      bet = ERC20BetsToTeam0[erc20][msg.sender];
+      betAmount = ERC20BetsToTeam0[erc20][msg.sender];
       sum = ERC20Team0BetSum[erc20];
       profit = ERC20Team1BetSum[erc20];
     }
     else if (betState == BET_STATES.TEAM_ONE_WON && ERC20BetsToTeam1[erc20][msg.sender] > 0) {
-      bet = ERC20BetsToTeam1[erc20][msg.sender];
+      betAmount = ERC20BetsToTeam1[erc20][msg.sender];
       sum = ERC20Team1BetSum[erc20];
       profit = ERC20Team0BetSum[erc20];
     }
@@ -301,19 +301,19 @@ contract Bet is ProposalInterface {
       return;
     }
 
-    assert(bet <= sum);
+    assert(betAmount <= sum);
 
-    profit = computeProfit(bet, sum, profit);
+    profit = computeProfit(betAmount, sum, profit);
     ERC20 erc20Contract = ERC20(erc20);
     require(erc20Contract.transfer(msg.sender, profit + collectOriginalBetERC20(erc20)));
   }
 
 
   // Compute the user's profit
-  function computeProfit(uint bet, uint sum, uint profit) internal returns(uint) {
+  function computeProfit(uint betAmount, uint sum, uint profit) internal returns(uint) {
     // Approach one:
     // We might lose precision, but no overflow
-    var senderPc = bet / sum;
+    var senderPc = betAmount / sum;
     assert(senderPc >= 0 && senderPc <= 1);
     
     var senderProfit = senderPc * profit;
