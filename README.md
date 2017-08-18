@@ -105,12 +105,13 @@ The system is unstable, so do not rely on the bets to be there in the following 
 right now!
 
 # TODOs
-* Support ERC20 tokens
-* Make UI to create arbiters
-* Index bets by category in Ebets events
-* Fix my bets
-* Fix images for bets
-* Better format BigNumber
-* Fix "Win", sum with already bet by account, edit positioning
-* Paginate front page
+- [ ] Support ERC20 tokens
+- [ ] Make UI to create arbiters
+- [ ] Option to create no-fee private bets
+- [ ] Index bets by category in Ebets events
+- [ ] Fix my bets
+- [ ] Fix images for bets
+- [ ] Better format BigNumber
+- [ ] Fix "Win", sum with already bet by account, edit positioning
+- [ ] Paginate bets
 
