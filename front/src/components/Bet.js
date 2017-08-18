@@ -460,7 +460,7 @@ class Bet extends Component {
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
     try{
-      stateObjects['iconUrl'] = require('assets/imgs/' + stateObjects.category + '.png');
+      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
     }
     catch(err) {
       stateObjects['iconUrl'] = null;
