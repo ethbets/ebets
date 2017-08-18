@@ -165,7 +165,7 @@ class Bet extends Component {
 
     if (this.state.currency.address === '') { 
       console.log('Betting using Ether');
-      value = value.times(new BigNumber('1000000000000000000'));
+      value = value.times(new BigNumber(1e18));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
         { from: web3.eth.accounts[0],
@@ -529,7 +529,7 @@ class Bet extends Component {
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
     try{
-      stateObjects['iconUrl'] = require('assets/imgs/' + stateObjects.category + '.png');
+      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
     }
     catch(err) {
       stateObjects['iconUrl'] = null;

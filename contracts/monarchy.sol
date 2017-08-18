@@ -19,7 +19,7 @@ contract Monarchy is Governance {
   function Monarchy() {
     members[msg.sender] = 1;
   }
-  function isMember(address user) constant returns(bool isMember) {
+  function isMember(address user) constant returns(bool member) {
     return (members[user] == 1);
   }
   function getName() constant returns(string) {
@@ -49,7 +49,7 @@ contract Monarchy is Governance {
     successor = member; 
   }
   
-  function removeMember(address member) onlyMonarch() {
+  function removeMember(address /*member*/) onlyMonarch() {
     members[msg.sender] = 0;
     members[successor] = 1;
     }

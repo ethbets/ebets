@@ -22,7 +22,7 @@ contract GovernanceInterface {
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
-  function isMember(address user) constant returns(bool isMember);
+  function isMember(address user) constant returns(bool member);
   function getName() constant returns(string name);
   function getHigherInstance() constant returns(address instanceAddress);
   

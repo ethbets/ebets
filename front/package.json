@@ -34,7 +34,7 @@
     "react-web3": "git+https://github.com/ethbets/react-web3.git",
     "reactstrap": "^4.8.0",
     "truffle-contract": "^2.0.1",
-    "web3": "^0.19.1",
+    "web3": "^1.0.0-beta.18",
     "webpack": "^3.2.0",
     "webpack-dev-server": "^2.7.1"
   },
