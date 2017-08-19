@@ -493,6 +493,14 @@ class Bet extends Component {
       betsToTeam1 = new BigNumber(0);
     }
 
+    var stateObjects = await setAttributes(this.state, betContractInstance);
+    try{
+      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
+    }
+    catch(err) {
+      stateObjects['iconUrl'] = null;
+    }
+
     var _validERC20 = [];
     var _valid = await betContractInstance.validERC20(0);
     var i = 1;
@@ -535,14 +543,6 @@ class Bet extends Component {
       i += 1;
     }
 
-    var stateObjects = await setAttributes(this.state, betContractInstance);
-    try{
-      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
-    }
-    catch(err) {
-      stateObjects['iconUrl'] = null;
-    }
-
     const betToTeam = (betToTeamERC20 !== null) ? betToTeamERC20 :
                         (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
                           ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
@@ -570,6 +570,7 @@ class Bet extends Component {
       ERC20Team1BetSum: _ERC20Team1BetSum,
       ERC20BetsToTeam0: _ERC20BetsToTeam0,
       ERC20BetsToTeam1: _ERC20BetsToTeam1,
+      validERC20: _validERC20,
       hasEverBet: hasEverBet,
       currentBetState: newStates.newOverAllState,
       stepperState: newStates.newStepperState,
@@ -633,14 +634,11 @@ class Bet extends Component {
           _ERC20BetsToTeam1[erc20] = new BigNumber(0);
         }
 
-        console.log('NewBetERC20 ' + erc20 + ' ' + amount);
         if (response.args.forTeam === false) {
-          console.log('Team 0');
           _ERC20Team0BetSum[erc20] = _ERC20Team0BetSum[erc20].plus(amount);
           if (response.args.from === web3.eth.accounts[0])
             _ERC20BetsToTeam0[erc20] = _ERC20BetsToTeam0[erc20].plus(amount);
           this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum, ERC20BetsToTeam0 : _ERC20BetsToTeam0 });
-          console.log(this.state.ERC20Team0BetSum[erc20]);
         }
         else {
           _ERC20Team1BetSum[erc20] = _ERC20Team1BetSum[erc20].plus(amount);
