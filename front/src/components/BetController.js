@@ -9,7 +9,6 @@
 import moment from 'moment';
 
 import PropTypes from 'prop-types';
-import EthereumBlockies from 'ethereum-blockies';
 import BigNumber from 'bignumber.js';
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
@@ -20,6 +19,7 @@ import Chip from 'material-ui/Chip';
 import RaisedButton from 'material-ui/RaisedButton';
 import * as MColors from 'material-ui/styles/colors';
 import LinkIcon from 'material-ui/svg-icons/content/link';
+import Address from 'components/Address';
 
 import {
   Table,
@@ -312,16 +312,11 @@ class BetController extends Component {
           </TableHeader>
           <TableBody displayRowCheckbox={false}>
             {this.state.betList.map((bet, index) => {
-              const imgURL = EthereumBlockies.create({
-                seed: bet.from.toLowerCase(),
-                spotcolor: -1,
-                size: 8,
-                scale: 4,
-              }).toDataURL();
-              
               return (
                 <TableRow key={index}>
-                  <TableRowColumn colSpan='2' ><img src={"data:image/jpeg;" + imgURL} />{bet.from}</TableRowColumn>
+                  <TableRowColumn colSpan='2' >
+                    <Address address={bet.from} />
+                  </TableRowColumn>
                   <TableRowColumn>{formatEth(bet.amount)}</TableRowColumn>
                   <TableRowColumn>{(bet.forTeam) ? this.props.team1Name : this.props.team0Name}</TableRowColumn>
                   <TableRowColumn>{moment(bet.timestamp*1e3).format('LLL')}</TableRowColumn>
