@@ -372,6 +372,7 @@ class Bet extends Component {
           betHappened={this.state.betHappened}
           isArbiter={this.state.isArbiter}
           arbiterInfo={this.state.arbiterInfo}
+          currency={this.state.currency}
         />
         <this.BetStatusDialog />
         <this.LinearProgressCustom mode="indeterminate" />
@@ -624,11 +625,14 @@ class Bet extends Component {
           _ERC20BetsToTeam1[erc20] = new BigNumber(0);
         }
 
+        console.log('NewBetERC20 ' + erc20 + ' ' + amount);
         if (response.args.forTeam === false) {
+          console.log('Team 0');
           _ERC20Team0BetSum[erc20] = _ERC20Team0BetSum[erc20].plus(amount);
           if (response.args.from === web3.eth.accounts[0])
             _ERC20BetsToTeam0[erc20] = _ERC20BetsToTeam0[erc20].plus(amount);
           this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum, ERC20BetsToTeam0 : _ERC20BetsToTeam0 });
+          console.log(this.state.ERC20Team0BetSum[erc20]);
         }
         else {
           _ERC20Team1BetSum[erc20] = _ERC20Team1BetSum[erc20].plus(amount);

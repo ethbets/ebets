@@ -11,9 +11,12 @@ Logic:
   of doing only the necessary bet withdraws.
 
 Front
-- [ ] Figure what exactly to do with Token decimals (how to compute the right number to send)
 - [ ] Withdraw: compute withdraw value according to the selected currency
 - [ ] Activate "loading bar" already when Approval request is sent
+- [ ] Dialog asking for confirmation before Approve
+- [ ] Dialog asking for confirmation before Bet (after Approve)
+- [ ] Dialog listing all the tokens that the user will Withdraw when pressed
+      "Withdraw" button
 
 Bugs
 - [ ] When creating a bet: Uncaught (in promise) Error: Invalid number of arguments to Solidity function

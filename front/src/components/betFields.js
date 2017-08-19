@@ -20,7 +20,7 @@ let BETFIELDS = {
   ERC20BetsToTeam1: {},
   ERC20Team0BetSum: {},
   ERC20Team1BetSum: {},
-  //validERC20: [],
+  validERC20: [],
   timestampMatchBegin: new BigNumber(0),
   timestampMatchEnd: new BigNumber(0),
   timestampArbiterDeadline: new BigNumber(0),

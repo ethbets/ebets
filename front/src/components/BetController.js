@@ -152,7 +152,8 @@ class BetController extends Component {
     else if ((this.props.currentBetState >= betState.team0Won &&
               this.props.currentBetState <= betState.draw) ||
               this.props.stepperState === stepperState.payout) {
-      var gain = this.FinalGain();
+      //var gain = this.FinalGain();
+      var gain = this.GainByCurrency();
       return (
       <RaisedButton 
         className="betBtn"
@@ -247,27 +248,37 @@ class BetController extends Component {
       );
   }
 
-  FinalGain = () => {
-    var amount;
+  GainByCurrency = () => {
+    if (this.props.currency.address == '') {
+      return this.FinalGain(this.props.hasBetOnTeam, this.props.team0BetSum, this.props.team1BetSum);
+    }
+
+    var addr = this.props.currency.address;
+    return this.FinalGain(this.props.ERC20HasBetOnTeam[addr], this.props.ERC20Team0BetSum[addr], this.props.ERC20Team1BetSum[addr]);
+  }
+
+  FinalGain = (hasBetOnTeam, team0BetSum, team1BetSum) => {
     var winnerPool;
     var loserPool;
+    var amount;
     var tax = new BigNumber(this.props.tax);
     tax = tax.dividedBy(100);
 
     if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
       return new BigNumber(0);
 
-    if (this.props.hasBetOnTeam === null)
+    //if (this.props.hasBetOnTeam.team === null)
+    if (hasBetOnTeam.team === null)
       return new BigNumber(0);
 
-    amount = this.props.hasBetOnTeam.amount;
+    amount = hasBetOnTeam.amount;
     if (this.props.currentBetState === betState.draw)
       return amount;
 
-    var hasBetTeam0 = !this.props.hasBetOnTeam.team;
-    var hasBetTeam1 = this.props.hasBetOnTeam.team;
-    var team0BetSum = this.props.team0BetSum;
-    var team1BetSum = this.props.team1BetSum;
+    var hasBetTeam0 = !hasBetOnTeam.team;
+    var hasBetTeam1 = hasBetOnTeam.team;
+    //var team0BetSum = this.props.team0BetSum;
+    //var team1BetSum = this.props.team1BetSum;
 
     if ((this.props.currentBetState === betState.team0Won && hasBetTeam1) ||
         (this.props.currentBetState === betState.team1Won && hasBetTeam0))
