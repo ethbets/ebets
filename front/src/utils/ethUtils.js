@@ -8,14 +8,14 @@
 import BigNumber from 'bignumber.js';
 
 export function formatEth(inWei) {
-  return inWei.dividedBy(oneEthInWei()).toFormat(18);
+  return inWei.dividedBy(oneEthInWei()).toString();
 }
 
 export function oneEthInWei() {
-  return new BigNumber('1000000000000000000');
+  return new BigNumber(1e18);
 }
 
 export function formatToken(value) {
-  return value.toFormat(18);
+  return value.toString();
 }
 

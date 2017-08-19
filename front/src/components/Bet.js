@@ -187,8 +187,7 @@ class Bet extends Component {
         erc20decimals = this.state.erc20Contracts[addr].decimals;
         if (erc20decimals !== undefined && erc20decimals.greaterThanOrEqualTo(1) && erc20decimals.lessThanOrEqualTo(18)) {
           var power = (new BigNumber(10)).toPower(erc20decimals);
-          //TODO: figure exactly what to do with the Token decimals
-          //value = value.times(power);
+          value = value.dividedBy(power);
         }
 
         //TODO: this is for testing purposes only. This calls the fallback function of our ERC20 test contracts,
