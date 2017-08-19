@@ -23,6 +23,7 @@ class Ebets extends Component {
   }
 
   getBetsByCategory = (category, ebetsContractInstance) => {
+    console.log(category);
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
       if (category === 'all_bets') {
@@ -52,7 +53,9 @@ class Ebets extends Component {
       this.state.betsEvents.stopWatching();
   }
   componentWillReceiveProps(nextProps) {
-    const category = nextProps.routeParams.category;
+    var category = nextProps.routeParams.category;
+    if (nextProps.routeParams.subcategory)
+        category += '/' + nextProps.routeParams.subcategory;
     if (this.state.ebetsContractInstance !== null && 
         category !== undefined) {
       this.getBetsByCategory(category, this.state.ebetsContractInstance)
@@ -80,7 +83,10 @@ class Ebets extends Component {
         console.error('Contract not deployed!');
         return;
       }
-      var bets = await this.getBetsByCategory(this.props.routeParams.category, ebetsContractInstance);
+      var category = this.props.routeParams.category;
+      if (this.props.routeParams.subcategory)
+        category += '/' + this.props.routeParams.subcategory;
+      var bets = await this.getBetsByCategory(category, ebetsContractInstance);
       //events
       const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
       betsEvents.watch((error, response) => {
