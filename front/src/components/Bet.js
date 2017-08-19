@@ -399,6 +399,13 @@ class Bet extends Component {
     this.setState({cancellationToken: cst});
     this.instantiateContract(cst.token);
   }
+
+  componentWillReceiveProps() {
+    var cst = new CancellationTokenSource;
+    this.setState({cancellationToken: cst});
+    this.instantiateContract(cst.token);
+  }
+
   componentWillUnmount() {
     this.state.cancellationToken.cancel();
   }

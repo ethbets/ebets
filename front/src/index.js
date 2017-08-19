@@ -20,15 +20,24 @@ window.React = React;
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
-render(
-  <Web3Provider onChangeAccount={() => {location.reload();}}
-    passive={true}
-    >
-     <Router
-      history={useRouterHistory(createHashHistory)({queryKey: false})}
-      onUpdate={() => window.scrollTo(0, 0)}
-    >
-      {Routes}
-    </Router>
-  </Web3Provider>
-, document.getElementById('app'));
+class Index extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <Web3Provider onChangeAccount={() => this.forceUpdate()}
+        passive={true}
+        >
+        <Router
+          history={useRouterHistory(createHashHistory)({queryKey: false})}
+          onUpdate={() => window.scrollTo(0, 0)}
+        >
+          {Routes}
+        </Router>
+      </Web3Provider>
+    );
+  }
+}
+
+render(<Index />, document.getElementById('app'));
