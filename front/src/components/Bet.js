@@ -316,9 +316,17 @@ class Bet extends Component {
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam0()}
         </Chip>
-        <Chip backgroundColor={MColors.white}>
-          {this.state.team0Name} vs {this.state.team1Name}
-        </Chip>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <h5 style={{marginLeft: 10}}>
+            {this.state.team0Name}
+          </h5>
+          <h3 style={{marginLeft: 12, marginRight: 12}}>
+            ⚔
+          </h3>
+          <h5 style={{marginRight: 10}}>
+            {this.state.team1Name}
+          </h5>
+        </div>
         <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam1()}
