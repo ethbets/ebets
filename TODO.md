@@ -1,5 +1,11 @@
 Branch erc20 TODO list:
 
+Layout:
+- [ ] When there are many bets in the list, the pool numbers look somewhat confusing (the blue chips).
+      Suggestions:
+      1) Use a fixed size for the blue chips and teams names
+      2) Use a slightly different background color for odd/even bets in the list
+
 Logic:
 - [ ] Withdraw: Send list of tokens to withdraw, like this the user can pay the price
   of doing only the necessary bet withdraws.
