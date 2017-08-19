@@ -5,7 +5,6 @@
  * of the BSD license. See the LICENSE file for details.
 */
 
-/*global web3:true */
 import React, { Component } from 'react';
 
 import EbetsJson from 'build/contracts/Ebets.json';
@@ -23,7 +22,6 @@ class Ebets extends Component {
   }
 
   getBetsByCategory = (category, ebetsContractInstance) => {
-    console.log(category);
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
       if (category === 'all_bets') {
@@ -68,38 +66,30 @@ class Ebets extends Component {
   async instantiateContract() {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
-    ebetsContract.setProvider(web3.currentProvider);
-    // Get accounts.
-    web3.eth.getAccounts(async (error) => {
-      if (error) {
-        console.error('Error', error);
-        return;
-      }
-      var ebetsContractInstance;
-      try {
-        ebetsContractInstance = await ebetsContract.deployed();
-      }
-      catch(error) {
-        console.error('Contract not deployed!');
-        return;
-      }
-      var category = this.props.routeParams.category;
-      if (this.props.routeParams.subcategory)
-        category += '/' + this.props.routeParams.subcategory;
-      var bets = await this.getBetsByCategory(category, ebetsContractInstance);
-      //events
-      const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
-      betsEvents.watch((error, response) => {
-        if (response.args.category === this.props.routeParams.category)
-          this.setState(previousState => ({bets: previousState.bets.concat(response.args.betAddr)}));
-      })
-      this.setState({
-        bets: bets,
-        //betsEvents: betsEvents,
-        ebetsContractInstance: ebetsContractInstance
-      });
+    ebetsContract.setProvider(this.context.web3.web3.currentProvider);
+    var ebetsContractInstance;
+    try {
+      ebetsContractInstance = await ebetsContract.deployed();
     }
-  );
+    catch(error) {
+      console.error('Contract not deployed!');
+      return;
+    }
+    var category = this.props.routeParams.category;
+    if (this.props.routeParams.subcategory)
+      category += '/' + this.props.routeParams.subcategory;
+    var bets = await this.getBetsByCategory(category, ebetsContractInstance);
+    //events
+    const betsEvents = ebetsContractInstance.allEvents({fromBlock: 'latest', toBlock: 'latest'});
+    betsEvents.watch((error, response) => {
+      if (response.args.category === this.props.routeParams.category)
+        this.setState(previousState => ({bets: previousState.bets.concat(response.args.betAddr)}));
+    })
+    this.setState({
+      bets: bets,
+      //betsEvents: betsEvents,
+      ebetsContractInstance: ebetsContractInstance
+    });
   }
 
   render() {
@@ -131,7 +121,8 @@ class Ebets extends Component {
 }
 
 Ebets.contextTypes = {
-  showUnfeatured: PropTypes.bool
+  showUnfeatured: PropTypes.bool,
+  web3: PropTypes.object
 };
 
 export default Ebets;
