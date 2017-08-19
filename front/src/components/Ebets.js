@@ -103,16 +103,17 @@ class Ebets extends Component {
       if (this.props.routeParams.subcategory !== undefined)
         category = category + '/' + this.props.routeParams.subcategory;
       listItems = this.state.bets.map(betCat => 
-        <Bet key={betCat.bet}
-            category={betCat.category}
-            address={betCat.bet}
-            showUnfeatured={this.context.showUnfeatured}
+        <Bet isDetailed={false}
+             key={betCat.bet}
+             category={betCat.category}
+             address={betCat.bet}
+             showUnfeatured={this.context.showUnfeatured}
         />
       );
     }
     // Detailed bet
     if (address !== undefined) {
-      listItems = <Bet category='detailed'
+      listItems = <Bet isDetailed={true}
                        address={address} />
     }
     return (

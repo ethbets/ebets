@@ -348,24 +348,24 @@ class Bet extends Component {
         <Card
           // FIXME: when corrected https://github.com/callemall/material-ui/issues/7411
           onExpandChange={lodash.debounce(this.onExpand, 150)}
-          expanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
+          expanded={(this.props.isDetailed) ? true : this.state.isExpanded}
         >
         <CardHeader
           avatar={(this.state.iconUrl != null) ? 
                     this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
           title={betTitle}
           style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}
-          showExpandableButton={(this.props.category === 'detailed') ? false : true}
+          showExpandableButton={(this.props.isDetailed) ? false : true}
         />
         <BetController
-          isDetailed={(this.props.category === 'detailed') ? true : false}
+          isDetailed={this.props.isDetailed}
           betContractInstance={this.state.betContractInstance}
           address={this.props.address}
           currentBetState={this.state.currentBetState}
           team0Name={this.state.team0Name}
           team1Name={this.state.team1Name}
           stepperState={this.state.stepperState}
-          isExpanded={(this.props.category === 'detailed') ? true : this.state.isExpanded}
+          isExpanded={(this.props.isDetailed) ? true : this.state.isExpanded}
           hasBetOnTeam={this.state.hasBetOnTeam}
           ERC20HasBetOnTeam={this.state.ERC20HasBetOnTeam}
           team0BetSum={this.state.team0BetSum}
