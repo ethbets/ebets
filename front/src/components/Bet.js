@@ -401,7 +401,6 @@ class Bet extends Component {
   }
 
   componentWillUnmount() {
-    console.log('stop', this.props.address)
     this.state.cancellationToken.cancel();
   }
   
