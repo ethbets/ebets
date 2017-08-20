@@ -414,7 +414,6 @@ class Bet extends Component {
   }
 
   componentWillUnmount() {
-    console.log('stop', this.props.address)
     this.state.cancellationToken.cancel();
   }
   
@@ -455,8 +454,7 @@ class Bet extends Component {
     });
   }
 
-  async instantiateContract(cancellationToken, receivingProps = true) {
-    console.log(this.props.address);
+  async instantiateContract(cancellationToken) {
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {

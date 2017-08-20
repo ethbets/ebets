@@ -13,6 +13,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import DateTimePicker from './DateTimePicker';
 import PropTypes from 'prop-types';
+import CircularProgress from 'material-ui/CircularProgress';
 
 import Dialog from 'material-ui/Dialog';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
@@ -52,9 +53,16 @@ class BetForm extends Component {
         type: 'info',
         message: ''
       },
+      transactionInProcess: false,
       ...betFields
     }
   }
+
+  CircularProgressCustom = () => {
+    if (this.state.transactionInProcess)
+      return <CircularProgress size={50} thickness={4} />;
+    return <img src={versusIcon} />;
+  };
 
   validateDateRange = (selectedField, selectedDate, limitField, limitDate) => {
     if (selectedDate < limitDate) {
@@ -195,16 +203,17 @@ class BetForm extends Component {
          */
         {from: web3.eth.accounts[0]}
         );
+      this.setState({transactionInProcess: true});
       return createdBet;
     })
     .then(response => {
-      this.setState({ alert: { type: 'success', message: 'Bet created successfully', open: true } });
       this.props.router.push('/bet/' + response.logs[0].args.betAddr);
     })
     .catch((error) => {
       console.log(error);
       this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true } });
-    });
+      this.setState({transactionInProcess: false});
+    })
   }
 
   render() {
@@ -245,7 +254,7 @@ class BetForm extends Component {
                 <GridTile
                   style={{width: 54, height: 54, marginLeft: 'auto', marginRight: 'auto'}}
                 >
-                  <img src={versusIcon} />
+                <this.CircularProgressCustom />
                 </GridTile>
                 <GridTile>
                   <TextField
