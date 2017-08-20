@@ -16,6 +16,7 @@ export function oneEthInWei() {
 }
 
 export function formatToken(value) {
-  return value.toString();
+  //return value.toString();
+  return formatEth(value);
 }
 

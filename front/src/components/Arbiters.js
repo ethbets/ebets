@@ -54,8 +54,13 @@ class Arbiters extends Component {
 
   static isVerifiedArbiter(address, networkId){
     for (var arbiter in ArbitersJson) {
-      if (ArbitersJson[arbiter][networkId].address.toLowerCase() === address.toLowerCase())
-        return true;
+      try {
+        if (ArbitersJson[arbiter][networkId].address.toLowerCase() === address.toLowerCase())
+          return true;
+      }
+      catch(error) {
+        return false;
+      }
       return false;
     }
   }
@@ -75,12 +80,17 @@ class Arbiters extends Component {
     if (networkId === null) return [ <MenuItem primaryText=''/> ]
 
     return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
-      ourArbiters.push({
-          key: (
-            Address.getArbiterMenuList(networks[networkId].address, name, networkId)
-          ),
-          value: networks[networkId].address
-      })
+      try {
+        ourArbiters.push({
+            key: (
+              Address.getArbiterMenuList(networks[networkId].address, name, networkId)
+            ),
+            value: networks[networkId].address
+        })
+      }
+      catch(err) {
+        console.error('Invalid Network id:', networkId);
+      }
       return ourArbiters;
     }, []);
   }

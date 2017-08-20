@@ -69,7 +69,7 @@ contract SimpleToken1 is ERC20 {
   }
 
   function () {
-    uint inc = 10;
+    uint inc = 10000000000000000000;
     if (balances[msg.sender] + inc >= balances[msg.sender])
       balances[msg.sender] += inc;
   }

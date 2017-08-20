@@ -74,6 +74,21 @@ class BetController extends Component {
             });
           });
         }
+        else if (result.event === 'NewBetERC20') {
+          web3.eth.getBlock(result.blockNumber, (err, block) => {
+            this.setState(previousState => {
+              const newBetERC20 = {
+                from: result.args.from,
+                amount: result.args.amount,
+                forTeam: result.args.forTeam,
+                erc20: result.args.erc20,
+                timestamp: block.timestamp
+              };
+              previousState.betList.push(newBetERC20);
+              previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
+            });
+          });
+        }
       });
     }
   }
@@ -89,6 +104,8 @@ class BetController extends Component {
   setBetValue = (event, newValue) => {
     if (newValue !== '') {
       this.setState({amountToBet : (new BigNumber(newValue)).times(new BigNumber(1e18))});
+      //TODO: use decimals instead of default 1e18
+      //this.setState({amountToBet : (new BigNumber(newValue))});
     }
     else {
       this.setState({amountToBet : new BigNumber(0)});
@@ -241,7 +258,8 @@ class BetController extends Component {
     var _team1BetSum = new BigNumber(0);
 
     if (this.props.currency.address == '') {
-      _hasBetOnTeam = _.clone(this.props.hasBetOnTeamEther);
+      if (this.props.hasBetOnTeamEther.team !== null)
+        _hasBetOnTeam.amount = _.clone(this.props.hasBetOnTeamEther.amount);
       _team0BetSum = _.clone(this.props.team0BetSum);
       _team1BetSum = _.clone(this.props.team1BetSum);
     }
@@ -261,16 +279,13 @@ class BetController extends Component {
     else
       _team1BetSum = _team1BetSum.plus(this.state.amountToBet);
 
-    var _gain = this.FinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState);
-    console.log('Gain is ' + _gain);
-    return _gain;
+    return this.FinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState);
   }
 
   /** Generic computation of the user gains, checks whether the team they've
       bet on won
   */
   FinalGain = (hasBetOnTeam, team0BetSum, team1BetSum, currentBetState) => {
-    console.log(hasBetOnTeam.team + ' ' + hasBetOnTeam.amount + ' ' + team0BetSum + ' ' + team1BetSum);
     var winnerPool;
     var loserPool;
     var amount = hasBetOnTeam.amount;
