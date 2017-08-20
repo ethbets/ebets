@@ -173,14 +173,13 @@ class BetController extends Component {
     else if ((this.props.currentBetState >= betState.team0Won &&
               this.props.currentBetState <= betState.draw) ||
               this.props.stepperState === stepperState.payout) {
-      var gain = this.FinalGainByCurrency();
       return (
       <RaisedButton 
         className="betBtn"
         primary={true}
         onTouchTap={() => this.props.withdrawFunction()}
         disabled={(this.props.stepperState !== stepperState.payout)}
-      ><span>Withdraw Ξ{gain.toString()}</span>
+      ><span>Withdraw</span>
       </RaisedButton>
       )
     }
