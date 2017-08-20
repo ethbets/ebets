@@ -51,7 +51,8 @@ class Bet extends Component {
     this.state = {
       currentBetState: 0, // Overall current bet state (from time and contract state)
       stepperState: 0,
-      hasBetOnTeam: {team: null, value: new BigNumber(0)}, // {team: false/true/null, value: amount}
+      hasBetOnTeam: null, 
+      hasBetOnTeamEther: {team: null, value: new BigNumber(0)}, // {team: false/true/null, value: amount}
       ERC20HasBetOnTeam: {},
       open: false,
       betHappened: false,
@@ -163,7 +164,8 @@ class Bet extends Component {
 
     if (this.state.currency.address === '') { 
       console.log('Betting using Ether');
-      value = value.times(new BigNumber(1e18));
+      //TODO: the value is being multiplied by 1e18 when read. Decide when it's best.
+      //value = value.times(new BigNumber(1e18));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
         { from: this.context.web3.selectedAccount,
@@ -185,7 +187,8 @@ class Bet extends Component {
         erc20decimals = this.state.erc20Contracts[addr].decimals;
         if (erc20decimals !== undefined && erc20decimals.greaterThanOrEqualTo(1) && erc20decimals.lessThanOrEqualTo(18)) {
           var power = (new BigNumber(10)).toPower(erc20decimals);
-          value = value.dividedBy(power);
+          //TODO: the value is being multiplied by 1e18 when read. Decide when it's best.
+          //value = value.times(power);
         }
 
         //TODO: this is for testing purposes only. This calls the fallback function of our ERC20 test contracts,
@@ -247,10 +250,10 @@ class Bet extends Component {
     this.transactionHappened(withdrawPromise)
     .then(() => {
       this.setState({
-        hasBetOnTeam : {
+        hasBetOnTeam : null,
+        hasBetOnTeamEther : {
           team : null,
           amount : new BigNumber(0),
-          stepperState: stepperState.matchDecision
         },
         ERC20HasBetOnTeam : {}
       });
@@ -286,6 +289,13 @@ class Bet extends Component {
     if (this.state.currency.address === '')
       return 'Ξ';
     return this.state.currency.name[0];
+  }
+
+  CurrencyAmount = (amount) => {
+    if (this.state.currency.address === '')
+      return formatEth(amount);
+
+    return formatToken(amount);
   }
 
   CurrencyAmountTeam0 = () => {
@@ -368,6 +378,7 @@ class Bet extends Component {
           stepperState={this.state.stepperState}
           isExpanded={(this.props.isDetailed) ? true : this.state.isExpanded}
           hasBetOnTeam={this.state.hasBetOnTeam}
+          hasBetOnTeamEther={this.state.hasBetOnTeamEther}
           ERC20HasBetOnTeam={this.state.ERC20HasBetOnTeam}
           team0BetSum={this.state.team0BetSum}
           team1BetSum={this.state.team1BetSum}
@@ -382,6 +393,8 @@ class Bet extends Component {
           isArbiter={this.state.isArbiter}
           arbiterInfo={this.state.arbiterInfo}
           currency={this.state.currency}
+          currencyIdFunction={this.CurrencyId.bind(this)}
+          currencyAmountFunction={this.CurrencyAmount.bind(this)}
         />
         <this.BetStatusDialog />
         <this.LinearProgressCustom mode="indeterminate" />
@@ -479,19 +492,26 @@ class Bet extends Component {
       betAddress = this.props.address;
     var betContractInstance = betContract.at(betAddress);
     const governanceAddress = await betContractInstance.arbiter();
-    
     const arbiterContractInstance = arbiterContract.at(governanceAddress);
+
+    var stateObjects = await setAttributes(this.state, betContractInstance);
+    try{
+      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
+    }
+    catch(err) {
+      stateObjects['iconUrl'] = null;
+    }
+
     var isArbiter;
     var betsToTeam0;
     var betsToTeam1;
-
     var _ERC20BetsToTeam0 = {};
     var _ERC20BetsToTeam1 = {};
     var _ERC20Team0BetSum = {};
     var _ERC20Team1BetSum = {};
     var _ERC20HasBetOnTeam = {};
 
-    if (this.context.web3.selectedAccount!== undefined) {
+    if (this.context.web3.selectedAccount !== undefined) {
       isArbiter = await arbiterContractInstance.isMember(this.context.web3.selectedAccount);
       betsToTeam0 = await betContractInstance.betsToTeam0(this.context.web3.selectedAccount);
       betsToTeam1 = await betContractInstance.betsToTeam1(this.context.web3.selectedAccount);
@@ -501,13 +521,7 @@ class Bet extends Component {
       betsToTeam1 = new BigNumber(0);
     }
 
-    var stateObjects = await setAttributes(this.state, betContractInstance);
-    try{
-      stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
-    }
-    catch(err) {
-      stateObjects['iconUrl'] = null;
-    }
+    var _TAX = stateObjects['TAX'].dividedBy(100);
 
     var _validERC20 = [];
     var _valid = await betContractInstance.validERC20(0);
@@ -551,9 +565,10 @@ class Bet extends Component {
       i += 1;
     }
 
-    const betToTeam = (betToTeamERC20 !== null) ? betToTeamERC20 :
-                        (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
-                          ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
+    const betToTeamEther = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
+                             ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
+ 
+    const betToTeam = (betToTeamEther !== null) ? betToTeamEther : betToTeamERC20;
     
     const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
       stateObjects.betState.toNumber(), betToTeam);
@@ -568,10 +583,12 @@ class Bet extends Component {
     cancellationToken.throwIfCancelled();
     this.setState({
       ...stateObjects,
-      hasBetOnTeam: {
-        team: betToTeam,
-        amount: (betToTeam === false) ? betsToTeam0 : 
-                 (betToTeam === true) ? betsToTeam1 : new BigNumber(0)
+      TAX: _TAX,
+      hasBetOnTeam: betToTeam,
+      hasBetOnTeamEther: {
+        team: betToTeamEther,
+        amount: (betToTeamEther === false) ? betsToTeam0 : 
+                 (betToTeamEther === true) ? betsToTeam1 : new BigNumber(0)
       },
       ERC20HasBetOnTeam: _ERC20HasBetOnTeam,
       ERC20Team0BetSum: _ERC20Team0BetSum,
@@ -610,15 +627,17 @@ class Bet extends Component {
 
         if (response.args.from === this.context.web3.selectedAccount) {
           this.setState(previousState => {
-            if (previousState.hasBetOnTeam.team === null)
-              previousState.hasBetOnTeam = {
+            if (previousState.hasBetOnTeam === null)
+              previousState.hasBetOnTeam = response.args.forTeam;
+            if (previousState.hasBetOnTeamEther.team === null)
+              previousState.hasBetOnTeamEther = {
                 team: response.args.forTeam,
                 amount: response.args.amount
               };
             else
-              previousState.hasBetOnTeam = {
+              previousState.hasBetOnTeamEther = {
                 team: response.args.forTeam,
-                amount: previousState.hasBetOnTeam.amount.add(response.args.amount)
+                amount: previousState.hasBetOnTeamEther.amount.add(response.args.amount)
               }
           });
         }
@@ -656,6 +675,9 @@ class Bet extends Component {
         }
 
         if (response.args.from === this.context.web3.selectedAccount) {
+          var _hasBetOnTeam = _.clone(this.state.hasBetOnTeam);
+          if (_hasBetOnTeam === null)
+            _hasBetOnTeam = response.args.forTeam;
           var _ERC20HasBetOnTeam = _.clone(this.state.ERC20HasBetOnTeam);
           if (erc20 in _ERC20HasBetOnTeam) {
             _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: _ERC20HasBetOnTeam[erc20].amount.add(amount) };
@@ -663,7 +685,8 @@ class Bet extends Component {
           else {
             _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: (new BigNumber(amount)) };
           }
-          this.setState({ ERC20HasBetOnTeam : _ERC20HasBetOnTeam });
+          this.setState({ hasBetOnTeam : _hasBetOnTeam,
+                          ERC20HasBetOnTeam : _ERC20HasBetOnTeam });
         }
       }
       else if (response.event === 'StateChanged') {
@@ -685,7 +708,7 @@ class Bet extends Component {
       }})}, 15000);
       setTimeout(() => {this.setState(() => {
       var shouldPay = stepperState.matchDecision;
-      if (this.state.hasBetOnTeam.team !== null)
+      if (this.state.hasBetOnTeam !== null)
         shouldPay = stepperState.payout;
       return {
         currentBetState: betState.team0Won,

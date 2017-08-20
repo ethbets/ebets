@@ -87,8 +87,12 @@ class BetController extends Component {
   };
 
   setBetValue = (event, newValue) => {
-    if (newValue !== '')
-      this.setState({amountToBet : new BigNumber(newValue)});
+    if (newValue !== '') {
+      this.setState({amountToBet : (new BigNumber(newValue)).times(new BigNumber(1e18))});
+    }
+    else {
+      this.setState({amountToBet : new BigNumber(0)});
+    }
   };
 
   Steps = () => {
@@ -152,8 +156,7 @@ class BetController extends Component {
     else if ((this.props.currentBetState >= betState.team0Won &&
               this.props.currentBetState <= betState.draw) ||
               this.props.stepperState === stepperState.payout) {
-      //var gain = this.FinalGain();
-      var gain = this.GainByCurrency();
+      var gain = this.FinalGainByCurrency();
       return (
       <RaisedButton 
         className="betBtn"
@@ -170,7 +173,7 @@ class BetController extends Component {
         primary={true}
         label='Bet'
         onTouchTap={() => this.props.betOnTeamFunction(
-          (this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team 
+          (this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam 
           : this.state.selectedTeam , 
           new BigNumber(this.state.amountToBet))}
       />
@@ -204,95 +207,130 @@ class BetController extends Component {
     );
   }
 
+  /** Computes the real final gain, to be used by Withdraw
+    */
+  FinalGainByCurrency = () => {
+    if (this.props.currency.address == '') {
+      return this.FinalGain(this.props.hasBetOnTeamEther, this.props.team0BetSum, this.props.team1BetSum, this.props.currentBetState);
+    }
+
+    var addr = this.props.currency.address;
+    return this.FinalGain(this.props.ERC20HasBetOnTeam[addr], this.props.ERC20Team0BetSum[addr], this.props.ERC20Team1BetSum[addr], this.props.currentBetState);
+  }
+
+  /** Pretends that the team the user selected won and the amount was bet,
+      to tell the user how much they would win
+    */
+  ExpectedGainByCurrency = () => {
+    var _betState = betState.arbiterUndecided;
+    var _selectedTeam;
+    if (this.props.hasBetOnTeam !== null)
+      _selectedTeam = this.props.hasBetOnTeam;
+    else if (this.state.selectedTeam !== null)
+      _selectedTeam = this.state.selectedTeam;
+    else
+      return new BigNumber(0);
+
+    if (_selectedTeam === false)
+      _betState = betState.team0Won;
+    else /*if (_selectedTeam === true)*/
+      _betState = betState.team1Won;
+
+    var _hasBetOnTeam = { team: _selectedTeam, amount: new BigNumber(0) };
+    var _team0BetSum = new BigNumber(0);
+    var _team1BetSum = new BigNumber(0);
+
+    if (this.props.currency.address == '') {
+      _hasBetOnTeam = _.clone(this.props.hasBetOnTeamEther);
+      _team0BetSum = _.clone(this.props.team0BetSum);
+      _team1BetSum = _.clone(this.props.team1BetSum);
+    }
+    else {
+      var addr = this.props.currency.address;
+      if (addr in this.props.ERC20HasBetOnTeam)
+        _hasBetOnTeam = _.clone(this.props.ERC20HasBetOnTeam[addr]);
+      if (addr in this.props.ERC20Team0BetSum)
+        _team0BetSum = _.clone(this.props.ERC20Team0BetSum[addr]);
+      if (addr in this.props.ERC20Team1BetSum)
+        _team1BetSum = _.clone(this.props.ERC20Team1BetSum[addr]);
+    }
+
+    _hasBetOnTeam.amount = _hasBetOnTeam.amount.plus(this.state.amountToBet);
+    if (_selectedTeam === false)
+      _team0BetSum = _team0BetSum.plus(this.state.amountToBet);
+    else
+      _team1BetSum = _team1BetSum.plus(this.state.amountToBet);
+
+    var _gain = this.FinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState);
+    console.log('Gain is ' + _gain);
+    return _gain;
+  }
+
+  /** Generic computation of the user gains, checks whether the team they've
+      bet on won
+  */
+  FinalGain = (hasBetOnTeam, team0BetSum, team1BetSum, currentBetState) => {
+    console.log(hasBetOnTeam.team + ' ' + hasBetOnTeam.amount + ' ' + team0BetSum + ' ' + team1BetSum);
+    var winnerPool;
+    var loserPool;
+    var amount = hasBetOnTeam.amount;
+    var tax = new BigNumber(this.props.tax);
+
+    if (hasBetOnTeam.team === null)
+      return new BigNumber(0);
+
+    if (amount.isZero())
+      return amount;
+
+    if (currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
+      return amount;
+
+    if (currentBetState === betState.draw)
+      return amount;
+
+    var hasBetTeam0 = !hasBetOnTeam.team;
+    var hasBetTeam1 = hasBetOnTeam.team;
+
+    if ((currentBetState === betState.team0Won && hasBetTeam1) ||
+        (currentBetState === betState.team1Won && hasBetTeam0))
+      return new BigNumber(0);
+
+    if (currentBetState === betState.team0Won) {
+      winnerPool = team0BetSum;
+      loserPool = team1BetSum;
+    }
+    else if (currentBetState === betState.team1Won) {
+      winnerPool = team1BetSum;
+      loserPool = team0BetSum;
+    }
+    return this.ComputeGain(amount, winnerPool, loserPool, tax);
+  }
+
+  /** Does the actual computation
+    */
   ComputeGain = (amount, winnerPool, loserPool, tax) => {
+    if (loserPool.isZero())
+      return amount;
     var profit = amount.dividedBy(winnerPool).times(loserPool);
     if (profit.gt(0))
       profit = profit.minus(profit.times(new BigNumber(tax)))
     return amount.plus(profit);
   }
 
+  /** Visual element that shows the expected gain
+    */
   ExpectedGain = () => {
-    var expectedIncome;
-    var amount;
-    var winnerPool;
-    var loserPool;
-    var tax = new BigNumber(this.props.tax);
-    tax = tax.dividedBy(100);
+    var _gain = this.ExpectedGainByCurrency();
 
-    if (this.state.selectedTeam === null || this.props.currentBetState !== betState.matchOpen)
+    if (this.state.amountToBet.isZero() || isNaN(_gain))
       return null;
 
-    if (this.state.amountToBet.lessThan(new BigNumber(0)))
-      return null;
-
-    amount = this.state.amountToBet.times(new BigNumber('1000000000000000000'));
-    if (this.state.selectedTeam === false) {
-      loserPool = this.props.team1BetSum;
-      winnerPool = this.props.team0BetSum;
-    }
-    else {
-      loserPool = this.props.team0BetSum;
-      winnerPool = this.props.team1BetSum;
-    }
-    winnerPool = winnerPool.plus(amount);
-    expectedIncome = this.ComputeGain(amount, winnerPool, loserPool, tax);
-
-    if (amount.isZero(0) || isNaN(amount))
-      return null;
-    else
-      return (
+    return (
       <Chip backgroundColor={MColors.yellow500}>
-        <Avatar size={32} backgroundColor={MColors.yellow800}>Ξ</Avatar>
-        Win {formatEth(expectedIncome)}
+          <Avatar size={32} backgroundColor={MColors.yellow800}>{this.props.currencyIdFunction()}</Avatar>
+        Win {this.props.currencyAmountFunction(_gain)}
       </Chip>
       );
-  }
-
-  GainByCurrency = () => {
-    if (this.props.currency.address == '') {
-      return this.FinalGain(this.props.hasBetOnTeam, this.props.team0BetSum, this.props.team1BetSum);
-    }
-
-    var addr = this.props.currency.address;
-    return this.FinalGain(this.props.ERC20HasBetOnTeam[addr], this.props.ERC20Team0BetSum[addr], this.props.ERC20Team1BetSum[addr]);
-  }
-
-  FinalGain = (hasBetOnTeam, team0BetSum, team1BetSum) => {
-    var winnerPool;
-    var loserPool;
-    var amount;
-    var tax = new BigNumber(this.props.tax);
-    tax = tax.dividedBy(100);
-
-    if (this.props.currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
-      return new BigNumber(0);
-
-    //if (this.props.hasBetOnTeam.team === null)
-    if (hasBetOnTeam.team === null)
-      return new BigNumber(0);
-
-    amount = hasBetOnTeam.amount;
-    if (this.props.currentBetState === betState.draw)
-      return amount;
-
-    var hasBetTeam0 = !hasBetOnTeam.team;
-    var hasBetTeam1 = hasBetOnTeam.team;
-    //var team0BetSum = this.props.team0BetSum;
-    //var team1BetSum = this.props.team1BetSum;
-
-    if ((this.props.currentBetState === betState.team0Won && hasBetTeam1) ||
-        (this.props.currentBetState === betState.team1Won && hasBetTeam0))
-      return new BigNumber(0);
-
-    if (this.props.currentBetState === betState.team0Won) {
-      winnerPool = team0BetSum;
-      loserPool = team1BetSum;
-    }
-    else if (this.props.currentBetState === betState.team1Won) {
-      winnerPool = team1BetSum;
-      loserPool = team0BetSum;
-    }
-    return this.ComputeGain(amount, winnerPool, loserPool, tax);
   }
 
   DynamicList = () => {
@@ -346,9 +384,9 @@ class BetController extends Component {
                                   marginRight: 10,
                                   marginLeft: 10 }}
               floatingLabelText='Team'
-              value={(this.props.hasBetOnTeam.team !== null) ? this.props.hasBetOnTeam.team : this.state.selectedTeam}
+              value={(this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam : this.state.selectedTeam}
               onChange={this.setTeam}
-              disabled={this.props.hasBetOnTeam.team !== null || this.props.currentBetState >= betState.matchRunning}
+              disabled={this.props.hasBetOnTeam !== null || this.props.currentBetState >= betState.matchRunning}
             >
               <MenuItem value={false} primaryText={this.props.team0Name} />
               <MenuItem value={true} primaryText={this.props.team1Name} />
