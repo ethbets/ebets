@@ -620,8 +620,6 @@ class Bet extends Component {
     var isArbiter;
     var betsToTeam0;
     var betsToTeam1;
-    var _ERC20BetsToTeam0 = {};
-    var _ERC20BetsToTeam1 = {};
     var _ERC20Team0BetSum = {};
     var _ERC20Team1BetSum = {};
     var _ERC20HasBetOnTeam = {};
@@ -656,21 +654,23 @@ class Bet extends Component {
 
       if (this.context.web3.web3.eth.defaultAccount !== undefined ) {
         try {
-          _ERC20BetsToTeam0[_valid] = await betContractInstance.ERC20BetsToTeam0(_valid, this.context.web3.web3.eth.defaultAccount);
-          _ERC20BetsToTeam1[_valid] = await betContractInstance.ERC20BetsToTeam1(_valid, this.context.web3.web3.eth.defaultAccount);
-          if (_ERC20BetsToTeam0[_valid].greaterThan(new BigNumber(0))) {
-            if (betToTeamERC20 === true)
-              console.log('Error: user has bet on different teams using different currencies');
-            betToTeamERC20 = false;
-            amount = _ERC20BetsToTeam0[_valid];
+          var bets0 = await betContractInstance.ERC20BetsToTeam0(_valid, this.context.web3.web3.eth.defaultAccount);
+          var bets1 = await betContractInstance.ERC20BetsToTeam1(_valid, this.context.web3.web3.eth.defaultAccount);
+          if (bets0.gt(0) || bets1.gt(0)) {
+            if (bets0.gt(0)) {
+              if (betToTeamERC20 === true)
+                console.log('Error: user has bet on different teams using different currencies');
+              betToTeamERC20 = false;
+              amount = bets0;
+            }
+            else {
+              if (betToTeamERC20 === false)
+                console.log('Error: user has bet on different teams using different currencies');
+              betToTeamERC20 = true;
+              amount = bets1;
+            }
+            _ERC20HasBetOnTeam[_valid] = {team: betToTeamERC20, amount: amount};
           }
-          else if (_ERC20BetsToTeam1[_valid].greaterThan(new BigNumber(0))) {
-            if (betToTeamERC20 === false)
-              console.log('Error: user has bet on different teams using different currencies');
-            betToTeamERC20 = true;
-            amount = _ERC20BetsToTeam1[_valid];
-          }
-          _ERC20HasBetOnTeam[_valid] = {team: betToTeamERC20, amount: amount};
         } catch(e) {
           console.log('Error: ' + e);
         }
@@ -708,8 +708,6 @@ class Bet extends Component {
       ERC20HasBetOnTeam: _ERC20HasBetOnTeam,
       ERC20Team0BetSum: _ERC20Team0BetSum,
       ERC20Team1BetSum: _ERC20Team1BetSum,
-      ERC20BetsToTeam0: _ERC20BetsToTeam0,
-      ERC20BetsToTeam1: _ERC20BetsToTeam1,
       validERC20: _validERC20,
       hasEverBet: hasEverBet,
       currentBetState: newStates.newOverAllState,
@@ -762,8 +760,6 @@ class Bet extends Component {
         cancellationToken.throwIfCancelled();
         var _ERC20Team0BetSum = _.clone(this.state.ERC20Team0BetSum);
         var _ERC20Team1BetSum = _.clone(this.state.ERC20Team1BetSum);
-        var _ERC20BetsToTeam0 = _.clone(this.state.ERC20BetsToTeam0);
-        var _ERC20BetsToTeam1 = _.clone(this.state.ERC20BetsToTeam1);
         var erc20 = response.args.erc20.toLowerCase();
         var amount = response.args.amount;
 
@@ -773,21 +769,15 @@ class Bet extends Component {
           this.setState({ validERC20 : _valid });
           _ERC20Team0BetSum[erc20] = new BigNumber(0);
           _ERC20Team1BetSum[erc20] = new BigNumber(0);
-          _ERC20BetsToTeam0[erc20] = new BigNumber(0);
-          _ERC20BetsToTeam1[erc20] = new BigNumber(0);
         }
 
         if (response.args.forTeam === false) {
           _ERC20Team0BetSum[erc20] = _ERC20Team0BetSum[erc20].plus(amount);
-          if (response.args.from === this.context.web3.web3.eth.defaultAccount)
-            _ERC20BetsToTeam0[erc20] = _ERC20BetsToTeam0[erc20].plus(amount);
-          this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum, ERC20BetsToTeam0 : _ERC20BetsToTeam0 });
+          this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum });
         }
         else {
           _ERC20Team1BetSum[erc20] = _ERC20Team1BetSum[erc20].plus(amount);
-          if (response.args.from === this.context.web3.web3.eth.defaultAccount)
-            _ERC20BetsToTeam1[erc20] = _ERC20BetsToTeam1[erc20].plus(amount);
-          this.setState({ ERC20Team1BetSum : _ERC20Team1BetSum, ERC20BetsToTeam1 : _ERC20BetsToTeam1 });
+          this.setState({ ERC20Team1BetSum : _ERC20Team1BetSum });
         }
 
         if (response.args.from === this.context.web3.web3.eth.defaultAccount) {
