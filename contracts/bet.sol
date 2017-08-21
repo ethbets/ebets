@@ -199,7 +199,7 @@ contract Bet is ProposalInterface {
     NewBetERC20(forTeam, msg.sender, amount, erc20);
   }
 
-  function withdraw() 
+  function withdraw(address[] tokens) 
     afterTimestamp(timestampMatchEnd)
     matchIsDecided() {
     uint idx;
@@ -215,8 +215,8 @@ contract Bet is ProposalInterface {
     }
     else {
       collectProfit();
-      for (idx = 0; idx < validERC20.length; ++idx) {
-        collectProfitERC20(validERC20[idx]);
+      for (idx = 0; idx < tokens.length; ++idx) {
+        collectProfitERC20(tokens[idx]);
       }
     }
   }

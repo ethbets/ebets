@@ -32,6 +32,7 @@ import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
 import {betState, stepperState} from 'utils/betStates';
 import {formatEth, formatToken} from 'utils/ethUtils';
+import {computeFinalGain} from 'utils/betMath';
 import Timer from './Timer';
 import Arbiters from 'components/Arbiters';
 import ERC20Tokens from 'components/ERC20Tokens';
@@ -65,6 +66,9 @@ class Bet extends Component {
       stepIndex: 0,
       currency: {name: 'Ether (default)', address: ''},
       erc20Contracts: {},
+      withdrawHappened: false,
+      withdrawTable: [],
+      withdrawTokens: [],
       ...betFields,
     }
   }
@@ -209,6 +213,7 @@ class Bet extends Component {
       })
       .then(() => {
         console.log('Sending Approval');
+        this.setState({transactionInProcess: true});
         return erc20instance.approve(
           this.state.betContractInstance.address,
           value,
@@ -227,6 +232,7 @@ class Bet extends Component {
       })
       .catch((err) => {
         console.log('Betting error: ' + err);
+        this.setState({transactionInProcess: false});
       });
     }
   };
@@ -243,13 +249,113 @@ class Bet extends Component {
       });
     this.transactionHappened(callVotePromise);
   }
+
+  clearWithdraw = () => {
+    this.setState({ withdrawTable : [],
+                    withdrawHappened : false,
+                    withdrawTokens : []});
+  };
+
+  handleWithdrawOk = () => {
+    this.setState({withdrawHappened: false});
+    this.withdrawRewards();
+  };
+
+  WithdrawStatusDialog = () => {
+    const actions = [
+      <FlatButton key='cancel'
+        label="Cancel"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.clearWithdraw}
+      />,
+      <FlatButton key='ok'
+        label="Ok"
+        primary={true}
+        keyboardFocused={false}
+        onTouchTap={this.handleWithdrawOk}
+      />
+    ];
+
+    return (
+      <Dialog
+        title="Withdraw rewards"
+        actions={actions}
+        modal={false}
+        open={this.state.withdrawHappened}
+        onRequestClose={this.clearWithdraw}
+      >
+      {this.state.withdrawTable}
+      </Dialog>
+    )
+  }
+
   withdraw = () => {
+    var _tokens = [];
+    var _table = [];
+
+    var draw = false;
+    var winner = null;
+    var _amount;
+    if (this.state.currentBetState === betState.team0Won)
+      winner = false;
+    else if (this.state.currentBetState === betState.team1Won)
+      winner = true;
+    else if (this.state.currentBetState === betState.draw)
+      draw = true;
+    else
+      return;
+
+    var _hasBetEther = this.state.hasBetOnTeamEther;
+    if (_hasBetEther.team !== null && _hasBetEther.amount.gt(0)) {
+      if (draw || _hasBetEther.team === winner) {
+        if (draw)
+          _amount = _hasBetEther.amount;
+        else if (_hasBetEther.team === winner)
+          _amount = this.FinalGainEther();
+        _table.push(<div key={'Ether'} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-between'}}>
+                      <span>Currency: Ether</span>
+                      <span>Bet: {formatEth(_hasBetEther.amount)}</span>
+                      <span>Reward: {formatEth(_amount)}</span>
+                    </div>);
+      }
+    }
+
+    for (var i = 0; i < this.state.validERC20.length; ++i) {
+      var erc20 = this.state.validERC20[i];
+      if (erc20 in this.state.ERC20HasBetOnTeam) {
+        var _hasBet = this.state.ERC20HasBetOnTeam[erc20];
+        if (_hasBet.amount.lte(0)) continue;
+        if (draw)
+          _amount = _hasBet.amount;
+        else if(_hasBet.team === winner)
+          _amount = this.FinalGainByCurrency(erc20);
+        else continue;
+        _tokens.push(erc20);
+        _table.push(<div key={erc20} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-evenly'}}>
+                      <span>Currency: {erc20}</span>
+                      <span>Bet: {formatEth(_hasBet.amount)}</span>
+                      <span>Reward: {formatEth(_amount)}</span>
+                    </div>);
+      }
+    }
+
+    this.setState({ withdrawTable : _table,
+                    withdrawHappened : true,
+                    withdrawTokens: _tokens
+                  });
+  }
+
+  withdrawRewards = () => {
     const withdrawPromise = this.state.betContractInstance.withdraw(
+    this.state.withdrawTokens,
     { from: this.context.web3.web3.eth.defaultAccount,
     });
     this.transactionHappened(withdrawPromise)
     .then(() => {
       this.setState({
+        withdrawTable : [],
+        withdrawTokens : [],
         hasBetOnTeam : null,
         hasBetOnTeamEther : {
           team : null,
@@ -267,6 +373,20 @@ class Bet extends Component {
     if (index !== -1) {
       this.setState({ currency: {name: selectedItem.textKey, address: selectedItem.valueKey.toLowerCase() }});
     }
+  }
+
+  /** Computes the real final gain, to be used by Withdraw
+    */
+  FinalGainEther = () => {
+    return this.FinalGainByCurrency('');
+  }
+
+  FinalGainByCurrency = (addr) => {
+    if (addr == '') {
+      return computeFinalGain(this.state.hasBetOnTeamEther, this.state.team0BetSum, this.state.team1BetSum, this.state.currentBetState, this.state.TAX);
+    }
+
+    return computeFinalGain(this.state.ERC20HasBetOnTeam[addr], this.state.ERC20Team0BetSum[addr], this.state.ERC20Team1BetSum[addr], this.state.currentBetState, this.state.TAX);
   }
 
   Currency = () => {
@@ -397,6 +517,7 @@ class Bet extends Component {
           currencyAmountFunction={this.CurrencyAmount.bind(this)}
         />
         <this.BetStatusDialog />
+        <this.WithdrawStatusDialog />
         <this.LinearProgressCustom mode="indeterminate" />
         </Card>
       );

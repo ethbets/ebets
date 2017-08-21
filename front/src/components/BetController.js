@@ -31,6 +31,7 @@ import {
 } from 'material-ui/Table';
 
 import {formatEth} from 'utils/ethUtils';
+import {computeFinalGain} from 'utils/betMath';
 import {
   Step,
   Stepper,
@@ -223,17 +224,6 @@ class BetController extends Component {
     );
   }
 
-  /** Computes the real final gain, to be used by Withdraw
-    */
-  FinalGainByCurrency = () => {
-    if (this.props.currency.address == '') {
-      return this.FinalGain(this.props.hasBetOnTeamEther, this.props.team0BetSum, this.props.team1BetSum, this.props.currentBetState);
-    }
-
-    var addr = this.props.currency.address;
-    return this.FinalGain(this.props.ERC20HasBetOnTeam[addr], this.props.ERC20Team0BetSum[addr], this.props.ERC20Team1BetSum[addr], this.props.currentBetState);
-  }
-
   /** Pretends that the team the user selected won and the amount was bet,
       to tell the user how much they would win
     */
@@ -278,57 +268,7 @@ class BetController extends Component {
     else
       _team1BetSum = _team1BetSum.plus(this.state.amountToBet);
 
-    return this.FinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState);
-  }
-
-  /** Generic computation of the user gains, checks whether the team they've
-      bet on won
-  */
-  FinalGain = (hasBetOnTeam, team0BetSum, team1BetSum, currentBetState) => {
-    var winnerPool;
-    var loserPool;
-    var amount = hasBetOnTeam.amount;
-    var tax = new BigNumber(this.props.tax);
-
-    if (hasBetOnTeam.team === null)
-      return new BigNumber(0);
-
-    if (amount.isZero())
-      return amount;
-
-    if (currentBetState < betState.team0Won || this.props.currentBetState > betState.draw)
-      return amount;
-
-    if (currentBetState === betState.draw)
-      return amount;
-
-    var hasBetTeam0 = !hasBetOnTeam.team;
-    var hasBetTeam1 = hasBetOnTeam.team;
-
-    if ((currentBetState === betState.team0Won && hasBetTeam1) ||
-        (currentBetState === betState.team1Won && hasBetTeam0))
-      return new BigNumber(0);
-
-    if (currentBetState === betState.team0Won) {
-      winnerPool = team0BetSum;
-      loserPool = team1BetSum;
-    }
-    else if (currentBetState === betState.team1Won) {
-      winnerPool = team1BetSum;
-      loserPool = team0BetSum;
-    }
-    return this.ComputeGain(amount, winnerPool, loserPool, tax);
-  }
-
-  /** Does the actual computation
-    */
-  ComputeGain = (amount, winnerPool, loserPool, tax) => {
-    if (loserPool.isZero())
-      return amount;
-    var profit = amount.dividedBy(winnerPool).times(loserPool);
-    if (profit.gt(0))
-      profit = profit.minus(profit.times(new BigNumber(tax)))
-    return amount.plus(profit);
+    return computeFinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState, this.props.tax);
   }
 
   /** Visual element that shows the expected gain
