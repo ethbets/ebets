@@ -45,10 +45,10 @@ contract StaticArbiter is Governance {
     require(proposals[proposal].voted[msg.sender] == 0); // Did not voted before
     require(outcome != 0); // Cannot erase vote
     
-    ProposalInterface proposalContract = ProposalInterface(proposal);
     proposals[proposal].outcomes[outcome] += 1;
     uint votesInOutcome = proposals[proposal].outcomes[outcome];
     if (votesInOutcome >= proposals[proposal].quorumNeeded) {
+      ProposalInterface proposalContract = ProposalInterface(proposal);
       proposalContract.__resolve(outcome);
       ResolvedProposal(proposal, outcome);
     }
