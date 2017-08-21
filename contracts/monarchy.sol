@@ -29,7 +29,6 @@ contract Monarchy is Governance {
     return higherInstance;
   }
 
-
   function castVote(address proposal, uint outcome) onlyMonarch() {
     ProposalInterface proposalContract = ProposalInterface(proposal);
     proposalContract.__resolve(outcome);

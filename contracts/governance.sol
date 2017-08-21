@@ -12,8 +12,8 @@ contract Governance is GovernanceInterface{
   struct Proposal {
     uint quorumNeeded;
     uint deadline;
-    address[] voted;
-    uint[] outcomes;
+    mapping (address => uint) voted; // Maps who voted in what
+    mapping (uint => uint) outcomes; // Maps outcomes votes
   }
   // Members of the Governance have a weight in their vote
   mapping (address => uint) public members;

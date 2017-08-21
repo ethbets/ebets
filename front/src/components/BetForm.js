@@ -284,7 +284,7 @@ class BetForm extends Component {
                   <AutoComplete
                     textFieldStyle={{width: 380}}
                     style={{width: 380}}
-                    floatingLabelText="Arbiter"
+                    floatingLabelText="Arbiter: decide the bet's outcome"
                     filter={(searchText, key, v) => 
                       (v.key.props.primaryText.toLowerCase().indexOf(searchText) !== -1)}
                     openOnFocus={true}
