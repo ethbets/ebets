@@ -84,7 +84,7 @@ contract StaticArbiter is Governance {
     proposals[proposalAddress].quorumNeeded = nMembers/2 + 1;
   }
   
-  // Static triunvirate
+  // Static arbiter
   function addMember(address /*member*/) {}
   function removeMember(address /*member*/) {}
 }

@@ -236,10 +236,16 @@ class Bet extends Component {
       });
     }
   };
-  callArbiter = () => {
-    const callArbiterPromise = this.state.betContractInstance.updateResult(
-      { from: this.context.web3.web3.eth.defaultAccount
-      });
+  callArbiter = (closeBet = false) => {
+    var callArbiterPromise;
+    if (closeBet)
+      callArbiterPromise = this.state.betContractInstance.close(
+        { from: this.context.web3.web3.eth.defaultAccount
+        });
+    else
+      callArbiterPromise = this.state.betContractInstance.updateResult(
+        { from: this.context.web3.web3.eth.defaultAccount
+        });
     this.transactionHappened(callArbiterPromise);
   };
   callVote = (onTeam) => {

@@ -165,24 +165,31 @@ class BetController extends Component {
       <RaisedButton
         disabled={this.props.currentBetState === betState.calledArbiter}
         secondary={true}
-        className="betBtn"
+        label='Call Arbiter'
         onTouchTap={() => this.props.callArbiterFunction()}
-      ><span>Call Arbiter</span>
-      </RaisedButton>
+      />
       )
     }
     else if ((this.props.currentBetState >= betState.team0Won &&
               this.props.currentBetState <= betState.draw) ||
               this.props.stepperState === stepperState.payout) {
       return (
-      <RaisedButton 
-        className="betBtn"
+      <RaisedButton
         primary={true}
+        label='Withdraw'
         onTouchTap={() => this.props.withdrawFunction()}
         disabled={(this.props.stepperState !== stepperState.payout)}
-      ><span>Withdraw</span>
-      </RaisedButton>
+      />
       )
+    }
+    else if (this.props.currentBetState === betState.betExpired) {
+      return (
+        <RaisedButton
+        secondary={true}
+        label='Draw Bet'
+        onTouchTap={() => this.props.callArbiterFunction(true)}
+      />
+      );
     }
     return (
       <RaisedButton 
@@ -216,7 +223,6 @@ class BetController extends Component {
         <RaisedButton
           disabled={this.props.currentBetState !== betState.calledArbiter}
           secondary={true}
-          className="betBtn"
           onTouchTap={() => this.props.callVoteFunction(this.state.selectedTeam)}
         ><span>Vote</span>
         </RaisedButton>
