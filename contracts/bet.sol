@@ -349,6 +349,7 @@ contract Bet is ProposalInterface {
     afterTimestamp(timestampArbiterDeadline)
     beforeTimestamp(timestampSelfDestructDeadline) {
     betState = BET_STATES.DRAW;
+    StateChanged(betState);
   }
 
   /* Selfdestructs the bet and return what it has in the account
