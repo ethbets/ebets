@@ -17,6 +17,7 @@ contract Ebets {
   }
 
   address owner;
+  uint8 public constant TAX = 10;
   mapping (string => Bet[]) bets; //indexed by category
 
   /* TODO: ALSO FIRE CATEGORY EVENT
@@ -33,7 +34,7 @@ contract Ebets {
                       string team1Name, string category, 
                       uint[] timestamps) {
 
-    Bet bet = new Bet(arbiter, team0Name, team1Name, timestamps);
+    Bet bet = new Bet(arbiter, team0Name, team1Name, timestamps, TAX);
     // Featured by default for resolver
     if (msg.sender == owner)
       bet.toggleFeatured();

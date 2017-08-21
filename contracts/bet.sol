@@ -75,7 +75,7 @@ contract Bet is ProposalInterface {
   // Self-destruct is possible if time > timestampSelfDestructDeadline
   uint public timestampSelfDestructDeadline;
 
-  uint8 public constant TAX = 10;
+  uint8 public TAX;
   uint constant TIMESTAMP_MARGIN = 1000;
 
   event NewBet(bool forTeam, address indexed from, uint amount);
@@ -83,7 +83,7 @@ contract Bet is ProposalInterface {
   event StateChanged(BET_STATES state);
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 
-               string _team1Name, uint[] _timestamps
+               string _team1Name, uint[] _timestamps, uint8 _tax
                ) {
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
@@ -100,6 +100,7 @@ contract Bet is ProposalInterface {
     timestampMatchEnd = _timestamps[1];// + TIMESTAMP_MARGIN;
     timestampArbiterDeadline = _timestamps[2];// + TIMESTAMP_MARGIN;
     timestampSelfDestructDeadline = _timestamps[3];// + TIMESTAMP_MARGIN;
+    TAX = _tax;
   }
 
   function __resolve(uint outcome)
