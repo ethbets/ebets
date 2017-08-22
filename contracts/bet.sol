@@ -263,15 +263,27 @@ contract Bet is ProposalInterface {
     uint sum = 0;
     uint profit = 0;
 
-    if (betState == BET_STATES.TEAM_ZERO_WON && betsToTeam0[msg.sender] > 0) {
-      betAmount = betsToTeam0[msg.sender];
-      sum = team0BetSum;
-      profit = team1BetSum;
+    if (betState == BET_STATES.TEAM_ZERO_WON) {
+      if (betsToTeam0[msg.sender] > 0) {
+        betAmount = betsToTeam0[msg.sender];
+        sum = team0BetSum;
+        profit = team1BetSum;
+      }
+      else if (betsToTeam1[msg.sender] > 0 && team0BetSum == 0) {
+        msg.sender.transfer(collectOriginalBet());
+        return;
+      }
     }
-    else if (betState == BET_STATES.TEAM_ONE_WON && betsToTeam1[msg.sender] > 0) {
-      betAmount = betsToTeam1[msg.sender];
-      sum = team1BetSum;
-      profit = team0BetSum;
+    else if (betState == BET_STATES.TEAM_ONE_WON) {
+      if (betsToTeam1[msg.sender] > 0) {
+       betAmount = betsToTeam1[msg.sender];
+       sum = team1BetSum;
+       profit = team0BetSum;
+      }
+      else if (betsToTeam0[msg.sender] > 0 && team1BetSum == 0) {
+        msg.sender.transfer(collectOriginalBet());
+        return;
+      }
     }
     else {
       return;
@@ -288,15 +300,27 @@ contract Bet is ProposalInterface {
     uint sum = 0;
     uint profit = 0;
 
-    if (betState == BET_STATES.TEAM_ZERO_WON && ERC20BetsToTeam0[erc20][msg.sender] > 0) {
-      betAmount = ERC20BetsToTeam0[erc20][msg.sender];
-      sum = ERC20Team0BetSum[erc20];
-      profit = ERC20Team1BetSum[erc20];
+    if (betState == BET_STATES.TEAM_ZERO_WON) {
+      if (ERC20BetsToTeam0[erc20][msg.sender] > 0) {
+        betAmount = ERC20BetsToTeam0[erc20][msg.sender];
+        sum = ERC20Team0BetSum[erc20];
+        profit = ERC20Team1BetSum[erc20];
+      }
+      else if (ERC20BetsToTeam1[erc20][msg.sender] > 0 && ERC20Team0BetSum[erc20] == 0) {
+        require(erc20Contract.transfer(msg.sender, collectOriginalBetERC20(erc20)));
+        return;
+      }
     }
-    else if (betState == BET_STATES.TEAM_ONE_WON && ERC20BetsToTeam1[erc20][msg.sender] > 0) {
-      betAmount = ERC20BetsToTeam1[erc20][msg.sender];
-      sum = ERC20Team1BetSum[erc20];
-      profit = ERC20Team0BetSum[erc20];
+    else if (betState == BET_STATES.TEAM_ONE_WON) {
+      if (ERC20BetsToTeam1[erc20][msg.sender] > 0) {
+        betAmount = ERC20BetsToTeam1[erc20][msg.sender];
+        sum = ERC20Team1BetSum[erc20];
+        profit = ERC20Team0BetSum[erc20];
+      }
+      else if (ERC20BetsToTeam0[erc20][msg.sender] > 0 && ERC20Team1BetSum[erc20] == 0) {
+        require(erc20Contract.transfer(msg.sender, collectOriginalBetERC20(erc20)));
+        return;
+      }
     }
     else {
       return;

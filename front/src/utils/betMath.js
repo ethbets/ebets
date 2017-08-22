@@ -20,21 +20,19 @@ export function computeFinalGain(hasBetOnTeam, team0BetSum, team1BetSum, current
   if (hasBetOnTeam.team === null)
     return new BigNumber(0);
 
-  if (amount.isZero())
-    return amount;
-
-  if (currentBetState < betState.team0Won || currentBetState > betState.draw)
-    return amount;
-
-  if (currentBetState === betState.draw)
+  if ( amount.isZero() ||
+       (currentBetState < betState.team0Won || currentBetState > betState.draw) ||
+       (currentBetState === betState.draw)
+     )
     return amount;
 
   var hasBetTeam0 = !hasBetOnTeam.team;
   var hasBetTeam1 = hasBetOnTeam.team;
 
-  if ((currentBetState === betState.team0Won && hasBetTeam1) ||
-      (currentBetState === betState.team1Won && hasBetTeam0))
-    return new BigNumber(0);
+  if (currentBetState === betState.team0Won && hasBetTeam1)
+    return team0BetSum.isZero() ? amount : (new BigNumber(0));
+  if (currentBetState === betState.team1Won && hasBetTeam0)
+    return team1BetSum.isZero() ? amount : (new BigNumber(0));
 
   if (currentBetState === betState.team0Won) {
     winnerPool = team0BetSum;

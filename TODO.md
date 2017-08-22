@@ -11,7 +11,7 @@ Logic:
 - [X] Withdraw: Send list of tokens to withdraw, like this the user can pay the price
   of doing only the necessary bet withdraws.
 - [ ] Use ERC20 decimals. For now default is 18
-- [ ] If the user bet on the loser team but no one bet on the winner, user gets their money back
+- [X] If the user bet on the loser team but no one bet on the winner, user gets their money back
 
 Front
 - [X] Withdraw: compute withdraw value according to the selected currency

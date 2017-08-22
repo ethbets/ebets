@@ -279,9 +279,22 @@ class Bet extends Component {
         label="Ok"
         primary={true}
         keyboardFocused={false}
+        disabled={this.state.withdrawTable === null || this.state.withdrawTable.length === 0}
         onTouchTap={this.handleWithdrawOk}
       />
     ];
+
+    if (this.state.withdrawTable === null || this.state.withdrawTable.length === 0)
+      return (
+        <Dialog
+          title="No rewards to withdraw"
+          actions={actions}
+          modal={false}
+          open={this.state.withdrawHappened}
+          onRequestClose={this.clearWithdraw}
+        >
+        </Dialog>
+      );
 
     return (
       <Dialog
@@ -293,7 +306,16 @@ class Bet extends Component {
       >
       {this.state.withdrawTable}
       </Dialog>
-    )
+    );
+  }
+
+  WithdrawTableEntry = (_key, _currency, _amount, _reward, _reason) => {
+    return (<div key={_key} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-between'}}>
+                  <span>Currency: {_currency}</span>
+                  <span>Bet: {formatEth(_amount)}</span>
+                  <span>Reward: {formatEth(_reward)}</span>
+                  <span>{_reason}</span>
+                </div>);
   }
 
   withdraw = () => {
@@ -319,11 +341,12 @@ class Bet extends Component {
           _amount = _hasBetEther.amount;
         else if (_hasBetEther.team === winner)
           _amount = this.FinalGainEther();
-        _table.push(<div key={'Ether'} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-between'}}>
-                      <span>Currency: Ether</span>
-                      <span>Bet: {formatEth(_hasBetEther.amount)}</span>
-                      <span>Reward: {formatEth(_amount)}</span>
-                    </div>);
+        _table.push(this.WithdrawTableEntry('Ether', 'Ether', _hasBetEther.amount, _amount, ''));
+      }
+      else if ( ( _hasBetEther.team === false && this.state.team1BetSum.isZero() ) ||
+                ( _hasBetEther.team === true && this.state.team0BetSum.isZero() )
+              ) {
+        _table.push(this.WithdrawTableEntry('Ether', 'Ether', _hasBetEther.amount, _hasBetEther.amount, '(no counter-bet)'));
       }
     }
 
@@ -331,18 +354,21 @@ class Bet extends Component {
       var erc20 = this.state.validERC20[i];
       if (erc20 in this.state.ERC20HasBetOnTeam) {
         var _hasBet = this.state.ERC20HasBetOnTeam[erc20];
+        var _reason = '';
         if (_hasBet.amount.lte(0)) continue;
         if (draw)
           _amount = _hasBet.amount;
         else if(_hasBet.team === winner)
           _amount = this.FinalGainByCurrency(erc20);
+        else if ( ( _hasBet.team === false && this.state.ERC20Team1BetSum[erc20].isZero() ) ||
+                  (  _hasBet.team === true && this.state.ERC20Team0BetSum[erc20].isZero() )
+                ) {
+          _amount = _hasBet.amount;
+          _reason = '(no counter-bet)';
+        }
         else continue;
         _tokens.push(erc20);
-        _table.push(<div key={erc20} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-evenly'}}>
-                      <span>Currency: {erc20}</span>
-                      <span>Bet: {formatEth(_hasBet.amount)}</span>
-                      <span>Reward: {formatEth(_amount)}</span>
-                    </div>);
+        _table.push(this.WithdrawTableEntry(erc20, erc20, _hasBet.amount, _amount, _reason));
       }
     }
 
