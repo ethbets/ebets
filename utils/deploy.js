@@ -71,42 +71,41 @@ async function deployAll() {
     const now = Date.now();
     console.log('Deploying in networkId:', networkId);
 
-     console.log('Deploying Monarchy...');
-     const monarchyAddress = await deployContract(MonarchyABI, MonarchyBin, deployAddress);
-     writeBinABI('./build/contracts/Monarchy.json', MonarchyJSON, 
-                 networkId, monarchyAddress, MonarchyABI, MonarchyBin, now);
-     console.log('Deployed');
+    console.log('Deploying Monarchy...');
+    const monarchyAddress = await deployContract(MonarchyABI, MonarchyBin, deployAddress);
+    writeBinABI('./build/contracts/Monarchy.json', MonarchyJSON, 
+                networkId, monarchyAddress, MonarchyABI, MonarchyBin, now);
+    console.log('Deployed');
 
-     console.log('Deploying Ebets...');
-     const ebetsAddress = await deployContract(EbetsABI, EbetsBin, deployAddress);
-     writeBinABI('./build/contracts/Ebets.json', EbetsJSON, 
-                 networkId, ebetsAddress, EbetsABI, EbetsBin, now);
-     console.log('Deployed');
+    console.log('Deploying Ebets...');
+    const ebetsAddress = await deployContract(EbetsABI, EbetsBin, deployAddress);
+    writeBinABI('./build/contracts/Ebets.json', EbetsJSON, 
+                networkId, ebetsAddress, EbetsABI, EbetsBin, now);
+    console.log('Deployed');
 
     console.log('Writing Bet file...');
     writeBinABI('./build/contracts/Bet.json', BetJSON, 
                 networkId, undefined, BetABI, BetBin, now);
     console.log('Written');
 
-     console.log('Writing ERC20 file...');
-     writeBinABI('./build/contracts/ERC20.json', ERC20JSON,
-                 networkId, undefined, ERC20ABI, ERC20Bin, now);
-     console.log('Written');
+    console.log('Writing ERC20 file...');
+    writeBinABI('./build/contracts/ERC20.json', ERC20JSON,
+                networkId, undefined, ERC20ABI, ERC20Bin, now);
+    console.log('Written');
 
-     console.log('Deploying ERC20 SimpleToken1...');
-     const simpleToken1Address = await deployContract(SimpleToken1ABI, SimpleToken1Bin, deployAddress);
-     writeBinABI('./build/contracts/SimpleToken1.json', SimpleToken1JSON, 
-                 networkId, simpleToken1Address, SimpleToken1ABI, SimpleToken1Bin, now);
-     console.log('Deployed');
+    console.log('Deploying ERC20 SimpleToken1...');
+    const simpleToken1Address = await deployContract(SimpleToken1ABI, SimpleToken1Bin, deployAddress);
+    writeBinABI('./build/contracts/SimpleToken1.json', SimpleToken1JSON, 
+                networkId, simpleToken1Address, SimpleToken1ABI, SimpleToken1Bin, now);
+    console.log('Deployed');
 
-     console.log('Deploying ERC20 SimpleToken2...');
-     const simpleToken2Address = await deployContract(SimpleToken2ABI, SimpleToken2Bin, deployAddress);
-     writeBinABI('./build/contracts/SimpleToken2.json', SimpleToken2JSON, 
-                 networkId, simpleToken2Address, SimpleToken2ABI, SimpleToken2Bin, now);
+    console.log('Deploying ERC20 SimpleToken2...');
+    const simpleToken2Address = await deployContract(SimpleToken2ABI, SimpleToken2Bin, deployAddress);
+    writeBinABI('./build/contracts/SimpleToken2.json', SimpleToken2JSON, 
+                networkId, simpleToken2Address, SimpleToken2ABI, SimpleToken2Bin, now);
     console.log('Deployed');
 
     process.exit();
-    //console.log(monarchyAddress);
   }
   catch(err) {
     console.error(err);

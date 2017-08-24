@@ -104,9 +104,7 @@ class BetController extends Component {
 
   setBetValue = (event, newValue) => {
     if (newValue !== '') {
-      this.setState({amountToBet : (new BigNumber(newValue)).times(new BigNumber(1e18))});
-      //TODO: use decimals instead of default 1e18
-      //this.setState({amountToBet : (new BigNumber(newValue))});
+      this.setState({amountToBet : (new BigNumber(newValue))});
     }
     else {
       this.setState({amountToBet : new BigNumber(0)});
@@ -252,14 +250,14 @@ class BetController extends Component {
     var _team0BetSum = new BigNumber(0);
     var _team1BetSum = new BigNumber(0);
 
-    if (this.props.currency.address == '') {
+    if (this.props.currency == '') {
       if (this.props.hasBetOnTeamEther.team !== null)
         _hasBetOnTeam.amount = _.clone(this.props.hasBetOnTeamEther.amount);
       _team0BetSum = _.clone(this.props.team0BetSum);
       _team1BetSum = _.clone(this.props.team1BetSum);
     }
     else {
-      var addr = this.props.currency.address;
+      var addr = this.props.currency;
       if (addr in this.props.ERC20HasBetOnTeam)
         _hasBetOnTeam = _.clone(this.props.ERC20HasBetOnTeam[addr]);
       if (addr in this.props.ERC20Team0BetSum)

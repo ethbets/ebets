@@ -30,8 +30,10 @@ import ERC20Json from 'build/contracts/ERC20.json';
 import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
 import stateTransitionFunctions from 'utils/stateTransitions';
 import betFields from './betFields';
+import ERC20Fields from './ERC20Fields';
 import {betState, stepperState} from 'utils/betStates';
 import {formatEth, formatToken} from 'utils/ethUtils';
+import isAddress from 'utils/validateAddress';
 import {computeFinalGain} from 'utils/betMath';
 import Timer from './Timer';
 import Arbiters from 'components/Arbiters';
@@ -64,7 +66,8 @@ class Bet extends Component {
       iconUrl: null,
       isArbiter: false,
       stepIndex: 0,
-      currency: {name: 'Ether (default)', address: ''},
+      currency: '',
+      currencyErrorMsg: '',
       erc20Contracts: {},
       withdrawHappened: false,
       withdrawTable: [],
@@ -166,10 +169,9 @@ class Bet extends Component {
       return;
     }
 
-    if (this.state.currency.address === '') { 
+    if (this.state.currency === '') { 
       console.log('Betting using Ether');
-      //TODO: the value is being multiplied by 1e18 when read. Decide when it's best.
-      //value = value.times(new BigNumber(1e18));
+      value = value.times(new BigNumber(1e18));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
         { from: this.context.web3.web3.eth.defaultAccount,
@@ -182,17 +184,14 @@ class Bet extends Component {
     else {
       var erc20instance;
       var erc20decimals;
-      var token = this.state.currency.name;
-      var addr = this.state.currency.address;
+      var addr = this.state.currency;
 
-      console.log('Instantiating ERC20 contract ' + name + ' at address ' + addr);
       this.instantiateERC20Contract(addr).then(() => {
         erc20instance = this.state.erc20Contracts[addr].instance;
         erc20decimals = this.state.erc20Contracts[addr].decimals;
-        if (erc20decimals !== undefined && erc20decimals.greaterThanOrEqualTo(1) && erc20decimals.lessThanOrEqualTo(18)) {
+        if (erc20decimals.greaterThanOrEqualTo(1) /*&& erc20decimals.lessThanOrEqualTo(18)*/) {
           var power = (new BigNumber(10)).toPower(erc20decimals);
-          //TODO: the value is being multiplied by 1e18 when read. Decide when it's best.
-          //value = value.times(power);
+          value = value.times(power);
         }
 
         //TODO: this is for testing purposes only. This calls the fallback function of our ERC20 test contracts,
@@ -223,7 +222,7 @@ class Bet extends Component {
       .then(tx => {
         console.log('Betting');
         const betPromise = this.state.betContractInstance.betERC20(
-          this.state.currency.address,
+          this.state.currency,
           teamToBet,
           value,
           { from: this.context.web3.web3.eth.defaultAccount }
@@ -403,8 +402,39 @@ class Bet extends Component {
 
   handleCurrencySubmit = (selectedItem, index) => {
     if (index !== -1) {
-      this.setState({ currency: {name: selectedItem.textKey, address: selectedItem.valueKey.toLowerCase() }});
+      var addr = selectedItem.valueKey.toLowerCase();
+      if (addr !== '') {
+        this.instantiateERC20Contract(addr)
+        .then(() => {
+          this.setState({ currency: addr, currencyErrorMsg: ''});
+        })
+        .catch((err) => {
+        });
+      }
+      else {
+        this.setState({ currency: addr, currencyErrorMsg: ''});
+      }
     }
+  }
+
+  handleCurrencyUpdate = (text, data, params) => {
+    var addr = text.toLowerCase().replace(/\s/g, '');
+    for (var idx in data) {
+      var item = data[idx];
+      if (item.textKey === text)
+        return;
+    }
+    if (addr.length !== 42 || !isAddress(addr)) {
+      this.setState({ currencyErrorMsg: 'Invalid ERC20 token address' });
+      return;
+    }
+    this.instantiateERC20Contract(addr)
+    .then(() => {
+      this.setState({ currency: addr, currencyErrorMsg: ''});
+    })
+    .catch((err) => {
+      this.setState({ currencyErrorMsg: 'Invalid ERC20 token address' });
+    });
   }
 
   /** Computes the real final gain, to be used by Withdraw
@@ -427,45 +457,49 @@ class Bet extends Component {
         textFieldStyle={{width: 160}}
         style={{width: 160, marginLeft: 20}}
         floatingLabelText="Currency"
-        searchText={this.state.currency.name}
+        searchText={(this.state.currency === '') ? 'Ether (default)' : this.state.erc20Contracts[this.state.currency].name}
         onNewRequest={this.handleCurrencySubmit}
+        onUpdateInput={this.handleCurrencyUpdate}
         openOnFocus={true}
         dataSource={ERC20Tokens.erc20tokens()}
         dataSourceConfig={{ text: 'textKey', value: 'valueKey' }}
         filter={AutoComplete.noFilter}
+        errorText={this.state.currencyErrorMsg}
       />
     );
   }
 
   CurrencyId = () => {
-    if (this.state.currency.address === '')
+    if (this.state.currency === '')
       return 'Ξ';
-    return this.state.currency.name[0];
+    //TODO: \/ maybe use entire symbol?
+    return this.state.erc20Contracts[this.state.currency].name[0];
   }
 
   CurrencyAmount = (amount) => {
-    if (this.state.currency.address === '')
+    var addr = this.state.currency;
+    if (addr === '')
       return formatEth(amount);
 
-    return formatToken(amount);
+    return formatToken(amount, this.erc20Contracts[addr].decimals);
   }
 
   CurrencyAmountTeam0 = () => {
-    if (this.state.currency.address === '')
+    if (this.state.currency === '')
       return formatEth(this.state.team0BetSum);
 
-    var erc20 = this.state.currency.address;
+    var erc20 = this.state.currency;
     if (erc20 in this.state.ERC20Team0BetSum)
-      return formatToken(this.state.ERC20Team0BetSum[erc20]);
+      return formatToken(this.state.ERC20Team0BetSum[erc20], this.state.erc20Contracts[erc20].decimals);
 
     return formatToken(new BigNumber('0'));
   }
 
   CurrencyAmountTeam1 = () => {
-    if (this.state.currency.address === '')
+    if (this.state.currency === '')
       return formatEth(this.state.team1BetSum);
 
-    var erc20 = this.state.currency.address;
+    var erc20 = this.state.currency;
     if (erc20 in this.state.ERC20Team1BetSum)
       return formatToken(this.state.ERC20Team1BetSum[erc20]);
 
@@ -582,6 +616,11 @@ class Bet extends Component {
   //   }
   // }
 
+  reflectERC20Fields(promise){
+    return promise.promise.then(function(v){ return {f:promise.field, v:v, status: 'resolved' }},
+                                function(e){ return {f:promise.field, e:e, status: 'rejected' }});
+  }
+
   instantiateERC20Contract(address) {
     return new Promise((resolve, reject) => {
       if (address in this.state.erc20Contracts)
@@ -591,17 +630,25 @@ class Bet extends Component {
       erc20Contract.setProvider(this.context.web3.web3.currentProvider);
       var erc20Instance = erc20Contract.at(address);
 
+      var _erc20Contracts = _.clone(this.state.erc20Contracts);
+      var promises = [];
       erc20Instance.then(() => {
-        return erc20Instance.decimals();
+        for (var erc20_field in ERC20Fields)
+          promises.push({field: erc20_field, promise: erc20Instance[erc20_field]()});
+        return Promise.all(promises.map(this.reflectERC20Fields));
       })
-      .then((dec) => {
+      .then((results) => {
+        var success = results.filter(x => x.status === 'resolved');
         var _erc20Contracts = _.clone(this.state.erc20Contracts);
-        _erc20Contracts[address] = {instance: erc20Instance, decimals: dec};
+        _erc20Contracts[address] = {instance: erc20Instance, decimals: new BigNumber(0), name: '', symbol: ''};
+        for (var idx in success) {
+          var field = success[idx];
+          _erc20Contracts[address][field.f] = field.v;
+        }
         this.setState({ erc20Contracts : _erc20Contracts});
         resolve();
       })
-      .catch(err => {
-        console.log('Could not instantiate ERC20 contract: ' + err);
+      .catch((err) => {
         reject(err);
       });
     });

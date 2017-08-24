@@ -15,8 +15,7 @@ export function oneEthInWei() {
   return new BigNumber(1e18);
 }
 
-export function formatToken(value) {
-  //return value.toString();
-  return formatEth(value);
+export function formatToken(inWei, dec = 18) {
+  return inWei.dividedBy((new BigNumber(10)).toPower(dec)).toString();
 }
 
