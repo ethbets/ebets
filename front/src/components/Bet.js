@@ -67,6 +67,7 @@ class Bet extends Component {
       isArbiter: false,
       stepIndex: 0,
       currency: '',
+      currencyName: 'Ether (default)',
       currencyErrorMsg: '',
       erc20Contracts: {},
       withdrawHappened: false,
@@ -404,36 +405,42 @@ class Bet extends Component {
     if (index !== -1) {
       var addr = selectedItem.valueKey.toLowerCase();
       if (addr !== '') {
+        this.setState({ currency: addr, currencyName: selectedItem.textKey});
         this.instantiateERC20Contract(addr)
         .then(() => {
-          this.setState({ currency: addr, currencyErrorMsg: ''});
+          this.setState({ currencyErrorMsg: ''});
         })
         .catch((err) => {
+          this.setState({ currencyErrorMsg: 'Invalid ERC20 token address'});
         });
       }
       else {
-        this.setState({ currency: addr, currencyErrorMsg: ''});
+        this.setState({ currency: addr, currencyName: 'Ether (default)', currencyErrorMsg: ''});
       }
     }
   }
 
   handleCurrencyUpdate = (text, data, params) => {
     var addr = text.toLowerCase().replace(/\s/g, '');
+    //Not sure if this \/ is the best way, but it handles the case
+    //when both handleCurrencyUpdate and handleCurrencySubmit are called
     for (var idx in data) {
       var item = data[idx];
       if (item.textKey === text)
         return;
     }
+    this.setState({ currency: addr, currencyName: addr });
     if (addr.length !== 42 || !isAddress(addr)) {
       this.setState({ currencyErrorMsg: 'Invalid ERC20 token address' });
       return;
     }
     this.instantiateERC20Contract(addr)
     .then(() => {
-      this.setState({ currency: addr, currencyErrorMsg: ''});
+      var _name = _.clone(this.state.erc20Contracts[addr].name);
+      this.setState({ currency: addr, currencyName: _name, currencyErrorMsg: ''});
     })
     .catch((err) => {
-      this.setState({ currencyErrorMsg: 'Invalid ERC20 token address' });
+      this.setState({ currencyErrorMsg: 'Invalid ERC20 token address', currencyName: addr });
     });
   }
 
@@ -456,8 +463,8 @@ class Bet extends Component {
       <AutoComplete
         textFieldStyle={{width: 160}}
         style={{width: 160, marginLeft: 20}}
-        floatingLabelText="Currency"
-        searchText={(this.state.currency === '') ? 'Ether (default)' : this.state.erc20Contracts[this.state.currency].name}
+        floatingLabelText='Currency'
+        searchText={this.state.currencyName}
         onNewRequest={this.handleCurrencySubmit}
         onUpdateInput={this.handleCurrencyUpdate}
         openOnFocus={true}
@@ -472,6 +479,8 @@ class Bet extends Component {
   CurrencyId = () => {
     if (this.state.currency === '')
       return 'Ξ';
+    if (! (this.state.currency in this.state.erc20Contracts))
+      return 'Ξ';
     //TODO: \/ maybe use entire symbol?
     return this.state.erc20Contracts[this.state.currency].name[0];
   }
@@ -480,30 +489,36 @@ class Bet extends Component {
     var addr = this.state.currency;
     if (addr === '')
       return formatEth(amount);
-
+    if (! (this.state.currency in this.state.erc20Contracts))
+      return formatEth(amount);
+ 
     return formatToken(amount, this.erc20Contracts[addr].decimals);
   }
 
   CurrencyAmountTeam0 = () => {
     if (this.state.currency === '')
       return formatEth(this.state.team0BetSum);
-
+    if (! (this.state.currency in this.state.erc20Contracts))
+      return formatEth(this.state.team0BetSum);
+ 
     var erc20 = this.state.currency;
     if (erc20 in this.state.ERC20Team0BetSum)
       return formatToken(this.state.ERC20Team0BetSum[erc20], this.state.erc20Contracts[erc20].decimals);
 
-    return formatToken(new BigNumber('0'));
+    return formatToken(new BigNumber(0));
   }
 
   CurrencyAmountTeam1 = () => {
     if (this.state.currency === '')
       return formatEth(this.state.team1BetSum);
-
+    if (! (this.state.currency in this.state.erc20Contracts))
+      return formatEth(this.state.team1BetSum);
+ 
     var erc20 = this.state.currency;
     if (erc20 in this.state.ERC20Team1BetSum)
       return formatToken(this.state.ERC20Team1BetSum[erc20]);
 
-    return formatToken(new BigNumber('0'));
+    return formatToken(new BigNumber(0));
   }
 
   FilteredBet = () => {

@@ -6,8 +6,6 @@ Layout:
       1) Use a fixed size for the blue chips and teams names
       2) Use a slightly different background color for odd/even bets in the list
 - [ ] Improve withdraw list layout
-- [ ] Bug: sometimes when an ERC20 token address is pasted it does NOT change automatically to the
-      token's name
 
 Logic:
 - [X] Withdraw: Send list of tokens to withdraw, like this the user can pay the price
