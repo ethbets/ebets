@@ -128,9 +128,9 @@ class BetController extends Component {
     };
     var CallArbiterName = () => {
       if (this.props.currentBetState === betState.calledArbiter)
-        return 'Called Arbiter';
+        return 'Arbiter has been invoked';
       else
-        return 'Call Arbiter';
+        return 'Invoke Arbiter';
     };
     
     // TODO: I don't think BetDecision() works
@@ -138,19 +138,19 @@ class BetController extends Component {
     return (
         <Stepper activeStep={this.props.stepperState}>
           <Step>
-            <StepLabel>Place your bet!</StepLabel>
+            <StepLabel style={{color: MColors.white}}>Place your bet!</StepLabel>
           </Step>
           <Step>
-            <StepLabel>Match running</StepLabel>
+            <StepLabel style={{color: MColors.white}}>Match running</StepLabel>
           </Step>
           <Step>
-            <StepLabel>{CallArbiterName()}</StepLabel>
+            <StepLabel style={{color: MColors.white}}>{CallArbiterName()}</StepLabel>
           </Step>
           <Step>
-            <StepLabel>{BetDecision()}</StepLabel>
+            <StepLabel style={{color: MColors.white}}>{BetDecision()}</StepLabel>
           </Step>
           <Step>
-            <StepLabel>Payout</StepLabel>
+            <StepLabel style={{color: MColors.white}}>Payout</StepLabel>
           </Step>
         </Stepper>
       );
@@ -162,8 +162,9 @@ class BetController extends Component {
       return (
       <RaisedButton
         disabled={this.props.currentBetState === betState.calledArbiter}
-        secondary={true}
-        label='Call Arbiter'
+        labelColor={MColors.white}
+        backgroundColor={MColors.cyan800}
+        label='Invoke Arbiter'
         onTouchTap={() => this.props.callArbiterFunction()}
       />
       )
@@ -173,8 +174,9 @@ class BetController extends Component {
               this.props.stepperState === stepperState.payout) {
       return (
       <RaisedButton
-        primary={true}
-        label='Withdraw'
+        labelColor={MColors.white}
+        backgroundColor={MColors.cyan800}
+        label='Collect'
         onTouchTap={() => this.props.withdrawFunction()}
         disabled={(this.props.stepperState !== stepperState.payout)}
       />
@@ -183,8 +185,9 @@ class BetController extends Component {
     else if (this.props.currentBetState === betState.betExpired) {
       return (
         <RaisedButton
-        secondary={true}
-        label='Draw Bet'
+        labelColor={MColors.white}
+        backgroundColor={MColors.cyan800}
+        label='Set as Draw'
         onTouchTap={() => this.props.callArbiterFunction(true)}
       />
       );
@@ -192,7 +195,8 @@ class BetController extends Component {
     return (
       <RaisedButton 
         disabled={(this.props.currentBetState !== betState.matchOpen)}
-        primary={true}
+        labelColor={MColors.white}
+        backgroundColor={MColors.cyan800}
         label='Bet'
         onTouchTap={() => this.props.betOnTeamFunction(
           (this.props.hasBetOnTeam !== null) ? this.props.hasBetOnTeam 
@@ -361,8 +365,9 @@ class BetController extends Component {
             {(!this.props.isDetailed) ? <RaisedButton
               style={{marginLeft: 14}}
               href={`#bet/${this.props.address}`}
+              labelColor={MColors.white}
+              backgroundColor={MColors.cyan800}
               label='Permalink'
-              primary={true}
               icon={<LinkIcon />}
             /> : null}
             <this.ExpectedGain />

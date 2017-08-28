@@ -72,20 +72,20 @@ class Clock extends React.Component {
     }
     else if (this.props.parentState === betState.shouldCallArbiter) {
       deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
-      msgString = 'Should call arbiter in: '
+      msgString = 'You may invoke Arbiter within: '
     }
     else if (this.props.parentState === betState.calledArbiter) {
       deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
-      msgString = 'Arbiter must answer in: '
+      msgString = 'Arbiter must answer within: '
     }
     else if (this.props.parentState === betState.betExpired) {
       deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
-      msgString = 'Bet expired, must decide to draw in: '
+      msgString = 'Bet expired, you may request draw within: '
     }
     else {
       // Bet expired!
       if (moment().unix() > this.props.terminateDeadline.toNumber()) {
-        msgString = 'Bet terminated, can call self-destruct!'
+        msgString = 'Bet terminated, self-destruct may be invoked!'
         return (
           <div className='pushRight'>
             <Chip backgroundColor={MColors.white}>
@@ -96,7 +96,7 @@ class Clock extends React.Component {
       }
       else {
         deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
-        msgString = 'Have decision, must collect reward in: '
+        msgString = 'You may collect your reward within: '
       }
     }
 
@@ -122,7 +122,7 @@ class Clock extends React.Component {
 
     return(
         <div className='pushRight'>
-          <Chip backgroundColor={MColors.white}>
+          <Chip>
             {msgString} {result_str}
           </Chip>
         </div>
