@@ -87,7 +87,7 @@ class Clock extends React.Component {
       if (moment().unix() > this.props.terminateDeadline.toNumber()) {
         msgString = 'Bet terminated, self-destruct may be invoked!'
         return (
-          <div className='pushRight'>
+          <div>
             <Chip backgroundColor={MColors.white}>
               {msgString}
             </Chip>
@@ -121,7 +121,7 @@ class Clock extends React.Component {
       result_str = deltaSeconds + 's';
 
     return(
-        <div className='pushRight'>
+        <div>
           <Chip>
             {msgString} {result_str}
           </Chip>

@@ -458,24 +458,6 @@ class Bet extends Component {
     return computeFinalGain(this.state.ERC20HasBetOnTeam[addr], this.state.ERC20Team0BetSum[addr], this.state.ERC20Team1BetSum[addr], this.state.currentBetState, this.state.TAX);
   }
 
-  Currency = () => {
-    return (
-      <AutoComplete
-        textFieldStyle={{width: 160}}
-        style={{width: 160, marginLeft: 20}}
-        floatingLabelText='Currency'
-        searchText={this.state.currencyName}
-        onNewRequest={this.handleCurrencySubmit}
-        onUpdateInput={this.handleCurrencyUpdate}
-        openOnFocus={true}
-        dataSource={ERC20Tokens.erc20tokens()}
-        dataSourceConfig={{ text: 'textKey', value: 'valueKey' }}
-        filter={AutoComplete.noFilter}
-        errorText={this.state.currencyErrorMsg}
-      />
-    );
-  }
-
   CurrencyId = () => {
     if (this.state.currency === '')
       return 'Ξ';
@@ -521,25 +503,37 @@ class Bet extends Component {
     return formatToken(new BigNumber(0));
   }
 
+  Currency = () => {
+    return (
+      <AutoComplete
+        textFieldStyle={{width: 160}}
+        style={{width: 160, marginLeft: 20, marginRight: 20}}
+        floatingLabelText='Currency'
+        searchText={this.state.currencyName}
+        onNewRequest={this.handleCurrencySubmit}
+        onUpdateInput={this.handleCurrencyUpdate}
+        openOnFocus={true}
+        dataSource={ERC20Tokens.erc20tokens()}
+        dataSourceConfig={{ text: 'textKey', value: 'valueKey' }}
+        filter={AutoComplete.noFilter}
+        errorText={this.state.currencyErrorMsg}
+      />
+    );
+  }
+
   FilteredBet = () => {
     const betTitle = 
       <div style={{display: 'flex', flexFlow: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 100}}>
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam0()}
         </Chip>
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <h5 style={{marginLeft: 10}}>
-            {this.state.team0Name}
-          </h5>
-          <h3 style={{marginLeft: 12, marginRight: 12}}>
-            ⚔
-          </h3>
-          <h5 style={{marginRight: 10}}>
-            {this.state.team1Name}
-          </h5>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: 200}}>
+          <span style={{marginLeft: 10, marginRight: 10, fontWeight: 'normal', fontSize: 16}}>
+            {this.state.team0Name}   x   {this.state.team1Name}
+          </span>
         </div>
-        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white}>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 100}}>
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam1()}
         </Chip>
@@ -566,7 +560,7 @@ class Bet extends Component {
           avatar={(this.state.iconUrl != null) ? 
                     this.state.iconUrl : <Avatar icon={<ImagePhotoCamera />} /> }
           title={betTitle}
-          style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}
+          style={{display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1 }}
           showExpandableButton={(this.props.isDetailed) ? false : true}
         />
         <BetController

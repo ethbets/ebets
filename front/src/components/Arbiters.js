@@ -47,7 +47,7 @@ class Arbiters extends Component {
       <Badge
         badgeContent={badgeContent}
       >
-      Using arbiter {arbiterInfo.name}
+      Arbiter: {arbiterInfo.name}
       </Badge>
     )
   }
