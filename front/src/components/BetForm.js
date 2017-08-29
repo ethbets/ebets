@@ -183,6 +183,8 @@ class BetForm extends Component {
 
     //create contract
     ebetsContract.deployed().then(instance => {
+      if (this.state.arbiterErrorMessage !== null)
+        return new Promise((resolve, reject) => {reject({message: 'Invalid Arbiter'})});
 
       const timestamps = [
         new BigNumber(moment(this.state.timestampMatchBegin).unix()),
@@ -210,7 +212,7 @@ class BetForm extends Component {
       this.props.router.push('/bet/' + response.logs[0].args.betAddr);
     })
     .catch((error) => {
-      console.log(error);
+      console.log('Error', error);
       this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true } });
       this.setState({transactionInProcess: false});
     })

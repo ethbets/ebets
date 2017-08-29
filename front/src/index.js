@@ -26,7 +26,7 @@ class Index extends React.Component {
   }
   render() {
     return (
-      <Web3Provider onChangeAccount={() => this.forceUpdate()}
+      <Web3Provider onChangeAccount={() => location.reload()}
         passive={true}
         >
         <Router
