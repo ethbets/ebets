@@ -173,7 +173,7 @@ class Master extends Component {
     const web3Context = this.context.web3;
     var errorMessage = null;
     if (web3Context.networkId !== null && web3Context.networkId !== '42' && web3Context.networkId !== '3') {
-      errorMessage = <div> <WarningIcon color={red500}/> Ebets runs only in the Kovan network, please switch to use the Dapp</div>;
+      errorMessage = <div> <WarningIcon color={red500}/> Ebets runs only in the Kovan or Ropsten networks, please switch to use the Dapp</div>;
       //this.props.router.push('');
     }
     else if (web3Context.accounts.length === 0) {
