@@ -22,9 +22,9 @@ class FAQ extends Component {
           <p>
             Users create bets including but not limited to "sports".
             Users can bet on created bets, after a pre determined time
-            an arbiter can be summoned to tell the decision, this arbiter can be
+            an arbiter can be summoned to cast the decision, this arbiter can be
             an oracle, or any smart contract. After the match is decided users
-            can withdraw their prize or cry their loss.
+            can withdraw their prizes or cry their loss.
           </p>
           <li>What are featured bets? What's the difference?</li>
           <p>
@@ -48,11 +48,12 @@ class FAQ extends Component {
           </p>
           <p>
             By doing this, you can create your own private bets without loss of generality,
-            for instance, if Alice and Bob want to do a fart competition, and they choose Charlie,
-            Danniel and Emily to arbitrate the outcome.
-            Charlie, Danniel and Emily, are going to witness the fart competition, and later can decide
+            for instance, if Alice and Bob want to do a competition, and they choose Charlie,
+            to arbitrate the outcome and act like an escrow among them.
+            Alice, Bob and Charlie, are going to witness the competition, and decide
             on the outcome together. The contract can be, for example, one that can only decide on the outcome
-            when a simple majority is reached, minimizing the chance of collusion among the arbiters.
+            when a simple majority is reached. If Alice and Bob are both honests, the match is decided without the
+            intervention of Charlie.
           </p>
 
           <li>Are you a prediction market?</li>
@@ -64,29 +65,31 @@ class FAQ extends Component {
           </p>
           <li>Why are you doing this?</li>
           <p>We want bets, and we want them now!
-            No ICO, no bullshit! This is a very simple (and we believe well writen) set of contracts
+            No ICO, no bullshit! This is a set of well writen smart contracts
             that perform simple tasks, make sports bets accessible.
           </p>
           <li>What are the fees?</li>
           <p>
             1% of the loosing side, this will be always transparent to the user.
+            One can also create bets with any fee, even 0.
           </p>
           <li>How do you guarantee not to steal my money?</li>
           <p>
-            The only attack we can do is bet a lot of ether in a team
-            and lie in the arbiter part, saying that that team won.
+            The only attack we can do is bet in a team
+            and lie in the arbiter part (if we control it), saying that the wrong team won.
             We plan to outsource and build a comunity of arbiters for
             the each bet category to overcome this issue.
           </p>
           <li>How do I play?</li>
           <p>
-            You need to connect to ethereum with your favorite client and execute the contracts.
+            You need to connect to ethereum with your favorite client and execute the contracts with the
+            web interface.
           </p>
           <li>What if I don't withdraw when I win?</li>
           <p>
-            If the arbiter doesn't arbitrate in time, the match is said to be draw,
+            If the arbiter doesn't arbitrate in time, the match is said to be drawn,
             and the users can withdraw what they bet. After a period, the contract can
-            be self-destructed and we collect the bet as fees.
+            be self-destructed and we collect the rest as fees.
           </p>
           <li>Do you plan on going in the live network?</li>
           <p>Yes</p>
