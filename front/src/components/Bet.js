@@ -81,6 +81,8 @@ class Bet extends Component {
       withdrawHappened: false,
       withdrawTable: [],
       withdrawTokens: [],
+      approvalData: {},
+      approvalHappened: false,
       ...betFields,
     }
   }
@@ -221,29 +223,42 @@ class Bet extends Component {
       })
       .then(() => {
         console.log('Sending Approval');
-        this.setState({transactionInProcess: true});
-        return erc20instance.approve(
-          this.state.betContractInstance.address,
-          value,
-          { from: this.context.web3.web3.eth.defaultAccount }
-        );
-      })
-      .then(tx => {
-        console.log('Betting');
-        const betPromise = this.state.betContractInstance.betERC20(
-          this.state.currency,
-          teamToBet,
-          value,
-          { from: this.context.web3.web3.eth.defaultAccount }
-        );
-        this.transactionHappened(betPromise)
+        var _apData = { erc20Instance: erc20instance, value: value, team: teamToBet };
+        this.setState({transactionInProcess: true,
+                       approvalHappened: true,
+                       approvalData: _apData});
       })
       .catch((err) => {
-        console.log('Betting error: ' + err);
-        this.setState({transactionInProcess: false});
+        console.log('Bet was not succesful: ' + err);
+        this.setState({transactionInProcess: false,
+                       approvalHappened: false,
+                       approvalData: {}});
       });
     }
   };
+
+  sendApproval = () => {
+    this.state.approvalData.erc20Instance.approve(
+      this.state.betContractInstance.address,
+      this.state.approvalData.value,
+      { from: this.context.web3.web3.eth.defaultAccount }
+    )
+    .then(tx => {
+      console.log('Betting');
+      const betPromise = this.state.betContractInstance.betERC20(
+        this.state.currency,
+        this.state.approvalData.team,
+        this.state.approvalData.value,
+        { from: this.context.web3.web3.eth.defaultAccount }
+      );
+      this.transactionHappened(betPromise)
+    })
+    .catch((err) => {
+      console.log('Bet was not successful: ' + err);
+      this.setState({ transactionInProcess: false });
+    })
+  }
+
   callArbiter = (closeBet = false) => {
     var callArbiterPromise;
     if (closeBet)
@@ -256,6 +271,7 @@ class Bet extends Component {
         });
     this.transactionHappened(callArbiterPromise);
   };
+
   callVote = (onTeam) => {
     const callVotePromise = this.state.arbiterContractInstance.castVote(
       this.props.address, onTeam,
@@ -263,6 +279,46 @@ class Bet extends Component {
       });
     this.transactionHappened(callVotePromise);
   }
+
+  clearApproval = () => {
+    this.setState({ transactionInProcess: false,
+                    approvalHappened : false,
+                    approvalData : {}});
+  };
+
+  handleApprovalOk = () => {
+    this.setState({approvalHappened: false});
+    this.sendApproval();
+  };
+
+  ApprovalStatusDialog = () => {
+    const actions = [
+      <FlatButton key='cancel'
+        label="Cancel"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.clearApproval}
+      />,
+      <FlatButton key='ok'
+        label="Ok"
+        primary={true}
+        keyboardFocused={false}
+        onTouchTap={this.handleApprovalOk}
+      />
+    ];
+
+    return (
+      <Dialog
+        title="An approval transaction from you to this bet will be sent to the selected ERC20 token, following by the transfer transaction. Do you confirm?"
+        actions={actions}
+        modal={false}
+        open={this.state.approvalHappened}
+        onRequestClose={this.clearApproval}
+      >
+      </Dialog>
+    );
+  }
+
 
   clearWithdraw = () => {
     this.setState({ withdrawTable : [],
@@ -508,7 +564,7 @@ class Bet extends Component {
     if (! (this.state.currency in this.state.erc20Contracts))
       return formatEth(amount);
  
-    return formatToken(amount, this.erc20Contracts[addr].decimals);
+    return formatToken(amount, this.state.erc20Contracts[addr].decimals);
   }
 
   CurrencyAmountTeam0 = () => {
@@ -627,6 +683,7 @@ class Bet extends Component {
         />
         <this.BetStatusDialog />
         <this.WithdrawStatusDialog />
+        <this.ApprovalStatusDialog />
         <this.LinearProgressCustom mode="indeterminate" />
         </Card>
       );
