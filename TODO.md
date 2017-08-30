@@ -7,7 +7,10 @@ Layout:
       2) Use a slightly different background color for odd/even bets in the list
 - [X] Improve withdraw list layout
 - [ ] Improve WIN layout
-- [ ] Improve FAQ
+- [X] Improve FAQ
+- [X] Add new categories
+- [ ] Add icons of new categories
+- [ ] Add ERC20 tokens
 
 Logic:
 - [X] Withdraw: Send list of tokens to withdraw, like this the user can pay the price

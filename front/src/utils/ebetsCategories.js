@@ -8,8 +8,30 @@ import React from 'react';
 
 const ebetsCategories = [
   {
-    name: 'UFC',
-    path: 'ufc'
+    name: 'Fighting',
+    subcategory: [
+      {
+        name: 'Boxing',
+        path: 'fighting/boxing'
+      },
+      {
+        name: 'MMA',
+        subcategory: [
+          {
+            name: 'UFC',
+            path: 'fighting/ufc'
+          },
+          {
+            name: 'Bellator',
+            path: 'fighting/bellator'
+          },
+          {
+            name: 'Invicta FC',
+            path: 'fighting/invictafc'
+          }
+        ]
+      }
+    ]
   },
   {
     name: 'E-Sports',
@@ -48,7 +70,40 @@ const ebetsCategories = [
   },
   {
     name: 'Football',
-    path: 'football'
+    subcategory: [
+      {
+        name: 'UEFA Champions League',
+        path: 'football/uefachampionsleague'
+      },
+      {
+        name: 'UEFA Europa League',
+        path: 'football/uefaeuropaleague'
+      },
+      {
+        name: 'La Liga',
+        path: 'football/laliga'
+      },
+      {
+        name: 'Bundesliga',
+        path: 'football/bundesliga'
+      },
+      {
+        name: 'Brasileirão',
+        path: 'football/brasileirao'
+      },
+      {
+        name: 'Premier League',
+        path: 'football/premierleague'
+      },
+      {
+        name: 'Serie A',
+        path: 'football/seriea'
+      },
+      {
+        name: 'Ligue 1',
+        path: 'football/ligue1'
+      }
+    ]
   }
 ]
 
