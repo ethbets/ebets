@@ -22,6 +22,14 @@ import * as MColors from 'material-ui/styles/colors';
 import ImagePhotoCamera from 'material-ui/svg-icons/image/photo-camera';
 import CircularProgress from 'material-ui/CircularProgress';
 import AutoComplete from 'material-ui/AutoComplete';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 
 import BetController from './BetController';
 
@@ -304,18 +312,32 @@ class Bet extends Component {
         open={this.state.withdrawHappened}
         onRequestClose={this.clearWithdraw}
       >
-      {this.state.withdrawTable}
+        <Table>
+          <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+            <TableRow>
+              <TableHeaderColumn style={{textAlign: 'left'}}>Currency</TableHeaderColumn>
+              <TableHeaderColumn>Bet</TableHeaderColumn>
+              <TableHeaderColumn>Reward</TableHeaderColumn>
+              <TableHeaderColumn>Reason</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody displayRowCheckbox={false}>
+            {this.state.withdrawTable}
+          </TableBody>
+        </Table>
       </Dialog>
     );
   }
 
   WithdrawTableEntry = (_key, _currency, _amount, _reward, _reason) => {
-    return (<div key={_key} style={{display: 'flex', flexFlow: 'row', justifyContent: 'space-between'}}>
-                  <span>Currency: {_currency}</span>
-                  <span>Bet: {formatEth(_amount)}</span>
-                  <span>Reward: {formatEth(_reward)}</span>
-                  <span>{_reason}</span>
-                </div>);
+    return (
+      <TableRow key={_key}>
+        <TableRowColumn>{_currency}</TableRowColumn>
+        <TableRowColumn>{formatEth(_amount)}</TableRowColumn>
+        <TableRowColumn>{formatEth(_reward)}</TableRowColumn>
+        <TableRowColumn>{_reason}</TableRowColumn>
+      </TableRow>
+    );
   }
 
   withdraw = () => {
@@ -350,12 +372,20 @@ class Bet extends Component {
       }
     }
 
+    var _erc20Promises = [];
     for (var i = 0; i < this.state.validERC20.length; ++i) {
       var erc20 = this.state.validERC20[i];
-      if (erc20 in this.state.ERC20HasBetOnTeam) {
+      if ((erc20 in this.state.ERC20HasBetOnTeam) && this.state.ERC20HasBetOnTeam[erc20].amount.gt(0)) {
+        _erc20Promises.push(this.instantiateERC20Contract(erc20));
+        _tokens.push(erc20);
+      }
+    }
+    Promise.all(_erc20Promises)
+    .then(() => {
+      for (var i = 0; i < _erc20Promises.length; ++i) {
+        var erc20 = _tokens[i];
         var _hasBet = this.state.ERC20HasBetOnTeam[erc20];
         var _reason = '';
-        if (_hasBet.amount.lte(0)) continue;
         if (draw)
           _amount = _hasBet.amount;
         else if(_hasBet.team === winner)
@@ -367,15 +397,19 @@ class Bet extends Component {
           _reason = '(no counter-bet)';
         }
         else continue;
-        _tokens.push(erc20);
-        _table.push(this.WithdrawTableEntry(erc20, erc20, _hasBet.amount, _amount, _reason));
+        var _name = this.state.erc20Contracts[erc20].name;
+        if (_name === '')
+          _name = erc20;
+        _table.push(this.WithdrawTableEntry(erc20, _name, _hasBet.amount, _amount, _reason));
       }
-    }
-
-    this.setState({ withdrawTable : _table,
-                    withdrawHappened : true,
-                    withdrawTokens: _tokens
-                  });
+      this.setState({ withdrawTable : _table,
+                      withdrawHappened : true,
+                      withdrawTokens: _tokens
+                    });
+    })
+    .catch(err => {
+      console.log('Could not instantiate contracts: ' + err);
+    })
   }
 
   withdrawRewards = () => {

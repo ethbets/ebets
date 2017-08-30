@@ -6,7 +6,7 @@ jsonFiles = {};
 
 jsonFiles['Monarchy'] = {
   name: 'Monarchy', 
-  description: 'The Monarchy contract have a single Arbiter that can decide on the bet outcomes'
+  description: 'The Monarchy contract consists of a single Arbiter that decides bets\' results'
 }
 
 for (var networkId in Monarchy.networks) {

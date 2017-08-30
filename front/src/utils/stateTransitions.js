@@ -25,10 +25,7 @@ const stateTransitionFunctions = {
     }
     else if (currentState === contractStates.DRAW) {
       newOverAllState = betState.draw;
-      if (hasBetOnTeam !== null)
-        newStepperState = stepperState.payout;
-      else
-        newStepperState = stepperState.matchDecision;
+      newStepperState = stepperState.payout;
     }
     else if (currentState === contractStates.UNDECIDED) {
       newOverAllState = betState.arbiterUndecided;
