@@ -7,6 +7,7 @@ Layout:
       2) Use a slightly different background color for odd/even bets in the list
 - [X] Improve withdraw list layout
 - [ ] Improve WIN layout
+- [ ] Improve FAQ
 
 Logic:
 - [X] Withdraw: Send list of tokens to withdraw, like this the user can pay the price
