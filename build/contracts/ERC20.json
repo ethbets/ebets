@@ -175,6 +175,9 @@
   ],
   "unlinked_binary": "0x",
   "networks": {
+    "3": {
+      "updated_at": 1504022633199
+    },
     "42": {
       "updated_at": 1503600325262
     }
