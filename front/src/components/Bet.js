@@ -454,8 +454,6 @@ class Bet extends Component {
         }
         else continue;
         var _name = this.state.erc20Contracts[erc20].name;
-        if (_name === '')
-          _name = erc20;
         _table.push(this.WithdrawTableEntry(erc20, _name, _hasBet.amount, _amount, _reason));
       }
       this.setState({ withdrawTable : _table,
@@ -669,6 +667,7 @@ class Bet extends Component {
           team1BetSum={this.state.team1BetSum}
           ERC20Team0BetSum={this.state.ERC20Team0BetSum}
           ERC20Team1BetSum={this.state.ERC20Team1BetSum}
+          erc20Contracts={this.state.erc20Contracts}
           tax={this.state.TAX}
           betOnTeamFunction={this.betOnTeam.bind(this)}
           callArbiterFunction={this.callArbiter.bind(this)}
@@ -740,7 +739,7 @@ class Bet extends Component {
       .then((results) => {
         var success = results.filter(x => x.status === 'resolved');
         var _erc20Contracts = _.clone(this.state.erc20Contracts);
-        _erc20Contracts[address] = {instance: erc20Instance, decimals: new BigNumber(0), name: '', symbol: ''};
+        _erc20Contracts[address] = {instance: erc20Instance, decimals: new BigNumber(0), name: address, symbol: ''};
         for (var idx in success) {
           var field = success[idx];
           _erc20Contracts[address][field.f] = field.v;
@@ -823,6 +822,8 @@ class Bet extends Component {
     while (_valid != '0x') {
       _valid = _valid.toLowerCase();
       _validERC20.push(_valid);
+
+      await this.instantiateERC20Contract(_valid);
 
       try {
         _ERC20Team0BetSum[_valid] = await betContractInstance.ERC20Team0BetSum(_valid);

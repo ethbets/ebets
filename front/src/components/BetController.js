@@ -306,7 +306,8 @@ class BetController extends Component {
             <TableRow>
               <TableHeaderColumn colSpan='2'>Address</TableHeaderColumn>
               <TableHeaderColumn>Amount</TableHeaderColumn>
-              <TableHeaderColumn>For Team</TableHeaderColumn>
+              <TableHeaderColumn>Currency</TableHeaderColumn>
+              <TableHeaderColumn>Team</TableHeaderColumn>
               <TableHeaderColumn>At</TableHeaderColumn>
             </TableRow>
           </TableHeader>
@@ -318,6 +319,7 @@ class BetController extends Component {
                     <Address address={bet.from} />
                   </TableRowColumn>
                   <TableRowColumn>{formatEth(bet.amount)}</TableRowColumn>
+                  <TableRowColumn>{bet.erc20 !== undefined ? this.props.erc20Contracts[bet.erc20].name : 'Ether'}</TableRowColumn>
                   <TableRowColumn>{(bet.forTeam) ? this.props.team1Name : this.props.team0Name}</TableRowColumn>
                   <TableRowColumn>{moment(bet.timestamp*1e3).format('LLL')}</TableRowColumn>
                 </TableRow>
