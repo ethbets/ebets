@@ -26,7 +26,7 @@ import BigNumber from 'bignumber.js';
 import isAddress from 'utils/validateAddress';
 import EbetsJson from 'build/contracts/Ebets.json';
 
-import betFields from 'components/betFields';
+import betFields from 'utils/betFields';
 import versusIcon from 'assets/imgs/icons/vs.png';
 
 import Arbiters from './Arbiters';
