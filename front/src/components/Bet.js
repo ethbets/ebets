@@ -141,14 +141,16 @@ class Bet extends Component {
     })
     .catch(_err => {
       err = _err;
-      this.setState({betStatusMessage: <div>Transaction FAILED<br/>Error: {err.toString()}</div>});
+      //this.setState({betStatusMessage: <div>Transaction FAILED<br/>Error: {err.toString()}</div>});
+      this.setState({betStatusMessage: <div>Transaction FAILED<br/></div>});
     })
     .then(() => {
       this.setState({betHappened: true});
       this.setState({transactionInProcess: false});
       if (err !== null)
         throw err;
-    });
+    })
+    .catch(err => { console.log('ERROR: ' + err); });
   };
 
   /* Begin
@@ -207,6 +209,7 @@ class Bet extends Component {
 
         //TODO: this is for testing purposes only. This calls the fallback function of our ERC20 test contracts,
         //which gives tokens to the sender
+        /*
         return new Promise((resolve, reject) => {
           this.context.web3.web3.eth.sendTransaction({
             to: addr,
@@ -220,8 +223,9 @@ class Bet extends Component {
             }
           });
         });
-      })
-      .then(() => {
+        */
+      //})
+      //.then(() => {
         console.log('Sending Approval');
         var _apData = { erc20Instance: erc20instance, value: value, team: teamToBet };
         this.setState({transactionInProcess: true,

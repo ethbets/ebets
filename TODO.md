@@ -10,7 +10,7 @@ Layout:
 - [X] Improve FAQ
 - [X] Add new categories
 - [X] Add icons of new categories
-- [ ] Add ERC20 tokens
+- [X] Add ERC20 tokens
 
 Logic:
 - [X] Withdraw: Send list of tokens to withdraw, like this the user can pay the price
