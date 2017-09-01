@@ -255,7 +255,7 @@ class Bet extends Component {
         this.state.approvalData.value,
         { from: this.context.web3.web3.eth.defaultAccount }
       );
-      this.transactionHappened(betPromise)
+      this.transactionHappened(betPromise);
     })
     .catch((err) => {
       console.log('Bet was not successful: ' + err);
