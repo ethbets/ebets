@@ -407,6 +407,7 @@ class Bet extends Component {
     { from: this.context.web3.web3.eth.defaultAccount,
     })
     .then(() => {
+      this.setState({ terminated: true });
     })
     .catch(e => {
       console.log('Error: ' + e);
@@ -633,16 +634,16 @@ class Bet extends Component {
   FilteredBet = () => {
     const betTitle = 
       <div style={{display: 'flex', flexFlow: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 100}}>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 120}}>
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam0()}
         </Chip>
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: 200}}>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: 230}}>
           <span style={{marginLeft: 10, marginRight: 10, fontWeight: 'normal', fontSize: 16}}>
             {this.state.team0Name}   x   {this.state.team1Name}
           </span>
         </div>
-        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 100}}>
+        <Chip backgroundColor={MColors.cyan500} labelColor={MColors.white} style={{width: 120}}>
           <Avatar size={32} backgroundColor={MColors.cyan800}>{this.CurrencyId()}</Avatar>
           {this.CurrencyAmountTeam1()}
         </Chip>
