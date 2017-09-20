@@ -30,7 +30,7 @@ import {
   TableRowColumn,
 } from 'material-ui/Table';
 
-import {formatEth, formatToken} from 'utils/ethUtils';
+import {ethToWei, formatEth, formatToken} from 'utils/ethUtils';
 import {computeFinalGain} from 'utils/betMath';
 import {
   Step,
@@ -264,7 +264,7 @@ class BetController extends Component {
     var _team0BetSum = new BigNumber(0);
     var _team1BetSum = new BigNumber(0);
 
-    if (this.props.currency == '') {
+    if (this.props.currency === '') {
       if (this.props.hasBetOnTeamEther.team !== null)
         _hasBetOnTeam.amount = _.clone(this.props.hasBetOnTeamEther.amount);
       _team0BetSum = _.clone(this.props.team0BetSum);
@@ -280,11 +280,11 @@ class BetController extends Component {
         _team1BetSum = _.clone(this.props.ERC20Team1BetSum[addr]);
     }
 
-    _hasBetOnTeam.amount = _hasBetOnTeam.amount.plus(this.state.amountToBet);
+    _hasBetOnTeam.amount = _hasBetOnTeam.amount.plus(ethToWei(this.state.amountToBet));
     if (_selectedTeam === false)
-      _team0BetSum = _team0BetSum.plus(this.state.amountToBet);
+      _team0BetSum = _team0BetSum.plus(ethToWei(this.state.amountToBet));
     else
-      _team1BetSum = _team1BetSum.plus(this.state.amountToBet);
+      _team1BetSum = _team1BetSum.plus(ethToWei(this.state.amountToBet));
 
     return computeFinalGain(_hasBetOnTeam, _team0BetSum, _team1BetSum, _betState, this.props.tax);
   }
@@ -298,8 +298,8 @@ class BetController extends Component {
       return null;
 
     return (
-      <Chip backgroundColor={MColors.yellow500}>
-          <Avatar size={32} backgroundColor={MColors.yellow800}>{this.props.currencyIdFunction()}</Avatar>
+      <Chip style={{marginRight: 12}}>
+          <Avatar>{this.props.currencyIdFunction()}</Avatar>
         Win {this.props.currencyAmountFunction(_gain)}
       </Chip>
       );
@@ -373,6 +373,7 @@ class BetController extends Component {
               type='number'
               onChange={this.setBetValue}
               />
+            <this.ExpectedGain />
             <this.DynamicBetButton />
             {(!this.props.isDetailed) ? <RaisedButton
               style={{marginLeft: 14}}
@@ -382,7 +383,6 @@ class BetController extends Component {
               label='Permalink'
               icon={<LinkIcon />}
             /> : null}
-            <this.ExpectedGain />
           </div>
           <this.Steps />
           <this.DynamicList />
