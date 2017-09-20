@@ -78,10 +78,6 @@ const stateTransitionFunctions = {
       };
     }
     else if (timerState === betTimeStates.matchDestruct) {
-      if ((currentState !== betState.draw) &&
-          (currentState !== betState.team0Won) &&
-          (currentState !== betState.team1Won) &&
-          (currentState !== betState.betTerminate))
       newState = {
         currentBetState: betState.betTerminate,
         stepperState: stepperState.matchEnded

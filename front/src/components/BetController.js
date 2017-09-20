@@ -192,6 +192,16 @@ class BetController extends Component {
       />
       );
     }
+    else if (this.props.currentBetState === betState.betTerminate) {
+      return (
+        <RaisedButton
+        labelColor={MColors.white}
+        backgroundColor={MColors.cyan800}
+        label='Terminate'
+        onTouchTap={() => this.props.terminateFunction()}
+      />
+      );
+    }
     return (
       <RaisedButton 
         disabled={(this.props.currentBetState !== betState.matchOpen)}

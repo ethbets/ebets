@@ -83,6 +83,7 @@ class Bet extends Component {
       withdrawTokens: [],
       approvalData: {},
       approvalHappened: false,
+      terminated: true,
       ...betFields,
     }
   }
@@ -400,6 +401,22 @@ class Bet extends Component {
     );
   }
 
+  terminate = () => {
+    this.setState({ transactionInProcess: true });
+    this.state.betContractInstance.terminate(
+    { from: this.context.web3.web3.eth.defaultAccount,
+    })
+    .then(() => {
+    })
+    .catch(e => {
+      console.log('Error: ' + e);
+    })
+    .then(() => {
+      this.setState({ transactionInProcess: false });
+    });
+  } 
+    
+
   withdraw = () => {
     var _tokens = [];
     var _table = [];
@@ -677,6 +694,7 @@ class Bet extends Component {
           callArbiterFunction={this.callArbiter.bind(this)}
           callVoteFunction={this.callVote.bind(this)}
           withdrawFunction={this.withdraw.bind(this)}
+          terminateFunction={this.terminate.bind(this)}
           betHappened={this.state.betHappened}
           isArbiter={this.state.isArbiter}
           arbiterInfo={this.state.arbiterInfo}
@@ -787,9 +805,22 @@ class Bet extends Component {
     }
     else
       betAddress = this.props.address;
-    var betContractInstance = betContract.at(betAddress);
-    const governanceAddress = await betContractInstance.arbiter();
-    const arbiterContractInstance = arbiterContract.at(governanceAddress);
+
+    var betContractInstance;
+    var governanceAddress;
+    var arbiterContractInstance;
+    try {
+      betContractInstance = betContract.at(betAddress);
+      governanceAddress = await betContractInstance.arbiter();
+      if (governanceAddress === '0x') {
+        return;
+      }
+      arbiterContractInstance = arbiterContract.at(governanceAddress);
+      this.setState({ terminated: false });
+    } catch(e) {
+      console.log('Error in contract instantiation: ' + e);
+      return;
+    }
 
     var stateObjects = await setAttributes(this.state, betContractInstance);
     try{
@@ -1029,6 +1060,9 @@ class Bet extends Component {
   }
 
   render() {
+    if (this.state.terminated)
+      return null;
+
     if (!this.state.loadCompleted)
       return (
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
