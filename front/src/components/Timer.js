@@ -88,7 +88,7 @@ class Clock extends React.Component {
         msgString = 'Bet terminated, self-destruct may be invoked!'
         return (
           <div>
-            <Chip backgroundColor={MColors.white}>
+            <Chip>
               {msgString}
             </Chip>
           </div>
