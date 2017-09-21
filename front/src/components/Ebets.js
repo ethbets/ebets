@@ -24,7 +24,7 @@ class Ebets extends Component {
   getBetsByCategory = (category, ebetsContractInstance) => {
     return new Promise( async (resolve, reject) => {
       let betPromises = [];
-      if (category === 'all_bets') {
+      if (category === 'all_bets' || category === 'my_bets') {
         betPromises = getParsedCategories().map(category => ({
             bets: ebetsContractInstance.getBetsByCategory(category.key),
             category: category.key
@@ -96,6 +96,7 @@ class Ebets extends Component {
     var { category, address } = this.props.routeParams;
     var listItems = [];
     if (category !== undefined) {
+      var mybets = (category === 'my_bets');
       if (this.props.routeParams.subcategory !== undefined)
         category = category + '/' + this.props.routeParams.subcategory;
       listItems = this.state.bets.map(betCat => 
@@ -104,6 +105,7 @@ class Ebets extends Component {
              category={betCat.category}
              address={betCat.bet}
              showUnfeatured={this.context.showUnfeatured}
+             mybets={mybets}
         />
       );
     }

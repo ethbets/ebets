@@ -906,8 +906,9 @@ class Bet extends Component {
     
     // Should check if has bet
     var hasEverBet = false;
-    if (this.props.category === 'my_bets') {
-      hasEverBet = await this.hasBet(betContractInstance);
+    if (this.props.mybets) {
+      //hasEverBet = await this.hasBet(betContractInstance);
+      hasEverBet = betToTeam;
     }
     const arbiterName = await arbiterContractInstance.getName();
     
@@ -1061,6 +1062,9 @@ class Bet extends Component {
   }
 
   render() {
+    if (this.props.mybets && this.state.hasBetOnTeam === null)
+      return null;
+
     if (this.state.terminated)
       return null;
 
