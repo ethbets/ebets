@@ -92,7 +92,7 @@ async function deployAll() {
     writeBinABI('./build/contracts/ERC20.json', ERC20JSON,
                 networkId, undefined, ERC20ABI, ERC20Bin, now);
     console.log('Written');
-
+/*
     console.log('Deploying ERC20 SimpleToken1...');
     const simpleToken1Address = await deployContract(SimpleToken1ABI, SimpleToken1Bin, deployAddress);
     writeBinABI('./build/contracts/SimpleToken1.json', SimpleToken1JSON, 
@@ -104,6 +104,7 @@ async function deployAll() {
     writeBinABI('./build/contracts/SimpleToken2.json', SimpleToken2JSON, 
                 networkId, simpleToken2Address, SimpleToken2ABI, SimpleToken2Bin, now);
     console.log('Deployed');
+    */
 
     process.exit();
   }
