@@ -77,9 +77,11 @@ class Ebets extends Component {
       return;
     }
     var category = this.props.routeParams.category;
-    var bets;
-    if (category !== undefined && this.props.routeParams.subcategory) {
-      category += '/' + this.props.routeParams.subcategory;
+    var bets = [];
+    console.log(category)
+    if (category !== undefined) {
+      if (this.props.routeParams.subcategory)
+        category += '/' + this.props.routeParams.subcategory;
       bets = await this.getBetsByCategory(category, ebetsContractInstance);
     }
     //events
