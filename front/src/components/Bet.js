@@ -85,6 +85,15 @@ class Bet extends Component {
       terminated: true,
       ...betFields,
     }
+
+    this.updateStateFromTimer = this.updateStateFromTimer.bind(this);
+    this.betOnTeam = this.betOnTeam.bind(this);
+    this.callArbiter = this.callArbiter.bind(this);
+    this.callVote = this.callVote.bind(this);
+    this.withdraw = this.withdraw.bind(this);
+    this.terminate = this.terminate.bind(this);
+    this.CurrencyId = this.CurrencyId.bind(this);
+    this.CurrencyAmount = this.CurrencyAmount.bind(this);
   }
 
   LinearProgressCustom = () => {
@@ -648,7 +657,7 @@ class Bet extends Component {
         </Chip>
         <this.Currency />
         <Timer parentState={this.state.currentBetState}
-               updateState={this.updateStateFromTimer.bind(this)}
+               updateState={this.updateStateFromTimer}
                beginDate={(MOCK) ? mockDateBegin : this.state.timestampMatchBegin}
                endDate={(MOCK) ? mockDateEnd : this.state.timestampMatchEnd}
                resolverDeadline={(MOCK) ? mockResolverDeadline : this.state.timestampArbiterDeadline}
@@ -690,17 +699,17 @@ class Bet extends Component {
           ERC20Team1BetSum={this.state.ERC20Team1BetSum}
           erc20Contracts={this.state.erc20Contracts}
           tax={this.state.TAX}
-          betOnTeamFunction={this.betOnTeam.bind(this)}
-          callArbiterFunction={this.callArbiter.bind(this)}
-          callVoteFunction={this.callVote.bind(this)}
-          withdrawFunction={this.withdraw.bind(this)}
-          terminateFunction={this.terminate.bind(this)}
+          betOnTeamFunction={this.betOnTeam}
+          callArbiterFunction={this.callArbiter}
+          callVoteFunction={this.callVote}
+          withdrawFunction={this.withdraw}
+          terminateFunction={this.terminate}
           betHappened={this.state.betHappened}
           isArbiter={this.state.isArbiter}
           arbiterInfo={this.state.arbiterInfo}
           currency={this.state.currency}
-          currencyIdFunction={this.CurrencyId.bind(this)}
-          currencyAmountFunction={this.CurrencyAmount.bind(this)}
+          currencyIdFunction={this.CurrencyId}
+          currencyAmountFunction={this.CurrencyAmount}
         />
         <this.BetStatusDialog />
         <this.WithdrawStatusDialog />
