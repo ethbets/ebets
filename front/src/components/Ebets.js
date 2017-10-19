@@ -5,6 +5,7 @@
  * of the BSD license. See the LICENSE file for details.
 */
 
+/*global web3:true */
 import React, { Component } from 'react';
 
 import EbetsJson from 'build/contracts/Ebets.json';
@@ -67,7 +68,7 @@ class Ebets extends Component {
   async instantiateContract() {
     const contract = require('truffle-contract');
     const ebetsContract = contract(EbetsJson);
-    ebetsContract.setProvider(this.context.web3.web3.currentProvider);
+    ebetsContract.setProvider(web3.currentProvider);
     var ebetsContractInstance;
     try {
       ebetsContractInstance = await ebetsContract.deployed();
