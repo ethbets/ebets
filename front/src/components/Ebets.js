@@ -7,9 +7,11 @@
 
 /*global web3:true */
 import React, { Component } from 'react';
+import Paginate from 'react-paginate';
 
 import EbetsJson from 'build/contracts/Ebets.json';
 import Bet from 'components/Bet';
+import BetList from 'components/BetList';
 import PropTypes from 'prop-types';
 import {getParsedCategories} from 'utils/ebetsCategories';
 
@@ -18,7 +20,9 @@ class Ebets extends Component {
     super(props);
     this.state = {
       bets: [],
-      ebetsContractInstance: null
+      ebetsContractInstance: null,
+      currentPage: 0,
+      pageCount: 1
     }
   }
 
@@ -94,36 +98,37 @@ class Ebets extends Component {
     this.setState({
       bets: bets,
       //betsEvents: betsEvents,
-      ebetsContractInstance: ebetsContractInstance
+      ebetsContractInstance: ebetsContractInstance,
+      pageCount: Math.ceil(bets.length / this.props.route.perPage)
     });
   }
 
+  handlePageClick = (index) => {
+    this.setState({ currentPage: index.selected });
+  };
+
+  displayedBets = () => {
+    const currentPage = this.state.currentPage;
+    return this.state.bets.slice(currentPage, currentPage + this.props.route.perPage)
+  }
+
   render() {
-    var { category, address } = this.props.routeParams;
-    var listItems = [];
-    if (category !== undefined) {
-      var mybets = (category === 'my_bets');
-      if (this.props.routeParams.subcategory !== undefined)
-        category = category + '/' + this.props.routeParams.subcategory;
-      listItems = this.state.bets.map(betCat => 
-        <Bet isDetailed={false}
-             key={betCat.bet}
-             category={betCat.category}
-             address={betCat.bet}
-             showUnfeatured={this.context.showUnfeatured}
-             mybets={mybets}
-        />
-      );
-    }
-    // Detailed bet
-    if (address !== undefined) {
-      listItems = <Bet isDetailed={true}
-                       address={address} />
-    }
     return (
-      <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
-        {listItems}
-      </ul>
+      <div className="pagination">
+        <BetList
+          bets={this.displayedBets()}
+          routeParams={this.props.routeParams}
+          location={this.props.location}
+        />
+        <Paginate
+          pageCount={this.state.pageCount}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          initialPage={this.state.currentPage}
+          onPageChange={this.handlePageClick}
+          activeClassName={"active"}
+        />
+      </div>
     );
   }
 }
