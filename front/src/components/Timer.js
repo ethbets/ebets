@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 
 import Chip from 'material-ui/Chip';
-import * as MColors from 'material-ui/styles/colors';
+import 'material-ui/styles/colors';
 
 import { betTimeStates, betState } from 'utils/betStates';
 

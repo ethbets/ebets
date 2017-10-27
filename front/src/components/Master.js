@@ -11,10 +11,9 @@ import AppBar from 'material-ui/AppBar';
 import spacing from 'material-ui/styles/spacing';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import {darkWhite, lightWhite, grey900} from 'material-ui/styles/colors';
+import {darkWhite, lightWhite, grey900, red500} from 'material-ui/styles/colors';
 import withWidth, {MEDIUM, LARGE} from 'material-ui/utils/withWidth';
 import WarningIcon from 'material-ui/svg-icons/alert/warning';
-import {red500} from 'material-ui/styles/colors';
 
 import {getParsedCategories} from 'utils/ebetsCategories';
 

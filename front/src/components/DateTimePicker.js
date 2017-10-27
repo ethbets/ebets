@@ -6,9 +6,7 @@
 */
 
 import DatePicker from 'material-ui/DatePicker';
-import ReactTestUtils from 'react-dom/test-utils';
 import TimePickerDialog from './TimePicker/TimePickerDialog';
-import lodash from 'lodash';
 import moment from 'moment';
 
 import React, { Component } from 'react';

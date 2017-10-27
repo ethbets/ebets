@@ -15,9 +15,7 @@ import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
 import Divider from 'material-ui/Divider';
 import { zIndex } from 'material-ui/styles';
 
-import _ from 'lodash';
 import { ebetsCategories } from 'utils/ebetsCategories';
-//import '../assets/stylesheets/base.css';
 
 const SelectableList = makeSelectable(List);
 
@@ -60,11 +58,7 @@ class NavDrawer extends Component {
       onRequestChangeNavDrawer,
       onChangeList,
     } = this.props;
-    const style = {
-      marginTop: 16,
-      marginLeft:16,
-      marginBottom: 16
-    };
+
     return <Drawer
       open={true}
       docked={true}

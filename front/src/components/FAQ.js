@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
-import HowDoesItWork from '../assets/imgs/Making-a-bet.png';
+// import HowDoesItWork from '../assets/imgs/Making-a-bet.png';
 
 class FAQ extends Component {
   constructor(props) {

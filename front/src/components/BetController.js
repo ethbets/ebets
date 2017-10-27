@@ -20,6 +20,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import * as MColors from 'material-ui/styles/colors';
 import LinkIcon from 'material-ui/svg-icons/content/link';
 import Address from 'components/Address';
+import _ from 'lodash';
 
 import {
   Table,
