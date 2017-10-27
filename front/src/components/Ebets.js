@@ -10,10 +10,11 @@ import React, { Component } from 'react';
 import Paginate from 'react-paginate';
 
 import EbetsJson from 'build/contracts/Ebets.json';
-import Bet from 'components/Bet';
 import BetList from 'components/BetList';
 import PropTypes from 'prop-types';
 import {getParsedCategories} from 'utils/ebetsCategories';
+
+import '../assets/stylesheets/pagination.css';
 
 class Ebets extends Component {
   constructor(props) {
@@ -114,20 +115,23 @@ class Ebets extends Component {
 
   render() {
     return (
-      <div className="pagination">
+      <div>
         <BetList
           bets={this.displayedBets()}
           routeParams={this.props.routeParams}
           location={this.props.location}
         />
+        <div style={{flexFlow: 'column', justifyContent: 'space-between'}}>
         <Paginate
           pageCount={this.state.pageCount}
           marginPagesDisplayed={2}
           pageRangeDisplayed={5}
+          containerClassName={"pagination"}
           initialPage={this.state.currentPage}
           onPageChange={this.handlePageClick}
           activeClassName={"active"}
         />
+        </div>
       </div>
     );
   }

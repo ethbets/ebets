@@ -25,9 +25,9 @@ class BetList extends Component {
                        address={address} />
     }
     return (
-      <div>
-        <h1>{this.props.location.pathname}</h1>
-        <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
+      <div style={{flexFlow: 'column', justifyContent: 'space-between'}}>
+        <h1 style={{marginLeft: 50}} >{this.props.location.pathname}</h1>
+        <ul>
           {listItems}
         </ul>
       </div>
