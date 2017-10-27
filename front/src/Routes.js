@@ -19,11 +19,11 @@ const Routes = (
   <Route path='/' component={Master}> 
     <IndexRedirect to="/category/all_bets" />
     <Route path='category'>
-      <Route path=':category' component={Ebets} perPage={2} />
-      <Route path=':category/:subcategory' component={Ebets} perPage={2} />
+      <Route path=':category' component={Ebets} perPage={4} />
+      <Route path=':category/:subcategory' component={Ebets} perPage={4} />
     </Route>
 
-    <Route path='bet/:address' component={Ebets} perPage={2} />
+    <Route path='bet/:address' component={Ebets} perPage={4} />
     <Route path='new_bet' component={CreateBet} />
     <Route path='faq' component={FAQ} />
     <Route path='arbiters' component={Arbiters} />

@@ -14,7 +14,7 @@ import BetList from 'components/BetList';
 import PropTypes from 'prop-types';
 import {getParsedCategories} from 'utils/ebetsCategories';
 
-import '../assets/stylesheets/pagination.css';
+import 'assets/stylesheets/pagination.css';
 
 class Ebets extends Component {
   constructor(props) {
@@ -25,6 +25,10 @@ class Ebets extends Component {
       currentPage: 0,
       pageCount: 1
     }
+  }
+
+  getPageCount(bets) {
+    return Math.ceil(bets.length / this.props.route.perPage)
   }
 
   getBetsByCategory = (category, ebetsContractInstance) => {
@@ -47,6 +51,7 @@ class Ebets extends Component {
         return before.concat(bet.map(b => ({bet: b, category: betPromises[idx].category})));
       }, []);
       resolve(bets);
+      this.setState({pageCount: this.getPageCount(bets)});
     });
   }
   
@@ -100,7 +105,7 @@ class Ebets extends Component {
       bets: bets,
       //betsEvents: betsEvents,
       ebetsContractInstance: ebetsContractInstance,
-      pageCount: Math.ceil(bets.length / this.props.route.perPage)
+      pageCount: this.getPageCount(bets)
     });
   }
 
@@ -109,8 +114,8 @@ class Ebets extends Component {
   };
 
   displayedBets = () => {
-    const currentPage = this.state.currentPage;
-    return this.state.bets.slice(currentPage, currentPage + this.props.route.perPage)
+    const initialPosition = this.state.currentPage * this.props.route.perPage;
+    return this.state.bets.slice(initialPosition , initialPosition + this.props.route.perPage)
   }
 
   render() {
@@ -121,17 +126,17 @@ class Ebets extends Component {
           routeParams={this.props.routeParams}
           location={this.props.location}
         />
-        <div style={{flexFlow: 'column', justifyContent: 'space-between'}}>
-        <Paginate
-          pageCount={this.state.pageCount}
-          marginPagesDisplayed={2}
-          pageRangeDisplayed={5}
-          containerClassName={"pagination"}
-          initialPage={this.state.currentPage}
-          onPageChange={this.handlePageClick}
-          activeClassName={"active"}
-        />
-        </div>
+        {this.state.pageCount > 1 &&
+          <Paginate
+            pageCount={this.state.pageCount}
+            marginPagesDisplayed={this.props.route.perPage}
+            pageRangeDisplayed={this.state.pageCount}
+            containerClassName={"pagination"}
+            initialPage={this.state.currentPage}
+            onPageChange={this.handlePageClick}
+            activeClassName={"active"}
+          />
+        }
       </div>
     );
   }
