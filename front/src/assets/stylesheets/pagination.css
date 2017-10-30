@@ -1,0 +1,29 @@
+.pagination li {
+  display: inline-block;
+  border-radius: 2px;
+  text-align: center;
+  vertical-align: top;
+  height: 30px;
+  cursor: pointer;
+}
+
+.pagination li a {
+  color: #bbb;
+  display: inline-block;
+  font-size: 1.2rem;
+  padding: 0 10px;
+  line-height: 30px;
+}
+
+.pagination li.active a {
+  color: #fff;
+}
+
+.pagination li.active {
+  background-color: #00BCD4;
+}
+
+.pagination li.disabled a {
+  cursor: default;
+  color: #777;
+}

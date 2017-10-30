@@ -7,19 +7,28 @@
 
 /*global web3:true */
 import React, { Component } from 'react';
+import Paginate from 'react-paginate';
 
 import EbetsJson from 'build/contracts/Ebets.json';
-import Bet from 'components/Bet';
+import BetList from 'components/BetList';
 import PropTypes from 'prop-types';
 import {getParsedCategories} from 'utils/ebetsCategories';
+
+import 'assets/stylesheets/pagination.css';
 
 class Ebets extends Component {
   constructor(props) {
     super(props);
     this.state = {
       bets: [],
-      ebetsContractInstance: null
+      ebetsContractInstance: null,
+      currentPage: 0,
+      pageCount: 1
     }
+  }
+
+  getPageCount(bets) {
+    return Math.ceil(bets.length / this.props.route.perPage)
   }
 
   getBetsByCategory = (category, ebetsContractInstance) => {
@@ -42,6 +51,7 @@ class Ebets extends Component {
         return before.concat(bet.map(b => ({bet: b, category: betPromises[idx].category})));
       }, []);
       resolve(bets);
+      this.setState({pageCount: this.getPageCount(bets)});
     });
   }
   
@@ -94,36 +104,40 @@ class Ebets extends Component {
     this.setState({
       bets: bets,
       //betsEvents: betsEvents,
-      ebetsContractInstance: ebetsContractInstance
+      ebetsContractInstance: ebetsContractInstance,
+      pageCount: this.getPageCount(bets)
     });
   }
 
+  handlePageClick = (index) => {
+    this.setState({ currentPage: index.selected });
+  };
+
+  displayedBets = () => {
+    const initialPosition = this.state.currentPage * this.props.route.perPage;
+    return this.state.bets.slice(initialPosition , initialPosition + this.props.route.perPage)
+  }
+
   render() {
-    var { category, address } = this.props.routeParams;
-    var listItems = [];
-    if (category !== undefined) {
-      var mybets = (category === 'my_bets');
-      if (this.props.routeParams.subcategory !== undefined)
-        category = category + '/' + this.props.routeParams.subcategory;
-      listItems = this.state.bets.map(betCat => 
-        <Bet isDetailed={false}
-             key={betCat.bet}
-             category={betCat.category}
-             address={betCat.bet}
-             showUnfeatured={this.context.showUnfeatured}
-             mybets={mybets}
-        />
-      );
-    }
-    // Detailed bet
-    if (address !== undefined) {
-      listItems = <Bet isDetailed={true}
-                       address={address} />
-    }
     return (
-      <ul style={{flexFlow: 'column', justifyContent: 'space-between'}}>
-        {listItems}
-      </ul>
+      <div>
+        <BetList
+          bets={this.displayedBets()}
+          routeParams={this.props.routeParams}
+          location={this.props.location}
+        />
+        {this.state.pageCount > 1 &&
+          <Paginate
+            pageCount={this.state.pageCount}
+            marginPagesDisplayed={this.props.route.perPage}
+            pageRangeDisplayed={this.state.pageCount}
+            containerClassName={"pagination"}
+            initialPage={this.state.currentPage}
+            onPageChange={this.handlePageClick}
+            activeClassName={"active"}
+          />
+        }
+      </div>
     );
   }
 }

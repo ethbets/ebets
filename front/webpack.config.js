@@ -1,9 +1,9 @@
-var path = require('path');
+const path = require('path')
 
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: __dirname + '/dist',
+    path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',
     publicPath: '/dist/'
   },
@@ -20,7 +20,7 @@ module.exports = {
       loader: 'babel-loader',
       include: __dirname,
       query: {
-        presets: [ 'es2015', 'react'],
+        presets: [ 'es2015', 'react' ],
         plugins: ['transform-class-properties', 'transform-object-rest-spread']
       }
     },
@@ -31,12 +31,13 @@ module.exports = {
         {
           loader: 'image-webpack-loader',
           query: {
-            progressive: true,
+            progressive: true
             //optimizationLevel: 7,
             //interlaced: false,
           }
         }
       ]
-    }]
+    },
+    { test: /\.css$/, loader: 'style-loader!css-loader' }]
   }
 }
