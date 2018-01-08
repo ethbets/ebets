@@ -32,4 +32,6 @@ contract GovernanceInterface {
   function castVote(address proposal, uint outcome);
   // Proposal should be solved by the deadline time
   function addProposal(address contractToDecide, uint deadline);
+  // Collects the arbiter fee
+  function collectFee() payable;
 }

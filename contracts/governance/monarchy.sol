@@ -51,5 +51,5 @@ contract Monarchy is Governance {
   function removeMember(address /*member*/) onlyMonarch() {
     members[msg.sender] = 0;
     members[successor] = 1;
-    }
+  }
 }

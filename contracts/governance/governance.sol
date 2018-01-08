@@ -18,7 +18,7 @@ contract Governance is GovernanceInterface{
   // Members of the Governance have a weight in their vote
   mapping (address => uint) public members;
   // Used in case of indecision
-  address public higherInstance;
+  Governance public higherInstance;
   mapping (address => Proposal) public proposals;
 
   // Members can be added to the governance
@@ -34,4 +34,10 @@ contract Governance is GovernanceInterface{
   function castVote(address proposal, uint outcome);
   // Proposal should be solved by the deadline time
   function addProposal(address proposalAddress, uint deadline);
+  // Collects the arbiter fee
+  function collectFee() payable {
+    if (higherInstance != address(0)) {
+      higherInstance.collectFee.value(this.balance)();
+    }
+  }
 }
