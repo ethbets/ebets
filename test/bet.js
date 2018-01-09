@@ -5,10 +5,16 @@
  * of the BSD license. See the LICENSE file for details.
  */
 
-import {assertJump, BigNumber, getEvents, increaseTimeTo, waitNDays} from './utils.js';
+import {assertRevert, BigNumber, getEvents, increaseTimeTo, waitNDays} from './utils.js';
+
+const should = require('chai')  // eslint-disable-line
+                   .use(require('chai-as-promised'))
+                   .use(require('chai-bignumber')(BigNumber))
+                   .should();
 
 const Ebets = artifacts.require('ebets');
 const Bet = artifacts.require('Bet');
+const TeamBet = artifacts.require('TeamBet');
 const Monarchy = artifacts.require('Monarchy');
 
 const BET_STATES = {
@@ -19,12 +25,20 @@ const BET_STATES = {
   UNDECIDED: 4,
   CALLED_RESOLVER: 5
 };
+const oneEther = new BigNumber(web3.toWei(1, 'ether'));
+const twoEther = new BigNumber(web3.toWei(2, 'ether'));
+
 
 contract('Bet', accounts => {
   const monarch = accounts[0];
   const betOwner = accounts[1];
+  const user0 = accounts[2];
+  const user1 = accounts[3];
+
   let arbiterInstance;
   let betInstance;
+  let team0Instance;
+  let team1Instance;
   before(async () => {
     arbiterInstance = await Monarchy.new({from: monarch});
     /*
@@ -53,16 +67,22 @@ contract('Bet', accounts => {
   });
 
   it('Should create a bet', async () => {
-    const day = 60 * 24;
+    const day = 60 * 60 * 24;
     const team0Name = 'Team 0';
     const team1Name = 'Team 1';
 
     const now = Math.floor(Date.now() / 1000);
-    const timestampMatchBegin = now + day;
-    const timestampMatchEnd = timestampMatchBegin + day;
-    const timestampArbiterDeadline = timestampMatchEnd + day;
-    const timestampAppealsDeadline = timestampArbiterDeadline + day;
-    const timestampSelfDestructDeadline = timestampAppealsDeadline + day;
+
+    /*
+     * Bet -- Match begin -- Match end -- Arbiter deadline -- Appeals deadline -- Self destruct deadline --
+     * Now --  now + 2d  --  now + 4d --     now + 6d      --     now + 8d     --        now + 10d        --
+    */
+
+    const timestampMatchBegin = now + 2*day;
+    const timestampMatchEnd = timestampMatchBegin + 2*day;
+    const timestampArbiterDeadline = timestampMatchEnd + 2*day;
+    const timestampAppealsDeadline = timestampArbiterDeadline + 2*day;
+    const timestampSelfDestructDeadline = timestampAppealsDeadline + 2*day;
     const timestamps = [
       timestampMatchBegin, timestampMatchEnd, timestampArbiterDeadline,
       timestampAppealsDeadline, timestampSelfDestructDeadline
@@ -72,11 +92,52 @@ contract('Bet', accounts => {
     betInstance = await Bet.new(
         monarch, team0Name, team1Name, timestamps, betTax, {from: betOwner});
 
-    const betState = await betInstance.betState();
+    team0Instance = await TeamBet.at(await betInstance.team0());
+    team1Instance = await TeamBet.at(await betInstance.team1());
+
     // Bet is initialized open
-    assert.isTrue(betState == BET_STATES.OPEN);
+    assert.isTrue(await betInstance.betState() == BET_STATES.OPEN);
     // Monarch is the arbiter
     assert.isTrue(await betInstance.arbiter() == monarch);
+  });
+
+  it('User 0 should bet on team 0', async () => {
+    await team0Instance.sendTransaction(
+        {from: user0, value: web3.toWei(1, 'ether'), gas: 100000});
+    const amountBet = await team0Instance.betsToTeam(user0);
+    amountBet.should.be.bignumber.equal(oneEther);
+  });
+
+  it('User 1 should bet on team 1', async () => {
+    await team1Instance.sendTransaction(
+        {from: user1, value: web3.toWei(2, 'ether'), gas: 100000});
+    const amountBet = await team1Instance.betsToTeam(user1);
+    amountBet.should.be.bignumber.equal(twoEther);
+  });
+
+  it('Should wait 3 days, so match begins', async () => {
+    console.log('[Match begun]'.yellow);
+    await waitNDays(3);
+  });
+
+  it('Users should not be able to bet', async () => {
+    try {
+      await team0Instance.sendTransaction(
+          {from: user0, value: web3.toWei(1, 'ether'), gas: 100000});
+    } catch (e) {
+      assertRevert(e);
+    }
+  });
+
+  it('Should wait 2 days, so match ends', async () => {
+    console.log('[Match ended]'.yellow);
+    await waitNDays(2);
+  });
+
+  it('User can call the arbiter', async () => {
+    await betInstance.updateResult({from: user0, gas: 3000000});
+
+    // assert.isTrue(await betInstance.betState() == BET_STATES.CALLED_RESOLVER);
   });
 
   /*

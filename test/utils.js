@@ -4,8 +4,8 @@
  * @param {object} error ErrorObject
  * @returns {void}
  */
-export function assertJump(error) {
-  assert.isAbove(error.message.search('invalid opcode'), -1, 'Invalid opcode error must be returned');
+export function assertRevert(error) {
+  assert.isAbove(error.message.search('revert'), -1, 'Revert');
 }
 
 /**

@@ -5,7 +5,7 @@ const path      = require('path');
 const basePath  = process.cwd();
 
 const buildDir          = path.join(basePath, 'build');
-const buildDirContracts = path.join(basePath, 'build/contracts');
+const buildDirContracts = path.join(basePath, 'build');
 const srcDir            = path.join(basePath, 'contracts');
 const testDir           = path.join(basePath, 'test');
 const migrationsDir     = path.join(basePath, 'migrations');
