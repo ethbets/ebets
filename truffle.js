@@ -1,21 +1,40 @@
+require('babel-register');
+require('babel-polyfill');
+
+const path      = require('path');
+const basePath  = process.cwd();
+
+const buildDir          = path.join(basePath, 'build');
+const buildDirContracts = path.join(basePath, 'build/contracts');
+const srcDir            = path.join(basePath, 'contracts');
+const testDir           = path.join(basePath, 'test');
+const migrationsDir     = path.join(basePath, 'migrations');
+
 module.exports = {
-  migrations_directory: "./migrations",
+  mocha: {
+    useColors: true
+  },
+  solc: {
+    optimizer: {
+      enabled: true,
+      runs: 200
+    }
+  },
   networks: {
-    development: {
-      host: "localhost",
-      port: 8545,
-      network_id: "42",
-      gas: 4100000,
-      gasPrice: 5010000004,
-      from: "0x82De95A2c2805731a404C4F652514929cdB463bb"
-    },
-    ropsten: {
-      host: "localhost",
-      port: 8545,
-      network_id: "3",
-      gas: 3100000,
-      gasPrice: 5010000004,
-      from: "0x82De95A2c2805731a404C4F652514929cdB463bb"
-    },
-  }
+    coverage: {
+      host: 'localhost',
+      network_id: 4447,
+      port: 8555,
+      gasPrice: 1,
+      gas: 100000000
+      // ,
+      // gas: 0xfffffffffff,
+      // gasPrice: 0x01
+    }
+  },
+  build_directory: buildDir,
+  contracts_build_directory: buildDirContracts,
+  migrations_directory: migrationsDir,
+  contracts_directory: srcDir,
+  test_directory: testDir
 };

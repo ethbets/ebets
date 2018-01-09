@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import './bet.sol';
+import '../bet.sol';
 import './governanceInterface.sol';
 
 contract EbetsJurisdictor {

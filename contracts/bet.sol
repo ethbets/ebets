@@ -79,7 +79,7 @@ contract Bet is ProposalInterface {
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 
                string _team1Name, uint[] _timestamps, uint8 _tax
-               ) {
+               ) public {
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
     require(_timestamps[1] < _timestamps[2]);
@@ -99,7 +99,7 @@ contract Bet is ProposalInterface {
     ARBITER_TAX = _tax;
   }
 
-  function __resolve(uint outcome)
+  function __resolve(uint outcome) public
     onlyArbiter()
     afterTimestamp(timestampMatchEnd)
     beforeTimestamp(timestampArbiterDeadline) {
@@ -116,7 +116,7 @@ contract Bet is ProposalInterface {
   }
 
   // Will create a Proposal on the arbiter
-  function updateResult()
+  function updateResult() public
     matchIsOpenOrUndecided()
     afterTimestamp(timestampMatchEnd) {
     betState = BET_STATES.CALLED_RESOLVER;
@@ -125,7 +125,7 @@ contract Bet is ProposalInterface {
   }
   // team = 0 : team 0
   // team = 1 : team 1
-  function withdraw(address winner, bool team)
+  function withdraw(address winner, bool team) public
     afterTimestamp(timestampAppealsDeadline) {
     uint profit = 0;
     if (betState == BET_STATES.DRAW) {
@@ -150,7 +150,7 @@ contract Bet is ProposalInterface {
    * this is in the unlikely event if the arbiter don't
    * decide in time, every one can collect the funds.
   */
-  function close()
+  function close() public
     afterTimestamp(timestampAppealsDeadline)
     beforeTimestamp(timestampSelfDestructDeadline) 
     matchIsNotDecided() {
@@ -161,7 +161,7 @@ contract Bet is ProposalInterface {
   /* Selfdestructs the bet and return what it has in the account
    * as a fee to the bet's arbiter.
    */
-  function terminate()
+  function terminate() public
     afterTimestamp(timestampSelfDestructDeadline) {
     arbiter.collectFee.value(this.balance)();
     require(this.balance == 0);
@@ -171,5 +171,5 @@ contract Bet is ProposalInterface {
   /* Fallback just throws now
    * Can do something, maybe increase the value of both pools
   */
-  function () { require(false); }
+  function () public { require(false); }
 }

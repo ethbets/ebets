@@ -27,12 +27,12 @@ contract TeamBet {
 
   event NewBet(address indexed from, uint amount);
 
-  function TeamBet(string _name) {
+  function TeamBet(string _name) public {
     name = _name;
     betContract = Bet(msg.sender);
   }
 
-  function () payable
+  function () public payable
     beforeTimestamp(betContract.timestampMatchBegin()) {
     //require(!betContract.arbiter.isMember(msg.sender));
     require(msg.value > 0);
@@ -52,7 +52,7 @@ contract TeamBet {
    * Before: Winner's stake in the contract
    * After: Winner's stake transfered to winner address
   */
-  function getOriginalBet(address winner)
+  function getOriginalBet(address winner) public
     onlyBetContract() returns(uint profit){
     uint betAmount = betsToTeam[winner];
     betsToTeam[winner] = 0;
@@ -65,6 +65,7 @@ contract TeamBet {
    * After: Due funds transfered to winner address
   */
   function collectProfit(address winner, uint otherBetAmount, uint otherBetSum, uint arbiterTax)
+    public
     onlyBetContract() returns (uint winnerProfit) {
     // Approach one:
     // We might lose precision, but no overflow
