@@ -19,7 +19,7 @@ const should = require('chai')  // eslint-disable-line
                    .use(require('chai-bignumber')(BigNumber))
                    .should();
 
-const Ebets = artifacts.require('ebets');
+const Ebets = artifacts.require('Ebets');
 const Bet = artifacts.require('Bet');
 const TeamBet = artifacts.require('TeamBet');
 const Monarchy = artifacts.require('Monarchy');
