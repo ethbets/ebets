@@ -8,6 +8,12 @@ export function assertRevert(error) {
   assert.isAbove(error.message.search('revert'), -1, 'Revert');
 }
 
+export async function getUsedGas(tx) {
+  let transaction = await web3.eth.getTransactionReceipt(tx);
+  return transaction.cumulativeGasUsed;
+}
+
+
 /**
 * @const BigNumber Pointer to web3.BigNumber
 */

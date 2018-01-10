@@ -7,7 +7,6 @@
 
 pragma solidity ^0.4.11;
 
-import './ERC20.sol';
 import './teamBet.sol';
 import './governance/governanceInterface.sol';
 import './betlib.sol';
@@ -121,6 +120,7 @@ contract Bet is ProposalInterface {
     afterTimestamp(timestampMatchEnd) {
     betState = BET_STATES.CALLED_RESOLVER;
     StateChanged(betState);
+    //arbiter.getName();
     arbiter.addProposal(this, timestampArbiterDeadline);
   }
   // team = 0 : team 0
@@ -163,8 +163,10 @@ contract Bet is ProposalInterface {
    */
   function terminate() public
     afterTimestamp(timestampSelfDestructDeadline) {
+    team0.collectBet();
+    team1.collectBet();
     arbiter.collectFee.value(this.balance)();
-    require(this.balance == 0);
+    assert(this.balance == 0);
     selfdestruct(arbiter);
   }
 

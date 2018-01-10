@@ -33,15 +33,15 @@ contract Monarchy is Governance {
     ProposalInterface proposalContract = ProposalInterface(proposal);
     proposalContract.__resolve(outcome);
     // "delete" proposal
-    proposals[proposal].deadline = 0;
+    delete proposals[proposal];
     ResolvedProposal(proposal, outcome);
   }
   function addProposal(address proposalAddress, uint deadline) public {
-    // require(block.timestamp < deadline);
-    // // Allow one proposal per bet
-    // require(proposals[proposalAddress].deadline == 0);
-    // proposals[proposalAddress].deadline = deadline;
-    // AddedProposal(proposalAddress, deadline, 0);
+    require(block.timestamp < deadline);
+    // Allow one proposal per bet
+    require(proposals[proposalAddress].deadline == 0);
+    proposals[proposalAddress].deadline = deadline;
+    AddedProposal(proposalAddress, deadline, 0);
   }
   
   function addMember(address member) public onlyMonarch() { 
@@ -51,5 +51,9 @@ contract Monarchy is Governance {
   function removeMember(address /*member*/) public onlyMonarch() {
     members[msg.sender] = 0;
     members[successor] = 1;
+  }
+
+  function getBalance() public onlyMonarch() {
+    msg.sender.transfer(this.balance);
   }
 }

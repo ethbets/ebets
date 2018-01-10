@@ -6,7 +6,6 @@
 */
 
 pragma solidity ^0.4.11;
-import './ERC20.sol';
 import './bet.sol';
 
 contract TeamBet {
@@ -89,5 +88,11 @@ contract TeamBet {
     assert(senderProfit <= notaxProfit);
     winner.transfer(senderProfit);
     return senderProfit;
+  }
+
+  // To be called by the bet and given to arbiter
+  // Call only at the very end of the bet
+  function collectBet() public onlyBetContract() returns(uint collected) {
+    selfdestruct(betContract);
   }
 }

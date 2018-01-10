@@ -28,16 +28,14 @@ contract Governance is GovernanceInterface{
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
-  function addMember(address member);
-  function removeMember(address member);
+  function addMember(address member) public;
+  function removeMember(address member) public;
   // Member cast vote for Proposal if enough are made can call ResolvedCall
-  function castVote(address proposal, uint outcome);
+  function castVote(address proposal, uint outcome) public;
   // Proposal should be solved by the deadline time
-  function addProposal(address proposalAddress, uint deadline);
+  function addProposal(address proposalAddress, uint deadline) public;
   // Collects the arbiter fee
-  function collectFee() payable {
-    if (higherInstance != address(0)) {
-      higherInstance.collectFee.value(this.balance)();
-    }
+  function collectFee()  public payable {
+    //TODO
   }
 }
