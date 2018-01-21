@@ -5,14 +5,11 @@
  * of the BSD license. See the LICENSE file for details.
 */
 
-/*global web3:true */
 import moment from 'moment';
-import contract from 'truffle-contract'
 import React, { Component } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import DateTimePicker from './DateTimePicker';
-import PropTypes from 'prop-types';
 import CircularProgress from 'material-ui/CircularProgress';
 
 import Dialog from 'material-ui/Dialog';
@@ -31,9 +28,11 @@ import versusIcon from 'assets/imgs/icons/vs.png';
 
 import Arbiters from './Arbiters';
 import {getParsedCategories} from 'utils/ebetsCategories';
+import Web3Service from 'services/Web3Service';
+
 //TODO: put this in a configruation file
-const ARBITER_DEADLINE_PERIOD = 7
-const SELF_DESTRUCT_DEADLINE_PERIOD = 14
+const ARBITER_DEADLINE_PERIOD = 7;
+const SELF_DESTRUCT_DEADLINE_PERIOD = 14;
 
 class BetForm extends Component {
   static gridListStyle = {
@@ -123,7 +122,7 @@ class BetForm extends Component {
 
   handleOnChange = (event) => {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const value = target.value;
     const name = target.name;
 
     this.setState({ [name]: value });
@@ -177,45 +176,50 @@ class BetForm extends Component {
     this.initializeTimestamps();
   }
 
+  normalizedTimestamps() {
+    return [
+      new BigNumber(moment(this.state.timestampMatchBegin).unix()),
+      new BigNumber(moment(this.state.timestampMatchEnd).unix()),
+      new BigNumber(moment(this.state.timestampArbiterDeadline).unix()),
+      new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
+    ];
+  }
+
   createContract() {
-    const ebetsContract = contract(EbetsJson);
-    ebetsContract.setProvider(web3.currentProvider);
+    const timestamps = this.normalizedTimestamps();
 
-    //create contract
-    ebetsContract.deployed().then(instance => {
-      if (this.state.arbiterErrorMessage !== null)
-        return new Promise((resolve, reject) => {reject({message: 'Invalid Arbiter'})});
+    const contract = new Web3Service.web3.eth.Contract(
+      EbetsJson.abi,
+      EbetsJson['networks'][Web3Service.networkId].address,
+      { from: Web3Service.selectedAccount }
+    )
+    const parameters = [
+      this.state.selectedArbiter,
+      this.state.team0Name,
+      this.state.team1Name,
+      this.state.category,
+      timestamps
+    ];
+    let gas;
+    contract.methods.createBet(...parameters).estimateGas({from: Web3Service.selectedAccount})
+      .then((gasAmount) => {
+          gas = parseInt(gasAmount * 1.1) // Give 10% more gas
+      })
 
-      const timestamps = [
-        new BigNumber(moment(this.state.timestampMatchBegin).unix()),
-        new BigNumber(moment(this.state.timestampMatchEnd).unix()),
-        new BigNumber(moment(this.state.timestampArbiterDeadline).unix()),
-        new BigNumber(moment(this.state.timestampSelfDestructDeadline).unix())
-      ];
-
-      //const arbiterAddress = Arbiters.addressOf(this.state.selectedArbiter)
-      let createdBet = instance.createBet(
-        this.state.selectedArbiter,
-        this.state.team0Name,
-        this.state.team1Name,
-        this.state.category,
-        timestamps,
-        /* TODO: accounts[0] can be changed by the user,
-         * There should be a way so when the user changes, this is updated too.
-         */
-        {from: web3.eth.accounts[0]}
-        );
-      this.setState({transactionInProcess: true});
-      return createdBet;
-    })
-    .then(response => {
-      this.props.router.push('/bet/' + response.logs[0].args.betAddr);
-    })
-    .catch((error) => {
-      console.log('Error', error);
-      this.setState({ alert: { type: 'danger', message: `Error: ${error.message}`, open: true } });
-      this.setState({transactionInProcess: false});
-    })
+    contract.methods.createBet(...parameters)
+      .send({ gas })
+      .once('transactionHash', (txHash) => {
+        this.setState({ alert: { type: 'info', message: `Created transaction with hash: ${txHash}\
+        Waiting for confirmation`, open: true }, transactionInProcess: true });
+      })
+      .once('error', (error) => {
+        this.setState({ alert: { type: 'danger', message: `Error: ${error.message}\
+        `, open: true }, transactionInProcess: true });
+      })
+      .then(receipt => {
+        this.setState({ transactionInProcess: false });
+        this.props.router.push('/bet/' + receipt.events.createdBet.returnValues['0']);
+      })
   }
 
   render() {
@@ -290,7 +294,7 @@ class BetForm extends Component {
                     filter={(searchText, key, v) => 
                       (v.key.props.primaryText.toLowerCase().indexOf(searchText) !== -1)}
                     openOnFocus={true}
-                    dataSource={Arbiters.arbiters(this.context.web3.networkId)}
+                    dataSource={Arbiters.arbiters(Web3Service.networkId)}
                     dataSourceConfig={{ text: 'value', value: 'key' }}
                     onNewRequest={this.handleArbiterSubmit}
                     onUpdateInput={this.handleArbiterChange}
@@ -352,8 +356,5 @@ class BetForm extends Component {
     )
   }
 }
-BetForm.contextTypes = {
-  web3: PropTypes.object
-};
 
 export default BetForm;
