@@ -5,10 +5,9 @@
  * of the BSD license. See the LICENSE file for details.
 */
 
-/*global web3:true */
 import moment from 'moment';
+import _ from 'lodash';
 
-import PropTypes from 'prop-types';
 import BigNumber from 'bignumber.js';
 import React, { Component } from 'react';
 import TextField from 'material-ui/TextField';
@@ -20,7 +19,6 @@ import RaisedButton from 'material-ui/RaisedButton';
 import * as MColors from 'material-ui/styles/colors';
 import LinkIcon from 'material-ui/svg-icons/content/link';
 import Address from 'components/Address';
-import _ from 'lodash';
 
 import {
   Table,
@@ -55,44 +53,44 @@ class BetController extends Component {
   }
 
   componentWillMount() {
-    if (this.props.isDetailed) {
-      var allBetEvents = this.props.betContractInstance.allEvents({
-      fromBlock: 0,
-      toBlock: 'latest'});
-      this.setState({allBetEvents: allBetEvents});
-      //this.setState({myBetsFilter: filter});
-      allBetEvents.watch((error, result) => {
-        if (result.event === 'NewBet') {
-          web3.eth.getBlock(result.blockNumber, (err, block) => {
-            this.setState(previousState => {
-              const newBet = {
-                from: result.args.from,
-                amount: result.args.amount,
-                forTeam: result.args.forTeam,
-                timestamp: block.timestamp
-              };
-              previousState.betList.push(newBet);
-              previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
-            });
-          });
-        }
-        else if (result.event === 'NewBetERC20') {
-          web3.eth.getBlock(result.blockNumber, (err, block) => {
-            this.setState(previousState => {
-              const newBetERC20 = {
-                from: result.args.from,
-                amount: result.args.amount,
-                forTeam: result.args.forTeam,
-                erc20: result.args.erc20,
-                timestamp: block.timestamp
-              };
-              previousState.betList.push(newBetERC20);
-              previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
-            });
-          });
-        }
-      });
-    }
+    // if (this.props.isDetailed) {
+    //   var allBetEvents = this.props.betContractInstance.allEvents({
+    //   fromBlock: 0,
+    //   toBlock: 'latest'});
+    //   this.setState({allBetEvents: allBetEvents});
+    //   //this.setState({myBetsFilter: filter});
+    //   allBetEvents.watch((error, result) => {
+    //     if (result.event === 'NewBet') {
+    //       Web3Service.web3.eth.getBlock(result.blockNumber, (err, block) => {
+    //         this.setState(previousState => {
+    //           const newBet = {
+    //             from: result.args.from,
+    //             amount: result.args.amount,
+    //             forTeam: result.args.forTeam,
+    //             timestamp: block.timestamp
+    //           };
+    //           previousState.betList.push(newBet);
+    //           previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
+    //         });
+    //       });
+    //     }
+    //     else if (result.event === 'NewBetERC20') {
+    //       Web3Service.web3.eth.getBlock(result.blockNumber, (err, block) => {
+    //         this.setState(previousState => {
+    //           const newBetERC20 = {
+    //             from: result.args.from,
+    //             amount: result.args.amount,
+    //             forTeam: result.args.forTeam,
+    //             erc20: result.args.erc20,
+    //             timestamp: block.timestamp
+    //           };
+    //           previousState.betList.push(newBetERC20);
+    //           previousState.betList.sort((A, B) => A.timestamp < B.timestamp);
+    //         });
+    //       });
+    //     }
+    //   });
+    // }
   }
   componentWillUnmount() {
     if (this.state.allBetEvents)
@@ -393,9 +391,5 @@ class BetController extends Component {
     return null;
   }
 }
-
-BetController.contextTypes = {
-  web3: PropTypes.object
-};
 
 export default BetController;

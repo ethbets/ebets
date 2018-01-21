@@ -63,28 +63,28 @@ class Clock extends React.Component {
     var deltaSeconds;
     var msgString;
     if (this.props.parentState === betState.matchOpen) {
-      deltaSeconds = this.props.beginDate.toNumber() - moment().unix();
+      deltaSeconds = this.props.beginDate - moment().unix();
       msgString = 'Begins in: ';
     }
     else if (this.props.parentState === betState.matchRunning) {
-      deltaSeconds = this.props.endDate.toNumber() - moment().unix();
+      deltaSeconds = this.props.endDate - moment().unix();
       msgString = 'Ends in: '
     }
     else if (this.props.parentState === betState.shouldCallArbiter) {
-      deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
+      deltaSeconds = this.props.resolverDeadline - moment().unix();
       msgString = 'You may invoke Arbiter within: '
     }
     else if (this.props.parentState === betState.calledArbiter) {
-      deltaSeconds = this.props.resolverDeadline.toNumber() - moment().unix();
+      deltaSeconds = this.props.resolverDeadline - moment().unix();
       msgString = 'Arbiter must answer within: '
     }
     else if (this.props.parentState === betState.betExpired) {
-      deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+      deltaSeconds = this.props.terminateDeadline - moment().unix();
       msgString = 'Bet expired, you may request draw within: '
     }
     else {
       // Bet expired!
-      if (moment().unix() > this.props.terminateDeadline.toNumber()) {
+      if (moment().unix() > this.props.terminateDeadline) {
         msgString = 'Bet terminated, self-destruct may be invoked!'
         return (
           <div>
@@ -95,7 +95,7 @@ class Clock extends React.Component {
         );
       }
       else {
-        deltaSeconds = this.props.terminateDeadline.toNumber() - moment().unix();
+        deltaSeconds = this.props.terminateDeadline - moment().unix();
         msgString = 'You may collect your reward within: '
       }
     }

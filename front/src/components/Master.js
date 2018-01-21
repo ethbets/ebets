@@ -14,10 +14,9 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {darkWhite, lightWhite, grey900, red500} from 'material-ui/styles/colors';
 import withWidth, {MEDIUM, LARGE} from 'material-ui/utils/withWidth';
 import WarningIcon from 'material-ui/svg-icons/alert/warning';
-
 import {getParsedCategories} from 'utils/ebetsCategories';
-
 import NavDrawer from './NavDrawer';
+import Web3Service from 'services/Web3Service'
 
 class Master extends Component {
   static propTypes = {
@@ -43,7 +42,7 @@ class Master extends Component {
   getChildContext() {
     return {
       muiTheme: this.state.muiTheme,
-      showUnfeatured: this.state.showUnfeatured      
+      showUnfeatured: this.state.showUnfeatured
     };
   }
 
@@ -201,16 +200,14 @@ class Master extends Component {
     styles.root.paddingLeft = 256;
     styles.footer.paddingLeft = 256;
 
-    const web3Context = this.context.web3;
     var errorMessage = null;
-    if (web3Context.networkId !== null && web3Context.networkId !== '42' && web3Context.networkId !== '3') {
-      errorMessage = <div style={{display: 'flex', flexFlow: 'row', alignItems: 'center'}}> <WarningIcon color={red500} style={{marginLeft: 12, marginRight: 12}}/>
+    if (Web3Service.networkId !== null && Web3Service.networkId !== 42 && Web3Service.networkId !== 3) {
+      errorMessage = <div > <WarningIcon color={red500}/>
         <span>Ebets runs only in the Kovan or Ropsten networks, please switch to use the Dapp</span>
       </div>;
       //this.props.router.push('');
-    }
-    else if (web3Context.accounts.length === 0) {
-      errorMessage = <div style={{display: 'flex', flexFlow: 'row', alignItems: 'center'}}> <WarningIcon color={red500} style={{marginLeft: 12, marginRight: 12}}/>
+    } else if (!Web3Service.selectedAccount) {
+      errorMessage = <div> <WarningIcon color={red500}/>
         <span>Make sure you unlock or have at least one account in your wallet</span>
       </div>;
     }
@@ -218,17 +215,18 @@ class Master extends Component {
       <div>
         <div style={{marginLeft: 210}}>
           <AppBar
-          onLeftIconButtonTouchTap={this.handleTouchTapLeftIconButton}
-          title={(errorMessage === null ) ? this.tabTitleDiv(this.props.location.pathname) : errorMessage}
-          zDepth={0}
-          style={styles.appBar}
-          showMenuIconButton={false}
-        />
+            onLeftIconButtonTouchTap={this.handleTouchTapLeftIconButton}
+            title={(errorMessage === null ) ? this.tabTitleDiv(this.props.location.pathname) : errorMessage}
+            zDepth={1}
+            style={styles.appBar}
+            showMenuIconButton={false}
+          />
           <div style={{marginTop: 73}}>
             {children}
           </div>
         </div>
         <NavDrawer
+          zDepth={2}
           style={styles.navDrawer}
           location={location}
           docked={true}
@@ -240,10 +238,5 @@ class Master extends Component {
     );
   }
 }
-
-Master.contextTypes = {
-  web3: PropTypes.object
-};
-
 
 export default withWidth()(Master);

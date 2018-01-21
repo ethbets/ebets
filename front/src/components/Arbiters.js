@@ -76,7 +76,7 @@ class Arbiters extends Component {
   }
   // TODO: This is bad practice, this should return something agnostic to react models
   static arbiters(networkId) {
-    if (networkId === null) return [ <MenuItem primaryText=''/> ]
+    if (networkId === null) return [ {} ]
 
     return _.reduce(ArbitersJson, (ourArbiters, networks, name) => {
       try {
