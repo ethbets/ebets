@@ -4,12 +4,9 @@
  * This software may be modified and distributed under the terms
  * of the BSD license. See the LICENSE file for details.
 */
-/*global web3:true */
-import contract from 'truffle-contract';
-import _ from 'lodash';
 import moment from 'moment';
+import _ from 'lodash';
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Progress } from 'reactstrap';
 import { Dialog, FlatButton } from 'material-ui'
@@ -30,8 +27,8 @@ import {
   TableRowColumn,
 } from 'material-ui/Table';
 
-import BetController from './BetController';
-
+import BetController from 'components/BetController';
+import Web3Service from 'services/Web3Service';
 import BetJson from 'build/contracts/Bet.json';
 import ERC20Json from 'build/contracts/ERC20.json';
 import GovernanceInterfaceJson from 'build/contracts/GovernanceInterface.json';
@@ -42,7 +39,7 @@ import {betState, stepperState} from 'utils/betStates';
 import {formatEth, formatToken} from 'utils/ethUtils';
 import isAddress from 'utils/validateAddress';
 import {computeFinalGain} from 'utils/betMath';
-import Timer from './Timer';
+import Timer from 'components/Timer';
 import Arbiters from 'components/Arbiters';
 import ERC20Tokens from 'components/ERC20Tokens';
 
@@ -82,7 +79,6 @@ class Bet extends Component {
       withdrawTokens: [],
       approvalData: {},
       approvalHappened: false,
-      terminated: true,
       ...betFields,
     }
 
@@ -91,7 +87,6 @@ class Bet extends Component {
     this.callArbiter = this.callArbiter.bind(this);
     this.callVote = this.callVote.bind(this);
     this.withdraw = this.withdraw.bind(this);
-    this.terminate = this.terminate.bind(this);
     this.CurrencyId = this.CurrencyId.bind(this);
     this.CurrencyAmount = this.CurrencyAmount.bind(this);
   }
@@ -178,12 +173,6 @@ class Bet extends Component {
       }))
       return;
     }
-    if (web3.eth.defaultAccount === undefined) {
-      this.transactionHappened(new Promise((resolve, reject) => {
-        reject('You must unlock your account before betting!');
-      }))
-      return;
-    }
     if (value === undefined || value.lessThan(new BigNumber(0))) {
       this.transactionHappened(new Promise((resolve, reject) => {
         reject('Must bet more than Ξ0');
@@ -196,7 +185,7 @@ class Bet extends Component {
       value = value.times(new BigNumber(1e18));
       const betPromise = this.state.betContractInstance.bet(
         teamToBet,
-        { from: web3.eth.defaultAccount,
+        { from: Web3Service.selectedAccount,
           value: value
         });
       this.transactionHappened(betPromise)
@@ -222,7 +211,7 @@ class Bet extends Component {
         return new Promise((resolve, reject) => {
           web3.eth.sendTransaction({
             to: addr,
-            from: web3.eth.defaultAccount,
+            from: Web3Service.selectedAccount,
             data: ''}, (err, transactionHash) => {
             if (!err) {
               resolve();
@@ -254,7 +243,7 @@ class Bet extends Component {
     this.state.approvalData.erc20Instance.approve(
       this.state.betContractInstance.address,
       this.state.approvalData.value,
-      { from: web3.eth.defaultAccount }
+      { from: Web3Service.selectedAccount }
     )
     .then(tx => {
       console.log('Betting');
@@ -262,7 +251,7 @@ class Bet extends Component {
         this.state.currency,
         this.state.approvalData.team,
         this.state.approvalData.value,
-        { from: web3.eth.defaultAccount }
+        { from: Web3Service.selectedAccount }
       );
       this.transactionHappened(betPromise);
     })
@@ -276,11 +265,11 @@ class Bet extends Component {
     var callArbiterPromise;
     if (closeBet)
       callArbiterPromise = this.state.betContractInstance.close(
-        { from: web3.eth.defaultAccount
+        { from: Web3Service.selectedAccount
         });
     else
       callArbiterPromise = this.state.betContractInstance.updateResult(
-        { from: web3.eth.defaultAccount
+        { from: Web3Service.selectedAccount
         });
     this.transactionHappened(callArbiterPromise);
   };
@@ -288,7 +277,7 @@ class Bet extends Component {
   callVote = (onTeam) => {
     const callVotePromise = this.state.arbiterContractInstance.castVote(
       this.props.address, onTeam,
-      { from: web3.eth.defaultAccount,
+      { from: Web3Service.selectedAccount,
       });
     this.transactionHappened(callVotePromise);
   }
@@ -409,23 +398,6 @@ class Bet extends Component {
     );
   }
 
-  terminate = () => {
-    this.setState({ transactionInProcess: true });
-    this.state.betContractInstance.terminate(
-    { from: web3.eth.defaultAccount,
-    })
-    .then(() => {
-      this.setState({ terminated: true });
-    })
-    .catch(e => {
-      console.log('Error: ' + e);
-    })
-    .then(() => {
-      this.setState({ transactionInProcess: false });
-    });
-  } 
-    
-
   withdraw = () => {
     var _tokens = [];
     var _table = [];
@@ -499,7 +471,7 @@ class Bet extends Component {
   withdrawRewards = () => {
     const withdrawPromise = this.state.betContractInstance.withdraw(
     this.state.withdrawTokens,
-    { from: web3.eth.defaultAccount,
+    { from: Web3Service.selectedAccount,
     });
     this.transactionHappened(withdrawPromise)
     .then(() => {
@@ -756,21 +728,18 @@ class Bet extends Component {
       if (address in this.state.erc20Contracts)
         resolve();
 
-      const erc20Contract = contract(ERC20Json);
-      erc20Contract.setProvider(web3.currentProvider);
-      var erc20Instance = erc20Contract.at(address);
+      const erc20Contract = new Web3Service.web3.eth.Contract(ERC20Json.abi, address);
 
-      var _erc20Contracts = _.clone(this.state.erc20Contracts);
       var promises = [];
-      erc20Instance.then(() => {
-        for (var erc20_field in ERC20Fields)
-          promises.push({field: erc20_field, promise: erc20Instance[erc20_field]()});
-        return Promise.all(promises.map(this.reflectERC20Fields));
-      })
+      for (var erc20_field in ERC20Fields) {
+        promises.push({field: erc20_field, promise: erc20Contract.methods[erc20_field]().call()});
+      }
+
+      Promise.all(promises.map(this.reflectERC20Fields))
       .then((results) => {
         var success = results.filter(x => x.status === 'resolved');
         var _erc20Contracts = _.clone(this.state.erc20Contracts);
-        _erc20Contracts[address] = {instance: erc20Instance, decimals: new BigNumber(0), name: address, symbol: ''};
+        _erc20Contracts[address] = {instance: erc20Contract, decimals: new BigNumber(0), name: address, symbol: ''};
         for (var idx in success) {
           var field = success[idx];
           _erc20Contracts[address][field.f] = field.v;
@@ -785,6 +754,7 @@ class Bet extends Component {
   }
 
   async instantiateContract(cancellationToken) {
+    const account = Web3Service.selectedAccount;
     var objs = {loadCompleted: true};
     async function setAttributes(attributeNames, contractInstance) {
       var promises = Object.keys(attributeNames).map(async (attr) => {
@@ -796,16 +766,13 @@ class Bet extends Component {
             && attr !== 'ERC20BetsToTeam1'
             && attr !== 'ERC20Team0BetSum'
             && attr !== 'ERC20Team1BetSum') { // idem
-          objs[attr] = await contractInstance[attr]()
+          objs[attr] = await contractInstance.methods[attr]().call()
         }
       });
       await Promise.all(promises);
       return objs;
     }
-    const betContract = contract(BetJson);
-    const arbiterContract = contract(GovernanceInterfaceJson);
-    arbiterContract.setProvider(web3.currentProvider);
-    betContract.setProvider(web3.currentProvider);
+
     var betAddress;
     var showDetails = false;
     if (this.props.params !== undefined) {
@@ -815,23 +782,12 @@ class Bet extends Component {
     else
       betAddress = this.props.address;
 
-    var betContractInstance;
-    var governanceAddress;
-    var arbiterContractInstance;
-    try {
-      betContractInstance = betContract.at(betAddress);
-      governanceAddress = await betContractInstance.arbiter();
-      if (governanceAddress === '0x') {
-        return;
-      }
-      arbiterContractInstance = arbiterContract.at(governanceAddress);
-      this.setState({ terminated: false });
-    } catch(e) {
-      console.log('Error in contract instantiation: ' + e);
-      return;
-    }
+    const betContract = new Web3Service.web3.eth.Contract(BetJson.abi, betAddress); 
+    const governanceAddress = await betContract.methods.arbiter().call();
+    console.log('FINE', governanceAddress)
+    const arbiterContract = new Web3Service.web3.eth.Contract(GovernanceInterfaceJson.abi, governanceAddress);
 
-    var stateObjects = await setAttributes(this.state, betContractInstance);
+    var stateObjects = await setAttributes(this.state, betContract);
     try{
       stateObjects['iconUrl'] = require('assets/imgs/' + this.props.category + '.png');
     }
@@ -845,192 +801,200 @@ class Bet extends Component {
     var _ERC20Team0BetSum = {};
     var _ERC20Team1BetSum = {};
     var _ERC20HasBetOnTeam = {};
-
-    if (web3.eth.defaultAccount !== undefined) {
-      isArbiter = await arbiterContractInstance.isMember(web3.eth.defaultAccount);
-      betsToTeam0 = await betContractInstance.betsToTeam0(web3.eth.defaultAccount);
-      betsToTeam1 = await betContractInstance.betsToTeam1(web3.eth.defaultAccount);
-    }
-    else {
-      betsToTeam0 = new BigNumber(0);
-      betsToTeam1 = new BigNumber(0);
-    }
-
-    var _TAX = stateObjects['TAX'].dividedBy(100);
-
-    var _validERC20 = [];
-    var _valid = await betContractInstance.validERC20(0);
-    var i = 1;
-    var betToTeamERC20 = null;
-    var amount = new BigNumber(0);
-    while (_valid != '0x') {
-      _valid = _valid.toLowerCase();
-      _validERC20.push(_valid);
-
-      await this.instantiateERC20Contract(_valid);
-
-      try {
-        _ERC20Team0BetSum[_valid] = await betContractInstance.ERC20Team0BetSum(_valid);
-        _ERC20Team1BetSum[_valid] = await betContractInstance.ERC20Team1BetSum(_valid);
-      } catch(e) {
-        console.log('Error: ' + e);
+    try {
+      if (account !== undefined) {
+        isArbiter = await arbiterContract.methods.isMember(account).call();
+        betsToTeam0 = await betContract.methods.betsToTeam0(account).call();
+        betsToTeam1 = await betContract.methods.betsToTeam1(account).call();
+      }
+      else {
+        betsToTeam0 = new BigNumber(0);
+        betsToTeam1 = new BigNumber(0);
+      }
+      var _TAX = stateObjects['TAX'] / 100;
+      var _validERC20 = [];
+      var _valid;
+       try {
+        _valid = await betContract.methods.validERC20(0).call();
+      }
+      catch(err) {
+        _valid = '0x';
       }
 
-      if (web3.eth.defaultAccount !== undefined ) {
+      var i = 1;
+      var betToTeamERC20 = null;
+      var amount = new BigNumber(0);
+      while (_valid != '0x') {
+        _valid = _valid.toLowerCase();
+        _validERC20.push(_valid);
+
+        await this.instantiateERC20Contract(_valid);
+
         try {
-          var bets0 = await betContractInstance.ERC20BetsToTeam0(_valid, web3.eth.defaultAccount);
-          var bets1 = await betContractInstance.ERC20BetsToTeam1(_valid, web3.eth.defaultAccount);
-          if (bets0.gt(0) || bets1.gt(0)) {
-            if (bets0.gt(0)) {
-              if (betToTeamERC20 === true)
-                console.log('Error: user has bet on different teams using different currencies');
-              betToTeamERC20 = false;
-              amount = bets0;
-            }
-            else {
-              if (betToTeamERC20 === false)
-                console.log('Error: user has bet on different teams using different currencies');
-              betToTeamERC20 = true;
-              amount = bets1;
-            }
-            _ERC20HasBetOnTeam[_valid] = {team: betToTeamERC20, amount: amount};
-          }
+          _ERC20Team0BetSum[_valid] = await betContract.methods.ERC20Team0BetSum(_valid).call();
+          _ERC20Team1BetSum[_valid] = await betContract.methods.ERC20Team1BetSum(_valid).call();
         } catch(e) {
           console.log('Error: ' + e);
         }
-      }
 
-      _valid = await betContractInstance.validERC20(i);
-      i += 1;
-    }
-
-    const betToTeamEther = (betsToTeam0.greaterThan(new BigNumber(0))) ? false :
-                             ((betsToTeam1.greaterThan(new BigNumber(0))) ? true : null);
- 
-    const betToTeam = (betToTeamEther !== null) ? betToTeamEther : betToTeamERC20;
-    
-    const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
-      stateObjects.betState.toNumber(), betToTeam);
-    
-    // Should check if has bet
-    var hasEverBet = false;
-    if (this.props.mybets) {
-      //hasEverBet = await this.hasBet(betContractInstance);
-      hasEverBet = betToTeam;
-    }
-    const arbiterName = await arbiterContractInstance.getName();
-    
-    cancellationToken.throwIfCancelled();
-    this.setState({
-      ...stateObjects,
-      TAX: _TAX,
-      hasBetOnTeam: betToTeam,
-      hasBetOnTeamEther: {
-        team: betToTeamEther,
-        amount: (betToTeamEther === false) ? betsToTeam0 : 
-                 (betToTeamEther === true) ? betsToTeam1 : new BigNumber(0)
-      },
-      ERC20HasBetOnTeam: _ERC20HasBetOnTeam,
-      ERC20Team0BetSum: _ERC20Team0BetSum,
-      ERC20Team1BetSum: _ERC20Team1BetSum,
-      validERC20: _validERC20,
-      hasEverBet: hasEverBet,
-      currentBetState: newStates.newOverAllState,
-      stepperState: newStates.newStepperState,
-
-      isArbiter: isArbiter,
-      arbiterContractInstance: arbiterContractInstance,
-      arbiterInfo: {
-        name: arbiterName,
-        verified: Arbiters.isVerifiedArbiter(arbiterContractInstance.address,this.context.web3.networkId)
-      },
-      betContractInstance: betContractInstance,
-      showDetails: showDetails
-    });
-    // Only watch new events
-    var laterEvents = betContractInstance.allEvents({
-      fromBlock: 'latest',
-      toBlock: 'latest'
-    });
-    
-    laterEvents.watch((error, response) => {
-      if (response.event === 'NewBet') {
-        console.log('bet');
-        cancellationToken.throwIfCancelled();
-        if (response.args.forTeam === false)
-          this.setState(previousState => (
-            { team0BetSum : previousState.team0BetSum.plus(response.args.amount) }));
-        else
-         this.setState(previousState => (
-            { team1BetSum : previousState.team1BetSum.plus(response.args.amount) }));
-
-        if (response.args.from === web3.eth.defaultAccount) {
-          this.setState(previousState => {
-            if (previousState.hasBetOnTeam === null)
-              previousState.hasBetOnTeam = response.args.forTeam;
-            if (previousState.hasBetOnTeamEther.team === null)
-              previousState.hasBetOnTeamEther = {
-                team: response.args.forTeam,
-                amount: response.args.amount
-              };
-            else
-              previousState.hasBetOnTeamEther = {
-                team: response.args.forTeam,
-                amount: previousState.hasBetOnTeamEther.amount.add(response.args.amount)
+        if (Web3Service.selectedAccount !== undefined ) {
+          try {
+            var bets0 = await betContract.methods.ERC20BetsToTeam0(_valid, account).call();
+            var bets1 = await betContract.methods.ERC20BetsToTeam1(_valid, account).call();
+            if (bets0.gt(0) || bets1.gt(0)) {
+              if (bets0.gt(0)) {
+                if (betToTeamERC20 === true)
+                  console.log('Error: user has bet on different teams using different currencies');
+                betToTeamERC20 = false;
+                amount = bets0;
               }
-          });
-        }
-      }
-      else if (response.event === 'NewBetERC20') {
-        cancellationToken.throwIfCancelled();
-        var _ERC20Team0BetSum = _.clone(this.state.ERC20Team0BetSum);
-        var _ERC20Team1BetSum = _.clone(this.state.ERC20Team1BetSum);
-        var erc20 = response.args.erc20.toLowerCase();
-        var amount = response.args.amount;
-
-        if (this.state.validERC20.indexOf(erc20) === -1) {
-          var _valid = _.clone(this.state.validERC20);
-          _valid.push(erc20);
-          this.setState({ validERC20 : _valid });
-          _ERC20Team0BetSum[erc20] = new BigNumber(0);
-          _ERC20Team1BetSum[erc20] = new BigNumber(0);
-        }
-
-        if (response.args.forTeam === false) {
-          _ERC20Team0BetSum[erc20] = _ERC20Team0BetSum[erc20].plus(amount);
-          this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum });
-        }
-        else {
-          _ERC20Team1BetSum[erc20] = _ERC20Team1BetSum[erc20].plus(amount);
-          this.setState({ ERC20Team1BetSum : _ERC20Team1BetSum });
-        }
-
-        if (response.args.from === web3.eth.defaultAccount) {
-          var _hasBetOnTeam = _.clone(this.state.hasBetOnTeam);
-          if (_hasBetOnTeam === null)
-            _hasBetOnTeam = response.args.forTeam;
-          var _ERC20HasBetOnTeam = _.clone(this.state.ERC20HasBetOnTeam);
-          if (erc20 in _ERC20HasBetOnTeam) {
-            _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: _ERC20HasBetOnTeam[erc20].amount.add(amount) };
+              else {
+                if (betToTeamERC20 === false)
+                  console.log('Error: user has bet on different teams using different currencies');
+                betToTeamERC20 = true;
+                amount = bets1;
+              }
+              _ERC20HasBetOnTeam[_valid] = {team: betToTeamERC20, amount: amount};
+            }
+          } catch(e) {
+            console.log('Error: ' + e);
           }
-          else {
-            _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: (new BigNumber(amount)) };
-          }
-          this.setState({ hasBetOnTeam : _hasBetOnTeam,
-                          ERC20HasBetOnTeam : _ERC20HasBetOnTeam });
         }
+
+        _valid = await betContract.methods.validERC20(i).call();
+        i += 1;
       }
-      else if (response.event === 'StateChanged') {
-        const responseState = response.args.state.toNumber();
-        var newStates = stateTransitionFunctions.fromBetStateToCurrentState(
-          responseState, this.state.hasBetOnTeam);
-        cancellationToken.throwIfCancelled();
-        this.setState({
-          currentBetState: newStates.newOverAllState,
-          stepperState: newStates.newStepperState
-        });
+
+      const betToTeamEther = ((new BigNumber(betsToTeam0)).greaterThan(new BigNumber(0))) ? false :
+                              (((new BigNumber(betsToTeam0)).greaterThan(new BigNumber(0))) ? true : null);
+      const betToTeam = (betToTeamEther !== null) ? betToTeamEther : betToTeamERC20;
+
+      const newStates = stateTransitionFunctions.fromBetStateToCurrentState(
+        stateObjects.betState, betToTeam);
+
+      // Should check if has bet
+      var hasEverBet = false;
+      if (this.props.category === 'my_bets') {
+        hasEverBet = await this.hasBet(betContract);
       }
-    });
+      const arbiterName = await arbiterContract.methods.getName().call();
+
+      cancellationToken.throwIfCancelled();
+      this.setState({
+        ...stateObjects,
+        TAX: _TAX,
+        hasBetOnTeam: betToTeam,
+        hasBetOnTeamEther: {
+          team: betToTeamEther,
+          amount: (betToTeamEther === false) ? betsToTeam0 :
+                  (betToTeamEther === true) ? betsToTeam1 : new BigNumber(0)
+        },
+        ERC20HasBetOnTeam: _ERC20HasBetOnTeam,
+        ERC20Team0BetSum: _ERC20Team0BetSum,
+        ERC20Team1BetSum: _ERC20Team1BetSum,
+        validERC20: _validERC20,
+        hasEverBet: hasEverBet,
+        currentBetState: newStates.newOverAllState,
+        stepperState: newStates.newStepperState,
+
+        isArbiter: isArbiter,
+        arbiterContractInstance: arbiterContract,
+        arbiterInfo: {
+          name: arbiterName,
+          verified: Arbiters.isVerifiedArbiter(arbiterContract.address, Web3Service.networkId)
+        },
+        betContractInstance: betContract,
+        showDetails: showDetails
+      });
+    } catch(err) {
+      console.error('Bet malformed');
+      console.log(err)
+      this.setState({loadCompleted: true});
+    }
+    // Only watch new events
+    // var laterEvents = betContractInstance.allEvents({
+    //   fromBlock: 'latest',
+    //   toBlock: 'latest'
+    // });
+
+    // laterEvents.watch((error, response) => {
+    //   if (response.event === 'NewBet') {
+    //     console.log('bet');
+    //     cancellationToken.throwIfCancelled();
+    //     if (response.args.forTeam === false)
+    //       this.setState(previousState => (
+    //         { team0BetSum : previousState.team0BetSum.plus(response.args.amount) }));
+    //     else
+    //      this.setState(previousState => (
+    //         { team1BetSum : previousState.team1BetSum.plus(response.args.amount) }));
+
+    //     if (response.args.from === Web3Service.selectedAccount) {
+    //       this.setState(previousState => {
+    //         if (previousState.hasBetOnTeam === null)
+    //           previousState.hasBetOnTeam = response.args.forTeam;
+    //         if (previousState.hasBetOnTeamEther.team === null)
+    //           previousState.hasBetOnTeamEther = {
+    //             team: response.args.forTeam,
+    //             amount: response.args.amount
+    //           };
+    //         else
+    //           previousState.hasBetOnTeamEther = {
+    //             team: response.args.forTeam,
+    //             amount: previousState.hasBetOnTeamEther.amount.add(response.args.amount)
+    //           }
+    //       });
+    //     }
+    //   }
+    //   else if (response.event === 'NewBetERC20') {
+    //     cancellationToken.throwIfCancelled();
+    //     var _ERC20Team0BetSum = _.clone(this.state.ERC20Team0BetSum);
+    //     var _ERC20Team1BetSum = _.clone(this.state.ERC20Team1BetSum);
+    //     var erc20 = response.args.erc20.toLowerCase();
+    //     var amount = response.args.amount;
+
+    //     if (this.state.validERC20.indexOf(erc20) === -1) {
+    //       var _valid = _.clone(this.state.validERC20);
+    //       _valid.push(erc20);
+    //       this.setState({ validERC20 : _valid });
+    //       _ERC20Team0BetSum[erc20] = new BigNumber(0);
+    //       _ERC20Team1BetSum[erc20] = new BigNumber(0);
+    //     }
+
+    //     if (response.args.forTeam === false) {
+    //       _ERC20Team0BetSum[erc20] = _ERC20Team0BetSum[erc20].plus(amount);
+    //       this.setState({ ERC20Team0BetSum : _ERC20Team0BetSum });
+    //     }
+    //     else {
+    //       _ERC20Team1BetSum[erc20] = _ERC20Team1BetSum[erc20].plus(amount);
+    //       this.setState({ ERC20Team1BetSum : _ERC20Team1BetSum });
+    //     }
+
+    //     if (response.args.from === Web3Service.selectedAccount) {
+    //       var _hasBetOnTeam = _.clone(this.state.hasBetOnTeam);
+    //       if (_hasBetOnTeam === null)
+    //         _hasBetOnTeam = response.args.forTeam;
+    //       var _ERC20HasBetOnTeam = _.clone(this.state.ERC20HasBetOnTeam);
+    //       if (erc20 in _ERC20HasBetOnTeam) {
+    //         _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: _ERC20HasBetOnTeam[erc20].amount.add(amount) };
+    //       }
+    //       else {
+    //         _ERC20HasBetOnTeam[erc20] = { team: response.args.forTeam, amount: (new BigNumber(amount)) };
+    //       }
+    //       this.setState({ hasBetOnTeam : _hasBetOnTeam,
+    //                       ERC20HasBetOnTeam : _ERC20HasBetOnTeam });
+    //     }
+    //   }
+    //   else if (response.event === 'StateChanged') {
+    //     const responseState = response.args.state.toNumber();
+    //     var newStates = stateTransitionFunctions.fromBetStateToCurrentState(
+    //       responseState, this.state.hasBetOnTeam);
+    //     cancellationToken.throwIfCancelled();
+    //     this.setState({
+    //       currentBetState: newStates.newOverAllState,
+    //       stepperState: newStates.newStepperState
+    //     });
+    //   }
+    // });
     if (MOCK) {
       setTimeout(() => {this.setState(() => {
         return {
@@ -1048,34 +1012,28 @@ class Bet extends Component {
     }
   }
 
-  hasBet = (betContractInstance) => {
-    return new Promise((resolve, reject) => {
-      var betEvents = betContractInstance.allEvents({
-      fromBlock: 0,
-      toBlock: 'latest'});
-      //this.setState({myBetsFilter: filter});
-      betEvents.get((error, result) => {
-        if (error) 
-          reject(error);
-        else {
-          for (var betEvent in result)
-            if (result[betEvent].args.from === web3.eth.defaultAccount) {
-              resolve(true);
-              return;
-            }
-          resolve(false);
-        }
-      });
-    });
-  }
+  // hasBet = (betContractInstance) => {
+  //   return new Promise((resolve, reject) => {
+  //     var betEvents = betContractInstance.allEvents({
+  //     fromBlock: 0,
+  //     toBlock: 'latest'});
+  //     //this.setState({myBetsFilter: filter});
+  //     betEvents.get((error, result) => {
+  //       if (error)
+  //         reject(error);
+  //       else {
+  //         for (var betEvent in result)
+  //           if (result[betEvent].args.from === Web3Service.selectedAccount) {
+  //             resolve(true);
+  //             return;
+  //           }
+  //         resolve(false);
+  //       }
+  //     });
+  //   });
+  // }
 
   render() {
-    if (this.props.mybets && this.state.hasBetOnTeam === null)
-      return null;
-
-    if (this.state.terminated)
-      return null;
-
     if (!this.state.loadCompleted)
       return (
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -1101,9 +1059,5 @@ class Bet extends Component {
       return <this.FilteredBet />
     }
 }
-
-Bet.contextTypes = {
-  web3: PropTypes.object
-};
 
 export default Bet;
