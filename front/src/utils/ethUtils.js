@@ -8,7 +8,7 @@
 import BigNumber from 'bignumber.js';
 
 export function formatEth(inWei) {
-  return inWei.dividedBy(oneEthInWei()).toString();
+  return new BigNumber(inWei).dividedBy(oneEthInWei()).toString();
 }
 
 export function oneEthInWei() {
@@ -22,7 +22,7 @@ export function ethToWei(inEth) {
 
 export function formatToken(inWei, dec = 0) {
   if (dec === 0)
-    return inWei.toString();
-  return inWei.dividedBy((new BigNumber(10)).toPower(dec)).toString();
+    return inWei;
+  return new BigNumber(inWei).dividedBy((new BigNumber(10)).toPower(dec)).toString();
 }
 

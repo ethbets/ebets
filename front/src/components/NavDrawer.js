@@ -72,39 +72,39 @@ class NavDrawer extends Component {
         value={location.pathname}
         onChange={onChangeList}
       >
-        <ListItem 
+        <ListItem
           primaryText='FAQ'
           value='/faq'
           href='#/faq'
           />
-        <ListItem 
+        <ListItem
           primaryText='My Bets'
           value='/category/my_bets'
           href='#/category/my_bets'
           />
-        <ListItem 
+        <ListItem
           primaryText='Create bet'
           value='/new_bet'
           href='#/new_bet'
-          />
-          <ListItem 
+        />
+        <ListItem
           primaryText='Arbiters'
           value='/arbiters'
           href='#/arbiters'
-          />
-          <Divider />
-          <ListItem
-            onTouchTap={() => {
-              this.props.onToggleUnfeatured(!this.state.showUnfeatured);
-              this.setState(previousState => ({showUnfeatured: !previousState.showUnfeatured}))}}
-          >
-          <Checkbox 
-            labelPosition='left'label='Unfeatured'
-            checkedIcon={ <Visibility /> }
-            uncheckedIcon={ <VisibilityOff /> }
-            checked={this.state.showUnfeatured}
-          />
-          </ListItem>
+        />
+        <Divider />
+        <ListItem
+          onTouchTap={() => {
+            this.props.onToggleUnfeatured(!this.state.showUnfeatured);
+            this.setState(previousState => ({showUnfeatured: !previousState.showUnfeatured}))}}
+        >
+        <Checkbox
+          labelPosition='left'label='Unfeatured'
+          checkedIcon={ <Visibility /> }
+          uncheckedIcon={ <VisibilityOff /> }
+          checked={this.state.showUnfeatured}
+        />
+        </ListItem>
         <ListItem
           primaryText='All'
           value='/category/all_bets'
