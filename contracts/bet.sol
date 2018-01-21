@@ -71,7 +71,6 @@ contract Bet is ProposalInterface {
   uint public timestampSelfDestructDeadline;
 
   uint8 public ARBITER_TAX;
-  uint constant TIMESTAMP_MARGIN = 1000;
 
   event StateChanged(BET_STATES state);
   event Withdraw(address winner, uint amount);
@@ -136,19 +135,19 @@ contract Bet is ProposalInterface {
     }
     else if (betState == BET_STATES.TEAM_ZERO_WON) {
       profit = team0.getOriginalBet(winner);
-      profit += team1.collectProfit(winner, team0.betSum(), profit, ARBITER_TAX);
+      profit += team1.collectProfit(winner, profit, team0.betSum(), ARBITER_TAX);
     }
     else if (betState == BET_STATES.TEAM_ONE_WON) {
       profit = team1.getOriginalBet(winner);
-      profit += team0.collectProfit(winner, team1.betSum(), profit, ARBITER_TAX);
+      profit += team0.collectProfit(winner, profit, team1.betSum(), ARBITER_TAX);
     }
     Withdraw(winner, profit);
   }
 
   /* After the arbiter appeals deadline and before the self-destruct
    * deadline, anyone can set the bet state to DRAW.
-   * this is in the unlikely event if the arbiter don't
-   * decide in time, every one can collect the funds.
+   * this is in the unlikely event that the arbiter doesn't
+   * decide in time.
   */
   function close() public
     afterTimestamp(timestampAppealsDeadline)
@@ -166,7 +165,6 @@ contract Bet is ProposalInterface {
     team0.collectBet();
     team1.collectBet();
     arbiter.collectFee.value(this.balance)();
-    assert(this.balance == 0);
     selfdestruct(arbiter);
   }
 

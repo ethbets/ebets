@@ -34,6 +34,8 @@ const BET_STATES = {
 };
 const oneEther = new BigNumber(web3.toWei(1, 'ether'));
 const twoEther = new BigNumber(web3.toWei(2, 'ether'));
+const threeEther = new BigNumber(web3.toWei(3, 'ether'));
+
 const betTax = 1;  // 1% tax
 
 contract('Bet', accounts => {
@@ -42,6 +44,7 @@ contract('Bet', accounts => {
   const user0 = accounts[2];
   const user1 = accounts[3];
   const user2 = accounts[4];
+  const user3 = accounts[5];
 
   let arbiterInstance;
   let betInstance;
@@ -90,18 +93,25 @@ contract('Bet', accounts => {
 
   it('User 0 should bet on team 0', async () => {
     const tx = await team0Instance.sendTransaction(
-        {from: user0, value: web3.toWei(1, 'ether'), gas: 100000});
+        {from: user0, value: oneEther, gas: 100000});
     logUsedGas('Bet', await getUsedGas(tx.tx));
     
     const amountBet = await team0Instance.betsToTeam(user0);
     amountBet.should.be.bignumber.equal(oneEther);
   });
 
-  it('User 1 should bet on team 1', async () => {
-    await team1Instance.sendTransaction(
-        {from: user1, value: web3.toWei(2, 'ether'), gas: 100000});
-    const amountBet = await team1Instance.betsToTeam(user1);
+  it('User 1 should bet on team 0', async () => {
+    await team0Instance.sendTransaction(
+        {from: user1, value: twoEther, gas: 100000});
+    const amountBet = await team0Instance.betsToTeam(user1);
     amountBet.should.be.bignumber.equal(twoEther);
+  });
+
+  it('User 2 should bet on team 1', async () => {
+    await team1Instance.sendTransaction(
+        {from: user2, value: oneEther, gas: 100000});
+    const amountBet = await team1Instance.betsToTeam(user2);
+    amountBet.should.be.bignumber.equal(oneEther);
   });
 
   it('Should wait 3 days, so match begins', async () => {
@@ -112,7 +122,7 @@ contract('Bet', accounts => {
   it('Users should not be able to bet', async () => {
     try {
       await team0Instance.sendTransaction(
-          {from: user0, value: web3.toWei(1, 'ether'), gas: 100000});
+          {from: user0, value: oneEther, gas: 100000});
     } catch (e) {
       assertRevert(e);
     }
@@ -157,9 +167,9 @@ contract('Bet', accounts => {
     await waitNDays(2);
   });
 
-  it('User 2 should be withdraw on behalf of user 0', async () => {
+  it('User 3 should be withdraw on behalf of user 0', async () => {
     const previousBalance = await web3.eth.getBalance(user0);
-    let tx = await betInstance.withdraw(user0, false, {from: user2});
+    let tx = await betInstance.withdraw(user0, false, {from: user3});
     logUsedGas('Withdraw bet', await getUsedGas(tx.tx));
     const userProfit = (await web3.eth.getBalance(user0)).sub(previousBalance);
 
@@ -167,7 +177,7 @@ contract('Bet', accounts => {
     // prev + originalBet + ((share)*loserSum - tax * loserSum)
     // prev + 1 + 1*2 - 0.01*2 = prev + 2.8
 
-    const profit = new BigNumber(web3.toWei(2.98, 'ether'));
+    const profit = new BigNumber(web3.toWei(1.303333333333333333, 'ether'));
     userProfit.should.be.bignumber.equal(profit);
 
     const events = getEvents(tx, 'Withdraw');
@@ -175,9 +185,9 @@ contract('Bet', accounts => {
     events[0].amount.should.be.bignumber.equal(profit);
   });
 
-  it('Can withdraw only once', async () => {
+  it('User 3 can withdraw only once', async () => {
     try {
-      await betInstance.withdraw(user0, false, {from: user2});
+      await betInstance.withdraw(user0, false, {from: user3});
     } catch (e) {
       assertRevert(e);
     }
@@ -190,7 +200,7 @@ contract('Bet', accounts => {
 
   it('Should terminate the bet', async () => {
     let profit = new BigNumber(web3.toWei(2 * (betTax / 100), 'ether'));
-    let terminateTx = await betInstance.terminate({from: user2});
+    let terminateTx = await betInstance.terminate({from: user3});
     logUsedGas('Terminate bet', await getUsedGas(terminateTx.tx));
 
     const previousBalance = await web3.eth.getBalance(monarch);

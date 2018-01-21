@@ -25,6 +25,7 @@ contract TeamBet {
   }
 
   event NewBet(address indexed from, uint amount);
+  event LOG(uint amount);
 
   function TeamBet(string _name) public {
     name = _name;
@@ -34,16 +35,8 @@ contract TeamBet {
   function () public payable
     beforeTimestamp(betContract.timestampMatchBegin()) {
     //require(!betContract.arbiter.isMember(msg.sender));
-    require(msg.value > 0);
-
-    uint prevSum;
-    require(betsToTeam[msg.sender] == 0);
-    prevSum = betSum;
-    require((prevSum + msg.value) >= prevSum); // Overflow
     betSum += msg.value;
-    assert(betSum >= prevSum);
     betsToTeam[msg.sender] += msg.value;
-
     NewBet(msg.sender, msg.value);
   }
 
@@ -63,21 +56,23 @@ contract TeamBet {
    * Before: winner not paid
    * After: Due funds transfered to winner address
   */
-  function collectProfit(address winner, uint otherBetAmount, uint otherBetSum, uint arbiterTax)
+  function collectProfit(address winner, uint betOnOtherBet, uint otherBetSum, uint arbiterTax)
     public
     onlyBetContract() returns (uint winnerProfit) {
+    uint precision = 10 ** 18;
     // Approach one:
     // We might lose precision, but no overflow
-    var senderPc = otherBetAmount / otherBetSum;
-    assert(senderPc >= 0 && senderPc <= 1);
-    
-    var senderProfit = senderPc * betSum;
+    var senderPc = (betOnOtherBet * precision) / otherBetSum;
+
+    assert(senderPc >= 0 && senderPc <= precision);
+
+    var senderProfit = (senderPc * betSum) / precision;
     assert(senderProfit <= betSum);
     
     // Approach two:
     // Better precision, since multiplication is done first, but may overflow
     //uint sender_profit = (bet * profit) / sum;
-    
+
     var mulTax = (senderProfit * arbiterTax);
     require(mulTax >= senderProfit); // Overflow
     var tax = mulTax / 100;
