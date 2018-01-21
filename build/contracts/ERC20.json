@@ -173,7 +173,7 @@
       "type": "event"
     }
   ],
-  "unlinked_binary": "0x",
+  "bin": "0x",
   "networks": {
     "3": {
       "updated_at": 1504022633199
