@@ -9,7 +9,7 @@ pragma solidity ^0.4.11;
 import './governance.sol';
 
 contract StaticArbiter is Governance {
-  string public constant name = "Custom";
+  string public name;
   uint nMembers;
 
   modifier isActiveMember() {
@@ -22,10 +22,12 @@ contract StaticArbiter is Governance {
     _;
   }
 
-  function StaticArbiter(address[] _members) {
+ function StaticArbiter(string _name, address[] _members) {
+    name = _name;
     nMembers = _members.length;
-    for (uint i = 0; i < _members.length; ++i)
+    for (uint i = 0; i < _members.length; ++i) {
       members[_members[i]] = 1;
+    }
   }
 
   function isMember(address user) constant returns(bool member) {
@@ -40,19 +42,19 @@ contract StaticArbiter is Governance {
 
   function castVote(address proposal, uint outcome) 
     isActiveMember
-    beforeDeadline(proposals[proposal].deadline) {
+    beforeDeadline(proposals[proposal].deadline)
+  {
+      require(proposals[proposal].voted[msg.sender] == 0); // Did not voted before
+      require(outcome != 0); // Cannot erase vote
 
-    require(proposals[proposal].voted[msg.sender] == 0); // Did not voted before
-    require(outcome != 0); // Cannot erase vote
-    
-    proposals[proposal].outcomes[outcome] += 1;
-    uint votesInOutcome = proposals[proposal].outcomes[outcome];
-    if (votesInOutcome >= proposals[proposal].quorumNeeded) {
-      ProposalInterface proposalContract = ProposalInterface(proposal);
-      proposalContract.__resolve(outcome);
-      ResolvedProposal(proposal, outcome);
-    }
-    proposals[proposal].voted[msg.sender] = outcome;
+      proposals[proposal].outcomes[outcome] += 1;
+      uint votesInOutcome = proposals[proposal].outcomes[outcome];
+      if (votesInOutcome >= proposals[proposal].quorumNeeded) {
+        ProposalInterface proposalContract = ProposalInterface(proposal);
+        proposalContract.__resolve(outcome);
+        ResolvedProposal(proposal, outcome);
+      }
+      proposals[proposal].voted[msg.sender] = outcome;
   }
 
   function declareHanged(address proposal, uint[] arbiterVotes) {
@@ -75,13 +77,13 @@ contract StaticArbiter is Governance {
   }
 
   function addProposal(address proposalAddress, uint deadline) 
-    beforeDeadline(deadline) {
-
-    // Allow one proposal per bet
-    require(proposals[proposalAddress].deadline == 0);
-    proposals[proposalAddress].deadline = deadline;
-    // Require simple majority
-    proposals[proposalAddress].quorumNeeded = nMembers/2 + 1;
+    beforeDeadline(deadline)
+  {
+      // Allow one proposal per bet
+      require(proposals[proposalAddress].deadline == 0);
+      proposals[proposalAddress].deadline = deadline;
+      // Require simple majority
+      proposals[proposalAddress].quorumNeeded = nMembers/2 + 1;
   }
   
   // Static arbiter
