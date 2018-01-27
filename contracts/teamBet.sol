@@ -25,7 +25,6 @@ contract TeamBet {
   }
 
   event NewBet(address indexed from, uint amount);
-  event LOG(uint amount);
 
   function TeamBet(string _name) public {
     name = _name;
@@ -68,7 +67,6 @@ contract TeamBet {
 
     var senderProfit = (senderPc * betSum) / precision;
     assert(senderProfit <= betSum);
-    
     // Approach two:
     // Better precision, since multiplication is done first, but may overflow
     //uint sender_profit = (bet * profit) / sum;

@@ -177,7 +177,7 @@ contract('Bet', accounts => {
     // prev + originalBet + ((share)*loserSum - tax * loserSum)
     // prev + 1 + 1*2 - 0.01*2 = prev + 2.8
 
-    const profit = new BigNumber(web3.toWei(1.303333333333333333, 'ether'));
+    const profit = new BigNumber(web3.toWei('1.33', 'ether'));
     userProfit.should.be.bignumber.equal(profit);
 
     const events = getEvents(tx, 'Withdraw');
@@ -193,13 +193,30 @@ contract('Bet', accounts => {
     }
   });
 
+  it('User 3 should be withdraw on behalf of user 1', async () => {
+    const previousBalance = await web3.eth.getBalance(user1);
+    let tx = await betInstance.withdraw(user1, false, {from: user3});
+    logUsedGas('Withdraw bet', await getUsedGas(tx.tx));
+    const userProfit = (await web3.eth.getBalance(user1)).sub(previousBalance);
+
+    // balance should be:
+    // prev + originalBet + ((share)*loserSum - tax * loserSum)
+
+    const profit = new BigNumber(web3.toWei('2.66', 'ether'));
+    userProfit.should.be.bignumber.equal(profit);
+
+    const events = getEvents(tx, 'Withdraw');
+    assert.equal(events[0].winner, user1);
+    events[0].amount.should.be.bignumber.equal(profit);
+  });
+
   it('Should wait 2 days, so Selfdestruct time begin', async () => {
     console.log('[Selfdestruct time begin]'.yellow);
     await waitNDays(2);
   });
 
   it('Should terminate the bet', async () => {
-    let profit = new BigNumber(web3.toWei(2 * (betTax / 100), 'ether'));
+    let profit = new BigNumber(web3.toWei('0.01', 'ether'));
     let terminateTx = await betInstance.terminate({from: user3});
     logUsedGas('Terminate bet', await getUsedGas(terminateTx.tx));
 
