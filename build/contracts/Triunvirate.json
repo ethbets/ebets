@@ -227,7 +227,7 @@
       "type": "event"
     }
   ],
-  "unlinked_binary": "0x",
+  "bin": "0x",
   "networks": {
     "42": {
       "links": {},

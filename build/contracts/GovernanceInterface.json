@@ -169,7 +169,7 @@
       "type": "event"
     }
   ],
-  "unlinked_binary": "0x",
+  "bin": "0x",
   "networks": {},
   "schema_version": "0.0.5",
   "updated_at": 1501945309301

@@ -43,7 +43,7 @@ function writeBinABI(buildPath, jsonFile, networkId, address, abi, bin, timestam
     updated_at: timestamp
   }
   jsonFile.networks[networkId] = obj;
-  jsonFile['unlinked_binary'] = bin;
+  jsonFile['bin'] = bin;
   jsonFile['abi'] = abi;
   fs.writeFileSync(buildPath, JSON.stringify(jsonFile, undefined, 2));
 }
