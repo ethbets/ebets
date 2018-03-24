@@ -48,7 +48,7 @@ const ebetsCategories = [
       //   name: 'League of Legends',
       //   subcategory: [
       //     {
-      //       category: 'foo',
+      //       name: 'foo',
       //       subcategory: [
       //         {
       //           name: 'Bar',

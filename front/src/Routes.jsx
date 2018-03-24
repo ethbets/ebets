@@ -11,28 +11,44 @@ import {
 } from 'react-router-dom';
 
 import Main from './components/Main';
+import LandingPage from './components/LandingPage';
 import Home from './components/Home';
 import FAQ from './components/FAQ';
 import Ebets from './components/Ebets';
 import CreateBet from './components/BetForm';
-import Arbiters from './components/Arbiters';
-// import NotFound from './components/NotFound';
 
-export default (
-  <Main>
-    <Switch>
-      <Route exact path="/" component={Home} />
-      {/* <IndexRedirect to="/category/all_bets" /> */}
-      {/* <Route path='category'>
-                    <Route path=':category' component={Ebets} perPage={4} />
-                    <Route path=':category/:subcategory' component={Ebets} perPage={4} />
-                </Route> */}
+const menus = {
+  'faq': {
+      text:'FAQ',
+      path: "/faq",
+  },
+  'my_bets': {
+      text:'My Bets',
+      path: "/my_bets",
+  },
+  'create_bet': {
+      text:'Create Bet',
+      path: "/new_bet",
+  },
+  // 'arbiters': {
+  //     text:'Arbiters',
+  //     path: "/arbiters",
+  // },
+};
 
-      <Route path="bet/:address" component={Ebets} perPage={4} />
-      <Route path="/new_bet" component={CreateBet} />
-      <Route path="/faq" component={FAQ} />
-      <Route path="/arbiters" component={Arbiters} />
-      {/* TODO <Route component={NotFound} /> */}
-    </Switch>
-  </Main>
+const routes = (
+  <Switch>
+    <Route exact path="/" component={LandingPage} />
+    <Main>
+        <Route path="/home" component={Home} />
+        <Route exact path="/categories" component={Ebets} perPage={4} />
+        <Route path="/categories/:subcategory" component={Ebets} perPage={4} />
+        <Route path="/bet/:address" component={Ebets} perPage={4} />
+        <Route path="/new_bet" component={CreateBet} />
+        <Route path="/faq" component={FAQ} />
+        {/* <Route path="/arbiters" component={Arbiters} /> */}
+    </Main>
+  </Switch>
 );
+
+export { routes, menus };

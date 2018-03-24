@@ -1,54 +1,64 @@
-const path = require('path')
+const path = require('path');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
-  entry: ['babel-polyfill', './src/index.js'],
+const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
+  template: path.join(__dirname, './public/index.html'),
+  filename: 'index.html',
+  inject: 'body'
+});
+
+const BUILD_DIR = path.resolve(__dirname, 'dist');
+
+const config = {
+  entry: [
+    path.join(__dirname, '/src/index.js'),
+  ],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: BUILD_DIR,
     filename: 'bundle.js',
-    publicPath: '/dist/'
   },
-
   resolve: {
-    modules: ['./src', 'node_modules'],
-    extensions: ['.js', 'jsx']
+    extensions: ['.js', '.jsx']
   },
-
+  devtool: 'inline-source-map',
+  devServer: {
+    contentBase: './public',
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+    },
+  },
+  performance: {
+    hints: process.env.NODE_ENV === 'production' ? "warning" : false
+  },
   module: {
-    loaders: [{
-      test: /\.js$/,
-      exclude: [/node_modules/, /assets/],
-      loader: 'babel-loader',
-      include: __dirname,
-      query: {
-        presets: [ 'es2015', 'react' ],
-        plugins: ['transform-class-properties', 'transform-object-rest-spread']
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader?cacheDirectory"
+        }
+      },
+      {
+        test: /\.css$/,
+        loader: 'style-loader!css-loader'
+      },
+      {
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        use: [{
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, 'src/assets/imgs'),
       }
-    },
-    {
-      test: /\.(gif|png|jpe?g|svg)$/i,
-      use: ['file-loader', {
-          loader: 'image-webpack-loader',
-          options: {
-            mozjpeg: {
-              progressive: true,
-              quality: 65
-            },
-            optipng: {
-              enabled: false,
-            },
-            pngquant: {
-              quality: '65-90',
-              speed: 4
-            },
-            gifsicle: {
-              interlaced: false,
-            },
-          }
-        },
-      ],
-      exclude: /node_modules/,
-      include: __dirname,
-    },
-    { test: /\.css$/, loader: 'style-loader!css-loader' }]
-  }
-}
+    ]
+  },
+  plugins:[HTMLWebpackPluginConfig]
+};
+module.exports = config;
