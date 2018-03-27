@@ -8,7 +8,7 @@ import React from 'react';
 import Typography from 'material-ui/Typography';
 
 const Ebets = () => {
-  return ( <Typography color='secondary' variant="title" noWrap> Available bets </Typography>);
+  return (<Typography color='secondary' variant="title" noWrap> Available bets </Typography>);
 };
 
 export default Ebets;
