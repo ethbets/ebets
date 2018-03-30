@@ -2,6 +2,13 @@
   "presets": [ "react" ],
   "plugins": [
     "babel-plugin-transform-object-rest-spread",
-    "babel-plugin-transform-class-properties"
+    "babel-plugin-transform-class-properties",
+    ["module-resolver", {
+      "root": ["./src"],
+      "alias": {
+        "build": "../build",
+        "test": "./test"
+      }
+    }]
   ]
 }
