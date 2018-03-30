@@ -11,9 +11,9 @@ import { withRouter } from 'react-router'
 
 import { withStyles } from 'material-ui/styles';
 
-import withTheme from '../theme';
-import NavBar from './NavBar';
-import AppDrawer from './AppDrawer';
+import withTheme from 'theme';
+import NavBar from 'components/NavBar';
+import AppDrawer from 'components/AppDrawer';
 
 const styles = theme => ({
   root: {

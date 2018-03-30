@@ -9,8 +9,8 @@ import { withRouter } from 'react-router-dom';
 
 import List from 'material-ui/List';
 
-import { ebetsCategories } from '../utils/ebetsCategories';
-import Item from './Item';
+import { ebetsCategories } from 'utils/ebetsCategories';
+import Item from 'components/Item';
 
 const snakeName = (name) => {
   return name.toLowerCase().replace(/ /g,"_");

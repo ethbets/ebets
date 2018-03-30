@@ -8,6 +8,10 @@ import React from 'react';
 
 const ebetsCategories = [
   {
+    name: 'All',
+    path: 'all_bets'
+  },
+  {
     name: 'Fighting',
     subcategory: [
       {

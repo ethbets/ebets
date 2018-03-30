@@ -35,7 +35,6 @@ class Web3Service {
   }
 
   connectToBrowser = async () => {
-    const pr = new Web3.providers.HttpProvider('http://localhost:8545');
     let provider;
     if (typeof web3 === 'undefined') {
       throw new Error('Failed to connect to browser provider');

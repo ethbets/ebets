@@ -29,6 +29,19 @@ const theme = createMuiTheme({
       contrastText: white,
     },
   },
+  overrides: {
+    MuiButton: {
+      root: {
+        color: softBlue,
+        '&:hover': {
+          color: white,
+          backgroundColor: softBlue,
+          borderRadius: 3,
+          border: 0,
+        }
+      },
+    },
+  },
   drawerWidth: 250,
   navBarHeight: 120,
 });

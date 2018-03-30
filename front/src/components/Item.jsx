@@ -64,7 +64,7 @@ class Item extends Component {
             onClick={handleButtonClick}
             style={style}
           >
-            <Typography color='secondary' noWrap>{text}</Typography>
+            <Typography color='inherit' noWrap>{text}</Typography>
           </Button>
         </ListItem>
       );
@@ -77,7 +77,7 @@ class Item extends Component {
           onClick={this.toggleSubItems}
           style={style}
         >
-          <Typography color='secondary' noWrap>{text}</Typography>
+          <Typography color='inherit' noWrap>{text}</Typography>
         </Button>
         <Collapse in={this.state.open} timeout="auto" unmountOnExit>
           {children}
@@ -88,7 +88,7 @@ class Item extends Component {
 }
 
 Item.defaultProps = {
-  depth: 0,
+  depth: 1,
   text: '',
 };
 

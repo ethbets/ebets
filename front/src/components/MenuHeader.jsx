@@ -10,8 +10,8 @@ import _ from 'lodash';
 
 import { withStyles } from 'material-ui/styles';
 
-import { menus } from '../Routes';
-import Item from './Item';
+import { menus } from 'Routes';
+import Item from 'components/Item';
 
 const styles = (theme) => ({
   container: {

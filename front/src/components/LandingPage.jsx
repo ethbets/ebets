@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import { Link } from 'react-router-dom';
-import withTheme from '../theme';
+import withTheme from 'theme';
 
 const styles = theme => ({
   button: {

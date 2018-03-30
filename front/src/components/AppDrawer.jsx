@@ -12,8 +12,8 @@ import Typography from 'material-ui/Typography';
 import Drawer from 'material-ui/Drawer';
 import Hidden from 'material-ui/Hidden';
 
-import ebetsLogo from '../assets/imgs/logo-blue.png';
-import Categories from './Categories';
+import ebetsLogo from 'assets/imgs/logo-blue.png';
+import Categories from 'components/Categories';
 
 const styles = theme => ({
   drawerHeader: {
@@ -57,7 +57,6 @@ const AppDrawer = (props) => {
       <Categories />
     </div>
   );
-
   return (
     <div>
       <Hidden lgUp>

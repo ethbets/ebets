@@ -41,9 +41,8 @@ const routes = (
     <Route exact path="/" component={LandingPage} />
     <Main>
         <Route path="/home" component={Home} />
-        <Route exact path="/categories" component={Ebets} perPage={4} />
-        <Route path="/categories/:subcategory" component={Ebets} perPage={4} />
-        <Route path="/bet/:address" component={Ebets} perPage={4} />
+        <Route path="/categories/:category?/:subcategory?" render={(props)=><Ebets perPage={4} {...props} />} />
+        <Route path="/bet/:address" render={(props)=><Ebets perPage={4} {...props} />} />
         <Route path="/new_bet" component={CreateBet} />
         <Route path="/faq" component={FAQ} />
         {/* <Route path="/arbiters" component={Arbiters} /> */}
