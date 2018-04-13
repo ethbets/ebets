@@ -9,7 +9,7 @@ pragma solidity ^0.4.11;
 
 contract ProposalInterface {
   // Callback to resolve Proposal
-  function __resolve(uint outcome);
+  function __resolve(uint outcome) public;
 }
 
 contract GovernanceInterface {
@@ -22,14 +22,16 @@ contract GovernanceInterface {
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
-  function isMember(address user) constant returns(bool member);
-  function getName() constant returns(string name);
-  function getHigherInstance() constant returns(address instanceAddress);
+  function isMember(address user) public constant returns(bool member);
+  function getName() public constant returns(string name);
+  function getHigherInstance() public constant returns(address instanceAddress);
   
-  function addMember(address member);
-  function removeMember(address member);
+  function addMember(address member) public;
+  function removeMember(address member) public;
   // Member cast vote for Proposal if enough are made can call ResolvedCall
-  function castVote(address proposal, uint outcome);
+  function castVote(address proposal, uint outcome) public;
   // Proposal should be solved by the deadline time
-  function addProposal(address contractToDecide, uint deadline);
+  function addProposal(address contractToDecide, uint deadline) public;
+  // Collects the arbiter fee
+  function collectFee() public payable;
 }

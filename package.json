@@ -1,0 +1,38 @@
+{
+  "name": "ebets",
+  "version": "0.0.1",
+  "description": "Ebets, betting with ethereum",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "bignumber": "^1.1.0",
+    "bignumber.js": "^4.0.2",
+    "eslint-config-react-app": "^1.0.5",
+    "request": "^2.81.0",
+    "solc": "^0.4.15",
+    "web3": "^1.0.0-beta.18"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chai-bignumber": "^2.0.2"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ethbets/ebets.git"
+  },
+  "author": "",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/ethbets/ebets/issues"
+  },
+  "homepage": "https://github.com/ethbets/ebets#readme"
+}

@@ -18,7 +18,7 @@ contract Governance is GovernanceInterface{
   // Members of the Governance have a weight in their vote
   mapping (address => uint) public members;
   // Used in case of indecision
-  address public higherInstance;
+  Governance public higherInstance;
   mapping (address => Proposal) public proposals;
 
   // Members can be added to the governance
@@ -28,10 +28,14 @@ contract Governance is GovernanceInterface{
   // Proposal is resolved, should Proposal __resolved(outcome) on address
   event ResolvedProposal(address reference, uint outcome);
 
-  function addMember(address member);
-  function removeMember(address member);
+  function addMember(address member) public;
+  function removeMember(address member) public;
   // Member cast vote for Proposal if enough are made can call ResolvedCall
-  function castVote(address proposal, uint outcome);
+  function castVote(address proposal, uint outcome) public;
   // Proposal should be solved by the deadline time
-  function addProposal(address proposalAddress, uint deadline);
+  function addProposal(address proposalAddress, uint deadline) public;
+  // Collects the arbiter fee
+  function collectFee()  public payable {
+    //TODO
+  }
 }

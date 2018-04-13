@@ -7,15 +7,11 @@
 
 pragma solidity ^0.4.11;
 
-import './ERC20.sol';
-import './governanceInterface.sol';
+import './teamBet.sol';
+import './governance/governanceInterface.sol';
+import './betlib.sol';
 
 contract Bet is ProposalInterface {
-
-  modifier onlyOwner() {
-    require(msg.sender == owner);
-    _;
-  }
   modifier onlyArbiter() {
     require(msg.sender == address(arbiter));
     _;
@@ -38,6 +34,12 @@ contract Bet is ProposalInterface {
             betState == BET_STATES.DRAW);
     _;
   }
+  modifier matchIsNotDecided() {
+    require(betState != BET_STATES.TEAM_ZERO_WON &&
+            betState != BET_STATES.TEAM_ONE_WON &&
+            betState != BET_STATES.DRAW);
+    _;
+  }
 
   enum BET_STATES {
     OPEN,
@@ -47,63 +49,55 @@ contract Bet is ProposalInterface {
     UNDECIDED,
     CALLED_RESOLVER
   }
- 
-  address public owner; // Can be a parent contract
-  GovernanceInterface public arbiter; // Governance account
+  
+  TeamBet public team0;
+  TeamBet public team1;
 
-  // Bet data
+  // Governance account
+  GovernanceInterface public arbiter;
+  // Bet State
   BET_STATES public betState = BET_STATES.OPEN;
-  bool public isFeatured;
-  string public team0Name;
-  string public team1Name;
-  uint public team0BetSum;
-  uint public team1BetSum;
-  mapping (address => uint) public betsToTeam0;
-  mapping (address => uint) public betsToTeam1;
-
-  // ERC20 support
-  mapping (address => mapping (address => uint)) public ERC20BetsToTeam0;
-  mapping (address => mapping (address => uint)) public ERC20BetsToTeam1;
-  mapping (address => uint) public ERC20Team0BetSum;
-  mapping (address => uint) public ERC20Team1BetSum;
-  address[] public validERC20;
-
+  
   // Chronology data
+  // Match begin
   uint public timestampMatchBegin;
+  // Match end
   uint public timestampMatchEnd;
+  // Arbiter must vote until
   uint public timestampArbiterDeadline;
+  // Appeals can be made (withdraw can be made after that time only)
+  uint public timestampAppealsDeadline;
   // Self-destruct is possible if time > timestampSelfDestructDeadline
   uint public timestampSelfDestructDeadline;
 
-  uint8 public TAX;
-  uint constant TIMESTAMP_MARGIN = 1000;
+  uint8 public ARBITER_TAX;
 
-  event NewBet(bool forTeam, address indexed from, uint amount);
-  event NewBetERC20(bool forTeam, address indexed from, uint amount, address erc20);
   event StateChanged(BET_STATES state);
+  event Withdraw(address winner, uint amount);
 
   function Bet(GovernanceInterface _arbiter, string _team0Name, 
                string _team1Name, uint[] _timestamps, uint8 _tax
-               ) {
+               ) public {
     require(block.timestamp < _timestamps[0]);
     require(_timestamps[0] < _timestamps[1]);
     require(_timestamps[1] < _timestamps[2]);
     require(_timestamps[2] < _timestamps[3]);
+    require(_timestamps[3] < _timestamps[4]);
 
-    isFeatured = false;
-    owner = msg.sender;
     arbiter = _arbiter;
-    team0Name = _team0Name;
-    team1Name = _team1Name;
-    // TODO: PUT BACK TIMESTAMP_MARGIN SUMS, PUT REQUIRES!
+    
+    team0 = new TeamBet(_team0Name);
+    team1 = new TeamBet(_team1Name);
+    // TODO: PUT BACK TIMESTAMP_MARGIN SUMS
     timestampMatchBegin = _timestamps[0];// - TIMESTAMP_MARGIN;
     timestampMatchEnd = _timestamps[1];// + TIMESTAMP_MARGIN;
     timestampArbiterDeadline = _timestamps[2];// + TIMESTAMP_MARGIN;
-    timestampSelfDestructDeadline = _timestamps[3];// + TIMESTAMP_MARGIN;
-    TAX = _tax;
+    timestampAppealsDeadline = _timestamps[3];// + TIMESTAMP_MARGIN;
+    timestampSelfDestructDeadline = _timestamps[4];// + TIMESTAMP_MARGIN;
+    ARBITER_TAX = _tax;
   }
 
-  function __resolve(uint outcome)
+  function __resolve(uint outcome) public
     onlyArbiter()
     afterTimestamp(timestampMatchEnd)
     beforeTimestamp(timestampArbiterDeadline) {
@@ -120,272 +114,62 @@ contract Bet is ProposalInterface {
   }
 
   // Will create a Proposal on the arbiter
-  function updateResult() payable
+  function updateResult() public
     matchIsOpenOrUndecided()
     afterTimestamp(timestampMatchEnd) {
-    require(betState != BET_STATES.CALLED_RESOLVER);
     betState = BET_STATES.CALLED_RESOLVER;
     StateChanged(betState);
+    //arbiter.getName();
     arbiter.addProposal(this, timestampArbiterDeadline);
   }
-  
-  function toggleFeatured() onlyOwner() {
-    isFeatured = !isFeatured;
-  }
-
-  function bet(bool forTeam) payable
-    beforeTimestamp(timestampMatchBegin) {
-    require(!arbiter.isMember(msg.sender));
-    require(msg.value > 0);
-    uint prevSum;
-    
-    if (forTeam == false) {
-      // Cannot bet in two teams
-      require(betsToTeam1[msg.sender] == 0);
-      prevSum = team0BetSum;
-      require((prevSum + msg.value) >= prevSum); // Overflow
-      team0BetSum += msg.value;
-      assert(team0BetSum >= prevSum);
-      betsToTeam0[msg.sender] += msg.value;
-    }
-    else {
-      // Cannot bet in two teams
-      require(betsToTeam0[msg.sender] == 0);
-      prevSum = team1BetSum;
-      require((prevSum + msg.value) >= prevSum); // Overflow
-      team1BetSum += msg.value;
-      assert(team1BetSum >= prevSum);
-      betsToTeam1[msg.sender] += msg.value;
-    }
-
-    NewBet(forTeam, msg.sender, msg.value);
-  }
-
-  function checkAddERC20(address erc20) internal {
-    if (ERC20Team0BetSum[erc20] == 0 && ERC20Team1BetSum[erc20] == 0) {
-      validERC20.push(erc20);
-    }
-  }
-
-  function betERC20(address erc20, bool forTeam, uint amount)
-    beforeTimestamp(timestampMatchBegin) {
-    require(!arbiter.isMember(msg.sender));
-    require(amount > 0);
-    uint prevSum;
-
-    ERC20 erc20Contract = ERC20(erc20);
-    require(erc20Contract.transferFrom(msg.sender, this, amount));
-
-    checkAddERC20(erc20);
-
-    if (forTeam == false) {
-      // Cannot bet in two teams
-      require(ERC20BetsToTeam1[erc20][msg.sender] == 0);
-      prevSum = ERC20Team0BetSum[erc20];
-      require((prevSum + amount) >= prevSum); // Overflow
-      ERC20Team0BetSum[erc20] += amount;
-      assert(ERC20Team0BetSum[erc20] >= prevSum);
-      ERC20BetsToTeam0[erc20][msg.sender] += amount;
-    }
-    else {
-      // Cannot bet in two teams
-      require(ERC20BetsToTeam0[erc20][msg.sender] == 0);
-      prevSum = ERC20Team1BetSum[erc20];
-      require((prevSum + amount) >= prevSum); // Overflow
-      ERC20Team1BetSum[erc20] += amount;
-      assert(ERC20Team1BetSum[erc20] >= prevSum);
-      ERC20BetsToTeam1[erc20][msg.sender] += amount;
-    }
-
-    NewBetERC20(forTeam, msg.sender, amount, erc20);
-  }
-
-  function withdraw(address[] tokens) 
-    afterTimestamp(timestampMatchEnd)
-    matchIsDecided() {
-    uint idx;
+  // team = 0 : team 0
+  // team = 1 : team 1
+  function withdraw(address winner, bool team) public
+    afterTimestamp(timestampAppealsDeadline) {
+    uint profit = 0;
     if (betState == BET_STATES.DRAW) {
-      msg.sender.transfer(collectOriginalBet());
-      for (idx = 0; idx < validERC20.length; ++idx) {
-        uint amount = collectOriginalBetERC20(validERC20[idx]);
-        if (amount > 0) {
-          ERC20 erc20Contract = ERC20(validERC20[idx]);
-          require(erc20Contract.transfer(msg.sender, amount));
-        }
-      }
+      if (team == false)
+        profit = team0.getOriginalBet(winner);
+      else
+        profit = team1.getOriginalBet(winner);
     }
-    else {
-      collectProfit();
-      for (idx = 0; idx < tokens.length; ++idx) {
-        collectProfitERC20(tokens[idx]);
-      }
-    }
-  }
-
-  // Transfers the user's initial bet back
-  function collectOriginalBet() internal returns(uint) {
-    uint amount;
-    if (betsToTeam0[msg.sender] > 0) {
-      amount = betsToTeam0[msg.sender];
-      betsToTeam0[msg.sender] = 0;
-      return amount;
-    }
-    else if (betsToTeam1[msg.sender] > 0) {
-      amount = betsToTeam1[msg.sender];
-      betsToTeam1[msg.sender] = 0;
-      return amount;
-    }
-    else {
-      return 0;
-    }
-  }
-
-  // Transfers the user's initial bet back
-  function collectOriginalBetERC20(address erc20) internal returns(uint) {
-    uint amount;
-    if (ERC20BetsToTeam0[erc20][msg.sender] > 0) {
-      amount = ERC20BetsToTeam0[erc20][msg.sender];
-      ERC20BetsToTeam0[erc20][msg.sender] = 0;
-      return amount;
-    }
-    else if (ERC20BetsToTeam1[erc20][msg.sender] > 0) {
-      amount = ERC20BetsToTeam1[erc20][msg.sender];
-      ERC20BetsToTeam1[erc20][msg.sender] = 0;
-      return amount;
-    }
-    else {
-      return 0;
-    }
-  }
-
-  function collectProfit() internal {
-    uint betAmount = 0;
-    uint sum = 0;
-    uint profit = 0;
-
-    if (betState == BET_STATES.TEAM_ZERO_WON) {
-      if (betsToTeam0[msg.sender] > 0) {
-        betAmount = betsToTeam0[msg.sender];
-        sum = team0BetSum;
-        profit = team1BetSum;
-      }
-      else if (betsToTeam1[msg.sender] > 0 && team0BetSum == 0) {
-        msg.sender.transfer(collectOriginalBet());
-        return;
-      }
+    else if (betState == BET_STATES.TEAM_ZERO_WON) {
+      profit = team0.getOriginalBet(winner);
+      profit += team1.collectProfit(winner, profit, team0.betSum(), ARBITER_TAX);
     }
     else if (betState == BET_STATES.TEAM_ONE_WON) {
-      if (betsToTeam1[msg.sender] > 0) {
-       betAmount = betsToTeam1[msg.sender];
-       sum = team1BetSum;
-       profit = team0BetSum;
-      }
-      else if (betsToTeam0[msg.sender] > 0 && team1BetSum == 0) {
-        msg.sender.transfer(collectOriginalBet());
-        return;
-      }
+      profit = team1.getOriginalBet(winner);
+      profit += team0.collectProfit(winner, profit, team1.betSum(), ARBITER_TAX);
     }
-    else {
-      return;
-    }
-
-    assert(betAmount <= sum);
-
-    profit = computeProfit(betAmount, sum, profit);
-    msg.sender.transfer(profit + collectOriginalBet());
+    Withdraw(winner, profit);
   }
 
-  function collectProfitERC20(address erc20) internal {
-    uint betAmount = 0;
-    uint sum = 0;
-    uint profit = 0;
-
-    if (betState == BET_STATES.TEAM_ZERO_WON) {
-      if (ERC20BetsToTeam0[erc20][msg.sender] > 0) {
-        betAmount = ERC20BetsToTeam0[erc20][msg.sender];
-        sum = ERC20Team0BetSum[erc20];
-        profit = ERC20Team1BetSum[erc20];
-      }
-      else if (ERC20BetsToTeam1[erc20][msg.sender] > 0 && ERC20Team0BetSum[erc20] == 0) {
-        require(erc20Contract.transfer(msg.sender, collectOriginalBetERC20(erc20)));
-        return;
-      }
-    }
-    else if (betState == BET_STATES.TEAM_ONE_WON) {
-      if (ERC20BetsToTeam1[erc20][msg.sender] > 0) {
-        betAmount = ERC20BetsToTeam1[erc20][msg.sender];
-        sum = ERC20Team1BetSum[erc20];
-        profit = ERC20Team0BetSum[erc20];
-      }
-      else if (ERC20BetsToTeam0[erc20][msg.sender] > 0 && ERC20Team1BetSum[erc20] == 0) {
-        require(erc20Contract.transfer(msg.sender, collectOriginalBetERC20(erc20)));
-        return;
-      }
-    }
-    else {
-      return;
-    }
-
-    assert(betAmount <= sum);
-
-    profit = computeProfit(betAmount, sum, profit);
-    ERC20 erc20Contract = ERC20(erc20);
-    require(erc20Contract.transfer(msg.sender, profit + collectOriginalBetERC20(erc20)));
-  }
-
-
-  // Compute the user's profit
-  function computeProfit(uint betAmount, uint sum, uint profit) internal returns(uint) {
-    // Approach one:
-    // We might lose precision, but no overflow
-    var senderPc = betAmount / sum;
-    assert(senderPc >= 0 && senderPc <= 1);
-    
-    var senderProfit = senderPc * profit;
-    assert(senderProfit <= profit);
-    
-    // Approach two:
-    // Better precision, since multiplication is done first, but may overflow
-    //uint sender_profit = (bet * profit) / sum;
-    
-    var mulTax = (senderProfit * TAX);
-    require(mulTax >= senderProfit); // Overflow
-    var tax = mulTax / 100;
-    assert(tax <= senderProfit);
-    
-    var notaxProfit = senderProfit;
-    senderProfit -= tax;
-    assert(senderProfit <= notaxProfit);
-
-    return senderProfit;
-
-    // We can collect the bet tax by ourselves when the bet self-destructs
-    // owner.transfer(tax);
-    //msg.sender.transfer(senderProfit + collectOriginalBet());
-  }
-  
-  /* After the arbiter deadline and before the self-destruct
+  /* After the arbiter appeals deadline and before the self-destruct
    * deadline, anyone can set the bet state to DRAW.
-   * this is in the unlikely event if the arbiter don't
-   * decide in time, every one can collect the funds.
+   * this is in the unlikely event that the arbiter doesn't
+   * decide in time.
   */
-  function close()
-    afterTimestamp(timestampArbiterDeadline)
-    beforeTimestamp(timestampSelfDestructDeadline) {
-    betState = BET_STATES.DRAW;
-    StateChanged(betState);
+  function close() public
+    afterTimestamp(timestampAppealsDeadline)
+    beforeTimestamp(timestampSelfDestructDeadline) 
+    matchIsNotDecided() {
+      betState = BET_STATES.DRAW;
+      StateChanged(betState);
   }
 
   /* Selfdestructs the bet and return what it has in the account
-   * as a fee to the bet's owner.
+   * as a fee to the bet's arbiter.
    */
-  function terminate()
+  function terminate() public
     afterTimestamp(timestampSelfDestructDeadline) {
-    selfdestruct(owner);
+    team0.collectBet();
+    team1.collectBet();
+    arbiter.collectFee.value(this.balance)();
+    selfdestruct(arbiter);
   }
 
   /* Fallback just throws now
    * Can do something, maybe increase the value of both pools
   */
-  function () { require(false); }
+  function () public { require(false); }
 }

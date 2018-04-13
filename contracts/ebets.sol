@@ -8,7 +8,7 @@
 pragma solidity ^0.4.11;
 
 import './bet.sol';
-import './governanceInterface.sol';
+import './governance/governanceInterface.sol';
 
 contract Ebets {
   modifier onlyOwner() {
@@ -36,8 +36,8 @@ contract Ebets {
 
     Bet bet = new Bet(arbiter, team0Name, team1Name, timestamps, TAX);
     // Featured by default for resolver
-    if (msg.sender == owner)
-      bet.toggleFeatured();
+    //if (msg.sender == owner)
+    //  bet.toggleFeatured();
     bets[category].push(bet);
     createdBet(bet, category);
   }
@@ -48,10 +48,11 @@ contract Ebets {
     removeBet(oldCategory, betIdx);
     bets[newCategory].push(bet);
   }
-
+  /*
   function toggleFeatured(uint betIdx, string category) onlyOwner() {
     bets[category][betIdx].toggleFeatured();
   }
+ */
 
   function getBetsByCategory(string category) constant returns(Bet[]) {
     return bets[category];
