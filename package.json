@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "argparse": "^1.0.10",
     "bignumber": "^1.1.0",
     "bignumber.js": "^4.0.2",
     "eslint-config-react-app": "^1.0.5",

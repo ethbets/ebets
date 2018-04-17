@@ -27,7 +27,6 @@ module.exports = {
       port: 8555,
       gasPrice: 1,
       gas: 100000000
-      // ,
       // gas: 0xfffffffffff,
       // gasPrice: 0x01
     }
