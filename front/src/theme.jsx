@@ -1,6 +1,6 @@
 import React from 'react';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import Reboot from 'material-ui/Reboot';
+import CssBaseline from 'material-ui/CssBaseline';
 
 // Color palette
 const black = "#393939";
@@ -49,7 +49,7 @@ const theme = createMuiTheme({
 function withTheme(Component) {
   return props => (
     <MuiThemeProvider theme={theme}>
-      <Reboot />
+      <CssBaseline />
       <Component {...props} />
     </MuiThemeProvider>
   );
