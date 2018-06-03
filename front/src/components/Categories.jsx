@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import List from 'material-ui/List';
+import List from '@material-ui/core/List';
 
 import { ebetsCategories } from 'utils/ebetsCategories';
 import Item from 'components/Item';

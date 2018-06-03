@@ -7,10 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
-import Drawer from 'material-ui/Drawer';
-import Hidden from 'material-ui/Hidden';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Drawer from '@material-ui/core/Drawer';
+import Hidden from '@material-ui/core/Hidden';
 
 import ebetsLogo from 'assets/imgs/logo-blue.png';
 import Categories from 'components/Categories';

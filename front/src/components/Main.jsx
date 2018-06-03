@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withRouter } from 'react-router'
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import withTheme from 'theme';
 import NavBar from 'components/NavBar';

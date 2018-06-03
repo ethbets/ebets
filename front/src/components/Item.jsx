@@ -8,11 +8,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography'
-import {ListItem} from 'material-ui/List';
-import Collapse from 'material-ui/transitions/Collapse';
-import Button from 'material-ui/Button';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography'
+import ListItem from '@material-ui/core/List';
+import Collapse from '@material-ui/core/Collapse';
+import Button from '@material-ui/core/Button';
 
 const styles = () => ({
   item: {
@@ -54,7 +54,7 @@ class Item extends Component {
 
     if (path) {
       return (
-        <ListItem className={classes.subItem} disableGutters >
+        <ListItem className={classes.subItem} >
           <Button
             component={props => (
               <Link variant="button" to={path} {...props} />
@@ -71,7 +71,7 @@ class Item extends Component {
     }
 
     return (
-      <ListItem className={classes.item} disableGutters >
+      <ListItem className={classes.item} >
         <Button
           className={classes.button}
           onClick={this.toggleSubItems}

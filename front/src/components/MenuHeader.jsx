@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import { menus } from 'Routes';
 import Item from 'components/Item';

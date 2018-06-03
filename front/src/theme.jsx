@@ -1,6 +1,6 @@
 import React from 'react';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import CssBaseline from 'material-ui/CssBaseline';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 // Color palette
 const black = "#393939";
