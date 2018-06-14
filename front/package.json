@@ -19,7 +19,7 @@
     "web3": "^1.0.0-beta.34"
   },
   "scripts": {
-    "start": "NODE_ENV=development webpack-dev-server --progress -d",
+    "start": "NODE_ENV=development webpack-dev-server --hot --progress --inline -d",
     "build": "NODE_ENV=production webpack --mode production --progress -p"
   },
   "devDependencies": {
