@@ -9,7 +9,7 @@ const coolGreyTwo= "#8b8e90";
 const coolGrey = "#95989a";
 const fadedBlue= "#5b8db9";
 const softBlue= "#65a8e2";
-const lightblueTwo = "#61bdee";
+const lightBlueTwo = "#61bdee";
 const lightBlue= "#60caf6";
 const white= "#e4e4e4";
 
@@ -20,7 +20,7 @@ const theme = createMuiTheme({
       light: coolGrey,
       main: greyishBrown,
       dark: black,
-      contrastText: lightblueTwo,
+      contrastText: lightBlueTwo,
     },
     secondary: {
       light: lightBlue,
@@ -39,6 +39,33 @@ const theme = createMuiTheme({
           borderRadius: 3,
           border: 0,
         }
+      },
+    },
+    MuiPickersToolbar: {
+      // toolbar: {
+      //   backgroundColor: lightBlueTwo,
+      // },
+    },
+    MuiPickersCalendarHeader: {
+      switchHeader: {
+        // backgroundColor: lightBlueTwo,
+        // color: 'white',
+      },
+    },
+    MuiPickersDay: {
+      day: {
+        color: lightBlueTwo,
+      },
+      selected: {
+        backgroundColor: lightBlueTwo,
+      },
+      current: {
+        color: lightBlueTwo,
+      },
+    },
+    MuiPickersModal: {
+      dialogAction: {
+        color: lightBlueTwo,
       },
     },
   },

@@ -10,12 +10,12 @@ import {
   Switch,
 } from 'react-router-dom';
 
-import Main from './components/Main';
-import LandingPage from './components/LandingPage';
-import Home from './components/Home';
-import FAQ from './components/FAQ';
-import Ebets from './components/Ebets';
-import CreateBet from './components/BetForm';
+import Main from 'components/Main';
+import LandingPage from 'components/LandingPage';
+import Home from 'components/Home';
+import FAQ from 'components/FAQ';
+import Ebets from 'components/Ebets';
+import CreateBet from 'components/BetForm';
 
 const menus = {
   'faq': {

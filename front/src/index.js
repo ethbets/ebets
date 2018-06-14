@@ -8,12 +8,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 
+import MomentUtils from 'material-ui-pickers/utils/moment-utils';
+import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
+
 import { routes } from './Routes';
 
-import './assets/stylesheets/index.css';
+import 'assets/stylesheets/index.css';
 
 ReactDOM.render(
-  <Router>{routes}</Router>,
+  <MuiPickersUtilsProvider utils={MomentUtils}>
+      <Router>{routes}</Router>
+  </MuiPickersUtilsProvider>,
   document.getElementById('root'),
 );
 
