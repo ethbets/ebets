@@ -5,7 +5,7 @@
  * of the BSD license. See the LICENSE file for details.
 */
 import React from 'react';
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 
 const BetForm = () => (
   <Typography color='secondary' variant="title" noWrap> Create bet </Typography>

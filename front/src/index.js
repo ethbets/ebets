@@ -13,8 +13,6 @@ import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsPr
 
 import { routes } from './Routes';
 
-import 'assets/stylesheets/index.css';
-
 ReactDOM.render(
   <MuiPickersUtilsProvider utils={MomentUtils}>
       <Router>{routes}</Router>
